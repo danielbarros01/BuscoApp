@@ -5,3 +5,9 @@ plugins {
 
     id("com.google.dagger.hilt.android") version "2.46.1" apply false
 }
+
+allprojects {
+    repositories {
+        maven { url = uri("https://oss.sonatype.org/content/repositories/snapshots/") }
+    }
+}

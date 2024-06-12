@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.practica.buscov2.model.LoginToken
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 
 class StoreToken(private val context: Context) {
@@ -17,7 +18,7 @@ class StoreToken(private val context: Context) {
         val TOKEN_EXPIRATION = stringPreferencesKey("token_expiration")
     }
 
-    val getToken : Flow<LoginToken> = getTokenFun()
+    //val getToken : Flow<LoginToken> = getTokenFun()
 
     suspend fun saveToken(loginToken: LoginToken) {
         context.dataStore.edit { preferences ->
@@ -26,14 +27,28 @@ class StoreToken(private val context: Context) {
         }
     }
 
-    fun getTokenFun(): Flow<LoginToken> {
+    // Devuelve un Flow que emite el token y su expiración cada vez que cambian
+    fun getTokenFlow(): Flow<LoginToken?> {
         return context.dataStore.data
             .map { preferences ->
-                val token = preferences[TOKEN] ?: ""
-                val expiration = preferences[TOKEN_EXPIRATION] ?: ""
-
-                LoginToken(token, expiration)
+                val token = preferences[TOKEN]
+                val expiration = preferences[TOKEN_EXPIRATION]
+                if (token != null && expiration != null) {
+                    LoginToken(token, expiration)
+                } else {
+                    null
+                }
             }
+    }
+
+    // Función para obtener el token de forma síncrona
+    suspend fun getTokenFun(): LoginToken? = getTokenFlow().firstOrNull()
+
+    suspend fun clearToken() {
+        context.dataStore.edit { preferences ->
+            preferences.remove(TOKEN)
+            preferences.remove(TOKEN_EXPIRATION)
+        }
     }
 }
 

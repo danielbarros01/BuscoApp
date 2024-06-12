@@ -18,6 +18,7 @@ import com.practica.buscov2.data.repository.BuscoRepository
 import com.practica.buscov2.model.ErrorBusco
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -62,12 +63,15 @@ class LoginViewModel @Inject constructor(
     private fun isValidEmail(email: String): Boolean =
         Patterns.EMAIL_ADDRESS.matcher(email).matches();
 
-    private fun isValidPassword(password: String): Boolean = password.length > 6;
+    private fun isValidPassword(password: String): Boolean = password.length >= 6;
 
     //api
-    fun login(onError: () -> Unit, onSuccess: () -> Unit) {
+    fun login(onError: () -> Unit, onSuccess: (String) -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
+                //Activo el loading
+                _isLoading.value = true
+
                 val response: LoginResult? = repo.login(email.value, password.value)
 
                 //Si hay un error
@@ -77,6 +81,8 @@ class LoginViewModel @Inject constructor(
                         title = response.error.title,
                         message = response.error.message
                     )
+                    //Desactivo el loading
+                    _isLoading.value = false
                     onError()
                     return@launch // Exit the coroutine if error occurs
                 }
@@ -88,12 +94,14 @@ class LoginViewModel @Inject constructor(
                 if (loginToken != null) storeToken.saveToken(loginToken)
 
                 //Asi obtenemos el token
-                val token = storeToken.getTokenFun().firstOrNull()
+                //val token = storeToken.getTokenFun().firstOrNull()
 
-                onSuccess()
+                loginToken?.let { onSuccess(it.token) }
             } catch (e: Exception) {
                 Log.d("Error", "Error: $e")
             }
         }
+        //Desactivo el loading
+        _isLoading.value = false
     }
 }

@@ -60,7 +60,12 @@ fun AlertErrorPreview() {
 }
 
 @Composable
-fun AlertError(showDialog: MutableState<Boolean>, title: String, message: String) {
+fun AlertError(
+    showDialog: MutableState<Boolean>,
+    title: String,
+    message: String,
+    onClick: () -> Unit = { showDialog.value = false }
+) {
     if (showDialog.value) {
         AlertDialog(
             onDismissRequest = { showDialog.value = false },
@@ -86,7 +91,10 @@ fun AlertError(showDialog: MutableState<Boolean>, title: String, message: String
             },
             text = { Text(text = message) },
             confirmButton = {
-                OutlinedButton(onClick = { showDialog.value = false }, modifier = Modifier.fillMaxWidth()) {
+                OutlinedButton(
+                    onClick = { onClick() },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
                     Text(text = "OK", color = Color.Black)
                 }
             },

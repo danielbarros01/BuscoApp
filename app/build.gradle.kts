@@ -11,7 +11,7 @@ android {
 
     defaultConfig {
         applicationId = "com.practica.buscov2"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -54,6 +54,8 @@ android {
 dependencies {
 //  Dagger Hilt
     implementation("com.google.dagger:hilt-android:2.46.1")
+    implementation("androidx.hilt:hilt-navigation-compose:1.0.0")
+    implementation(libs.androidx.room.ktx)
     kapt("com.google.dagger:hilt-compiler:2.46.1")
 
     //Navigation
@@ -67,6 +69,11 @@ dependencies {
     //Datastore preferences
     val dataStoreVersion = "1.0.0"
     implementation("androidx.datastore:datastore-preferences:$dataStoreVersion")
+
+    //-- OnBoarding
+    implementation("com.google.accompanist:accompanist-pager:0.15.0")
+
+    implementation("androidx.compose.material3:material3:1.3.0-beta01")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

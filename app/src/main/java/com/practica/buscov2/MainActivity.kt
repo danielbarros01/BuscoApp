@@ -17,7 +17,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.practica.buscov2.navigation.NavManager
 import com.practica.buscov2.ui.theme.BuscoV2Theme
+import com.practica.buscov2.ui.viewModel.CheckEmailViewModel
+import com.practica.buscov2.ui.viewModel.CompleteDataViewModel
+import com.practica.buscov2.ui.viewModel.GeorefViewModel
 import com.practica.buscov2.ui.viewModel.LoginViewModel
+import com.practica.buscov2.ui.viewModel.RegisterViewModel
 import com.practica.buscov2.ui.views.LoginView
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -25,7 +29,11 @@ import dagger.hilt.android.AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val viewModel : LoginViewModel by viewModels()
+        val loginViewModel : LoginViewModel by viewModels()
+        val completeDataViewModel : CompleteDataViewModel by viewModels()
+        val georefViewModel : GeorefViewModel by viewModels()
+        val checkEmailViewModel : CheckEmailViewModel by viewModels()
+        val registerViewModel : RegisterViewModel by viewModels()
 
         setContent {
             BuscoV2Theme {
@@ -33,7 +41,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    NavManager(viewModel = viewModel)
+                    NavManager()
                 }
             }
         }

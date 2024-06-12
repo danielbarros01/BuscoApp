@@ -13,19 +13,25 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.practica.buscov2.R
+import com.practica.buscov2.ui.theme.GrayPlaceholder
+import com.practica.buscov2.ui.theme.OrangePrincipal
 
 
 @Composable
-fun ButtonPrincipal(text: String, loginEnabled: Boolean, onLoginSelected: () -> Unit) {
+fun ButtonPrincipal(text: String, enabled: Boolean, onSelected: () -> Unit) {
     Button(
-        onClick = { onLoginSelected() },
+        onClick = { onSelected() },
         modifier = Modifier
             .fillMaxWidth()
             .height(56.dp),
@@ -34,7 +40,7 @@ fun ButtonPrincipal(text: String, loginEnabled: Boolean, onLoginSelected: () -> 
             contentColor = Color.White
         ),
         shape = RoundedCornerShape(12.dp),
-        enabled = loginEnabled
+        enabled = enabled
     )
     {
         Text(text = text)
@@ -62,5 +68,49 @@ fun ButtonGoogle() {
                 fontWeight = FontWeight.Bold
             )
         }
+    }
+}
+
+@Composable
+fun OnBoardNavButton(
+    modifier: Modifier = Modifier,
+    currentPage: Int,
+    noOfPages: Int,
+    enabled: Boolean = false,
+    onNextClicked: () -> Unit,
+    onClick: () -> Unit
+) {
+    Button(
+        onClick = {
+            if (currentPage < noOfPages - 1) {
+                onNextClicked()
+            } else {
+                onClick()
+            }
+        }, modifier = modifier
+            .fillMaxWidth()
+            .height(56.dp),
+        enabled = enabled
+    ) {
+        Text(text = if (currentPage < noOfPages - 1) "Continuar" else "Guardar")
+    }
+}
+
+@Composable
+fun ButtonTransparent(
+    modifier: Modifier = Modifier,
+    text: String,
+    enabled: Boolean = true,
+    textDecoration: TextDecoration? = null,
+    onSelected: () -> Unit
+) {
+    TextButton(onClick = { onSelected() }, enabled = enabled) {
+        Text(
+            text = text,
+            color = if (enabled) OrangePrincipal else GrayPlaceholder,
+            fontSize = 18.sp,
+            style = TextStyle(textDecoration = textDecoration),
+            fontWeight = FontWeight.Bold
+        )
     }
 }
