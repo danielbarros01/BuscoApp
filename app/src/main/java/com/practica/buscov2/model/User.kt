@@ -14,7 +14,8 @@ data class User(
     val telephone: String? = null,
     val image: String? = null,
     val verificationCode: Int? = null,
-    val confirmed: Boolean? = null
+    val confirmed: Boolean? = null,
+    val googleId: String? = null,
 )
 
 /*

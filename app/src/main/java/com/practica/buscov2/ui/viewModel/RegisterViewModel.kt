@@ -9,11 +9,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.google.android.gms.common.api.ApiException
+import com.google.android.gms.tasks.Task
 import com.practica.buscov2.data.dataStore.StoreToken
 import com.practica.buscov2.data.repository.BuscoRepository
 import com.practica.buscov2.model.ErrorBusco
 import com.practica.buscov2.model.LoginResult
 import com.practica.buscov2.model.LoginToken
+import com.practica.buscov2.model.User
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.firstOrNull
@@ -122,4 +126,65 @@ class RegisterViewModel @Inject constructor(
         _isLoading.value = false
     }
 
+
+    fun loginWithGoogle(
+        completedTask: Task<GoogleSignInAccount>,
+        onError: () -> Unit,
+        onSuccess: (String) -> Unit
+    ) {
+        try {
+            //Activo el loading
+            _isLoading.value = true
+
+            val account = completedTask.getResult(ApiException::class.java)
+
+            // Obtener el nombre, el ID de Google y el correo electrónico
+            val name = account?.displayName
+            val email = account?.email
+            val googleId = account?.id
+
+            viewModelScope.launch(Dispatchers.IO) {
+                val response: LoginResult? = repo.loginGoogle(
+                    User(
+                        //Para quitar espacio si existe
+                        username = name?.replace(" ",""),
+                        email = email,
+                        googleId = googleId.toString()
+                    )
+                )
+
+                //Si hay un error
+                if (response?.error != null) {
+                    error = error.copy(
+                        code = response.error.code,
+                        title = response.error.title,
+                        message = response.error.message
+                    )
+
+                    //Desactivo el loading
+                    _isLoading.value = false
+
+                    onError()
+                    return@launch // Exit the coroutine if error occurs
+                }
+
+                //Si no hubo error, se puede ejecutar lo siguiente
+                val loginToken: LoginToken? = response?.loginToken
+
+                //Guardar el token
+                if (loginToken != null) storeToken.saveToken(loginToken)
+
+                loginToken?.let {
+                    //Desactivo el loading
+                    _isLoading.value = false
+
+                    onSuccess(it.token)
+                }
+            }
+        } catch (e: ApiException) {
+            Log.w("Error", "signInResult:failed code=" + e.statusCode)
+            //Desactivo el loading
+            _isLoading.value = false
+        }
+    }
 }

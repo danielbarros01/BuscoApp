@@ -1,5 +1,7 @@
 package com.practica.buscov2.ui.views
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,10 +22,12 @@ import androidx.compose.material3.DatePickerState
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -53,6 +57,7 @@ import com.practica.buscov2.model.georef.Localidad
 import com.practica.buscov2.model.georef.Pais
 import com.practica.buscov2.model.georef.Provincia
 import com.practica.buscov2.ui.components.AlertError
+import com.practica.buscov2.ui.components.ArrowBack
 import com.practica.buscov2.ui.components.CommonField
 import com.practica.buscov2.ui.components.DateField
 import com.practica.buscov2.ui.components.InsertImage
@@ -73,6 +78,7 @@ import java.time.Instant
 import java.time.ZoneId
 
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun CompleteDataView(
     viewModel: CompleteDataViewModel,
@@ -96,6 +102,7 @@ fun CompleteDataView(
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CompleteData(
@@ -151,14 +158,31 @@ fun CompleteData(
             if (isLoading) {
                 LoaderMaxSize()
             }
-            Column(modifier = modifier.padding(15.dp).padding(it)) {
+
+            //Si estoy en la segunda parte
+            if (currentPage.intValue > 0) {
+                IconButton(
+                    modifier = Modifier.padding(start = 15.dp, top = 10.dp),
+                    onClick = {
+                        currentPage.intValue--
+                        viewModel.changeEnabledButton(true)
+                    }) {
+                    ArrowBack()
+                }
+            }
+
+            Column(
+                modifier = modifier
+                    .padding(15.dp)
+                    .padding(it)
+            ) {
                 InsertImage(
                     R.drawable.logo,
                     Modifier
                         .width(150.dp)
                         .height(150.dp)
                         .align(Alignment.CenterHorizontally)
-                        .padding(bottom = 10.dp)
+                        .padding(top = 15.dp, bottom = 10.dp)
                 )
 
                 TitleAndName(username)
@@ -175,6 +199,7 @@ fun CompleteData(
     )
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 private fun ConfigMinAndMaxDate(
     viewModel: CompleteDataViewModel,
     dateMillis: Long,
@@ -488,7 +513,7 @@ private fun BottomBarPart(
     val buttonEnable: Boolean by viewModel.buttonEnable
     val cantPage = 2
 
-    Column(modifier = Modifier.padding(bottom = 20.dp)) {
+    Column(modifier = Modifier.padding(start = 15.dp, end = 15.dp, bottom = 20.dp)) {
         PagerIndicator(
             size = cantPage,
             currentPage = currentPage.value

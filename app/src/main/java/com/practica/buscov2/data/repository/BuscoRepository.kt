@@ -7,10 +7,12 @@ import com.practica.buscov2.data.ApiBusco
 import com.practica.buscov2.model.ErrorBusco
 import com.practica.buscov2.model.LoginRequest
 import com.practica.buscov2.model.LoginResult
+import com.practica.buscov2.model.LoginToken
 import com.practica.buscov2.model.RegisterRequest
 import com.practica.buscov2.model.User
 import com.practica.buscov2.model.UserResult
 import com.practica.buscov2.util.AppUtils.Companion.convertToIsoDate
+import retrofit2.Response
 import javax.inject.Inject
 
 class BuscoRepository @Inject constructor(private val api: ApiBusco) {
@@ -129,6 +131,30 @@ class BuscoRepository @Inject constructor(private val api: ApiBusco) {
             return ErrorBusco(0, "Error", message = "Error desconocido, intentalo de nuevo")
         }
     }
+
+    suspend fun loginGoogle(user: User): LoginResult? {
+        val response = api.googleLogin(user)
+
+        return when (response.code()) {
+            200 -> if (response.isSuccessful) response.body()
+                ?.let { LoginResult(it, null) } else LoginResult(
+                null,
+                ErrorBusco(0, "Error", message = "Error desconocido")
+            )
+
+            500 -> LoginResult(
+                null,
+                ErrorBusco(
+                    401,
+                    title = "Error en la autenticación",
+                    message = "Al parecer el error es nuestro, por favor, intentalo de nuevo más tarde."
+                )
+            )
+
+            else -> LoginResult(null, ErrorBusco(0, "Error", message = "Error desconocido"))
+        }
+    }
+
 
     private fun gsonError(response: retrofit2.Response<*>): ErrorBusco {
         val errorBody = response.errorBody()

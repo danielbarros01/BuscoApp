@@ -48,9 +48,9 @@ fun ButtonPrincipal(text: String, enabled: Boolean, onSelected: () -> Unit) {
 }
 
 @Composable
-fun ButtonGoogle() {
+fun ButtonGoogle(onClick: () -> Unit = {}) {
     OutlinedButton(
-        onClick = { /*TODO*/ },
+        onClick = { onClick() },
         shape = RoundedCornerShape(12.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -113,4 +113,15 @@ fun ButtonTransparent(
             fontWeight = FontWeight.Bold
         )
     }
+}
+
+
+@Composable
+fun ArrowBack(){
+    Icon(
+        painter = painterResource(id = R.drawable.arrow_back),
+        contentDescription = "Volver",
+        modifier = Modifier.size(60.dp),
+        tint = OrangePrincipal
+    )
 }

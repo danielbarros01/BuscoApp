@@ -1,5 +1,9 @@
 package com.practica.buscov2.ui.views
 
+import android.app.Activity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,9 +16,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.google.android.gms.tasks.Task
 import com.google.gson.Gson
 import com.practica.buscov2.R
 import com.practica.buscov2.model.User
@@ -28,20 +35,33 @@ import com.practica.buscov2.ui.components.PasswordField
 import com.practica.buscov2.ui.components.SeparatoryLine
 import com.practica.buscov2.ui.components.Space
 import com.practica.buscov2.ui.components.Title
+import com.practica.buscov2.ui.viewModel.GoogleLoginViewModel
 import com.practica.buscov2.ui.viewModel.RegisterViewModel
+import com.practica.buscov2.ui.viewModel.UserViewModel
 
 @Composable
-fun RegisterView(vm: RegisterViewModel, navController: NavController) {
+fun RegisterView(
+    vm: RegisterViewModel,
+    userVm: UserViewModel,
+    vmGoogle: GoogleLoginViewModel,
+    navController: NavController
+) {
     Box(
         modifier = Modifier
             .fillMaxSize()
     ) {
-        Register(Modifier.align(Alignment.Center), vm, navController)
+        Register(Modifier.align(Alignment.Center), vm, vmGoogle, userVm, navController)
     }
 }
 
 @Composable
-fun Register(modifier: Modifier, viewModel: RegisterViewModel, navController: NavController) {
+fun Register(
+    modifier: Modifier,
+    viewModel: RegisterViewModel,
+    vmGoogle: GoogleLoginViewModel,
+    vmUser: UserViewModel,
+    navController: NavController
+) {
     val username: String by viewModel.username
     val email: String by viewModel.email
     val password: String by viewModel.password
@@ -57,7 +77,7 @@ fun Register(modifier: Modifier, viewModel: RegisterViewModel, navController: Na
         AlertError(showDialog = showError, error.title, error.message)
     }
 
-    if(isLoading){
+    if (isLoading) {
         LoaderMaxSize()
     }
 
@@ -119,6 +139,54 @@ fun Register(modifier: Modifier, viewModel: RegisterViewModel, navController: Na
         Space(4.dp)
         SeparatoryLine()
         Space(4.dp)
-        ButtonGoogle()
+        GoogleRegister(vmGoogle, viewModel, vmUser, navController) {
+            //En caso de error
+            showError.value = true
+        }
     }
 }
+
+@Composable
+fun GoogleRegister(
+    vmGoogle: GoogleLoginViewModel,
+    vmRegister: RegisterViewModel,
+    vmUser: UserViewModel,
+    navController: NavController,
+    onError: () -> Unit
+) {
+    vmGoogle.initialize(LocalContext.current)
+
+    val startForResult =
+        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                val intent = result.data
+                if (result.data != null) {
+                    val task: Task<GoogleSignInAccount> =
+                        GoogleSignIn.getSignedInAccountFromIntent(intent)
+
+                    //Iniciar sesion
+                    vmRegister.loginWithGoogle(task, onError = { onError() }) { token ->
+                        //Obtener el usuario
+                        vmUser.getMyProfile(token, {}) {
+                            //Si los datos estan completados, ir a Home
+                            if (it.name != null && it.lastname != null) {
+                                navController.navigate("Home")
+                            }
+                            //Si no estan completados los datos, ir a CompleteData
+                            else {
+                                navController.navigate("CompleteData/${it.username}")
+                            }
+                        }
+                    }
+
+                }
+            }
+        }
+
+    ButtonGoogle(onClick = { startForResult.launch(vmGoogle.getSignInIntent()) })
+}
+
+
+
+
+

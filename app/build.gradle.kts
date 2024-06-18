@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
@@ -11,10 +13,15 @@ android {
 
     defaultConfig {
         applicationId = "com.practica.buscov2"
-        minSdk = 26
+        minSdk = 24
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
+
+        //Para obtener el gpcId para login con Google
+        val properties = Properties()
+        properties.load(project.rootProject.file("local.properties").inputStream())
+        buildConfigField("String", "GOOGLE_OAUTH_ID", properties.getProperty("GOOGLE_AUTH_GPC_ID"))
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -40,6 +47,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.1"
@@ -56,6 +64,7 @@ dependencies {
     implementation("com.google.dagger:hilt-android:2.46.1")
     implementation("androidx.hilt:hilt-navigation-compose:1.0.0")
     implementation(libs.androidx.room.ktx)
+
     kapt("com.google.dagger:hilt-compiler:2.46.1")
 
     //Navigation
@@ -74,6 +83,10 @@ dependencies {
     implementation("com.google.accompanist:accompanist-pager:0.15.0")
 
     implementation("androidx.compose.material3:material3:1.3.0-beta01")
+
+
+    //auth google
+    implementation("com.google.android.gms:play-services-auth:20.3.0")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

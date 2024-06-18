@@ -1,8 +1,11 @@
 package com.practica.buscov2.ui.views
 
-import androidx.compose.foundation.background
+import android.app.Activity
+import android.provider.Settings.Global.getString
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -10,24 +13,24 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.google.android.gms.tasks.Task
 import com.google.gson.Gson
 import com.practica.buscov2.R
 import com.practica.buscov2.ui.components.AlertError
@@ -40,20 +43,22 @@ import com.practica.buscov2.ui.components.PasswordField
 import com.practica.buscov2.ui.components.SeparatoryLine
 import com.practica.buscov2.ui.components.Space
 import com.practica.buscov2.ui.components.Title
+import com.practica.buscov2.ui.viewModel.GoogleLoginViewModel
 import com.practica.buscov2.ui.viewModel.LoginViewModel
-import com.practica.buscov2.ui.viewModel.TokenViewModel
 import com.practica.buscov2.ui.viewModel.UserViewModel
 
 @Composable
 fun LoginView(
     viewModel: LoginViewModel,
-    vmUser: UserViewModel, navController: NavController
+    vmUser: UserViewModel,
+    vmGoogle: GoogleLoginViewModel,
+    navController: NavController
 ) {
     Box(
         modifier = Modifier
             .fillMaxSize()
     ) {
-        Login(Modifier.align(Alignment.Center), viewModel, vmUser, navController)
+        Login(Modifier.align(Alignment.Center), viewModel, vmUser, vmGoogle, navController)
     }
 }
 
@@ -111,6 +116,7 @@ fun Login(
     modifier: Modifier,
     viewModel: LoginViewModel,
     vmUser: UserViewModel,
+    vmGoogle: GoogleLoginViewModel,
     navController: NavController
 ) {
     val email: String by viewModel.email
@@ -121,12 +127,11 @@ fun Login(
     val isLoading: Boolean by viewModel.isLoading
 
     //val user by vmUser.user.collectAsState()
-
     if (showError.value) {
         AlertError(showDialog = showError, error.title, error.message)
     }
 
-    if(isLoading){
+    if (isLoading) {
         LoaderMaxSize()
     }
 
@@ -182,8 +187,51 @@ fun Login(
         Space(4.dp)
         SeparatoryLine()
         Space(4.dp)
-        ButtonGoogle()
+        GoogleLogin(vmGoogle, viewModel, vmUser, navController) {
+            //En caso de error
+            showError.value = true
+        }
     }
+}
+
+@Composable
+fun GoogleLogin(
+    vmGoogle: GoogleLoginViewModel,
+    vmLogin: LoginViewModel,
+    vmUser: UserViewModel,
+    navController: NavController,
+    onError: () -> Unit
+) {
+    vmGoogle.initialize(LocalContext.current)
+
+    val startForResult =
+        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                val intent = result.data
+                if (result.data != null) {
+                    val task: Task<GoogleSignInAccount> =
+                        GoogleSignIn.getSignedInAccountFromIntent(intent)
+
+                    //Iniciar sesion
+                    vmLogin.loginWithGoogle(task, onError = { onError() }) { token ->
+                        //Obtener el usuario
+                        vmUser.getMyProfile(token, {}) {
+                            //Si los datos estan completados, ir a Home
+                            if (it.name != null && it.lastname != null) {
+                                navController.navigate("Home")
+                            }
+                            //Si no estan completados los datos, ir a CompleteData
+                            else {
+                                navController.navigate("CompleteData/${it.username}")
+                            }
+                        }
+                    }
+
+                }
+            }
+        }
+
+    ButtonGoogle(onClick = { startForResult.launch(vmGoogle.getSignInIntent()) })
 }
 
 

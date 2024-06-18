@@ -12,6 +12,7 @@ import com.practica.buscov2.model.User
 import com.practica.buscov2.ui.viewModel.CheckEmailViewModel
 import com.practica.buscov2.ui.viewModel.CompleteDataViewModel
 import com.practica.buscov2.ui.viewModel.GeorefViewModel
+import com.practica.buscov2.ui.viewModel.GoogleLoginViewModel
 import com.practica.buscov2.ui.viewModel.HomeViewModel
 import com.practica.buscov2.ui.viewModel.LoginViewModel
 import com.practica.buscov2.ui.viewModel.RegisterViewModel
@@ -30,8 +31,13 @@ import com.practica.buscov2.ui.views.StartView
 fun NavManager() {
     val navController = rememberNavController()
     val tokenViewModel: TokenViewModel = hiltViewModel()
+    val loginGoogleViewModel: GoogleLoginViewModel = hiltViewModel()
 
     NavHost(navController = navController, startDestination = "Start") {
+        /*composable("Google"){
+            GoogleView()
+        }*/
+
         composable("Start") {
             val startViewModel: StartViewModel = hiltViewModel()
             val userViewModel: UserViewModel = hiltViewModel()
@@ -41,7 +47,7 @@ fun NavManager() {
         composable("Login") {
             val loginViewModel: LoginViewModel = hiltViewModel()
             val userViewModel: UserViewModel = hiltViewModel()
-            LoginView(loginViewModel, userViewModel, navController)
+            LoginView(loginViewModel, userViewModel, loginGoogleViewModel, navController)
         }
 
         composable(
@@ -77,12 +83,13 @@ fun NavManager() {
 
         composable("RegisterView") {
             val registerViewModel: RegisterViewModel = hiltViewModel()
-            RegisterView(registerViewModel, navController)
+            val userViewModel: UserViewModel = hiltViewModel()
+            RegisterView(registerViewModel, userViewModel, loginGoogleViewModel, navController)
         }
 
         composable("Home") {
             val homeViewModel: HomeViewModel = hiltViewModel()
-            HomeView(homeViewModel, navController)
+            HomeView(homeViewModel, loginGoogleViewModel, navController)
         }
     }
 }

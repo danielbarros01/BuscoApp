@@ -9,6 +9,7 @@ import com.practica.buscov2.util.Constants.Companion.ENDPOINT_LOGIN
 import com.practica.buscov2.util.Constants.Companion.ENDPOINT_MY_PROFILE
 import com.practica.buscov2.util.Constants.Companion.ENDPOINT_REGISTER
 import com.practica.buscov2.util.Constants.Companion.ENDPOINT_USERS
+import com.practica.buscov2.util.Constants.Companion.GOOGLE_LOGIN
 import com.practica.buscov2.util.Constants.Companion.RESEND_CODE
 import retrofit2.Response
 import retrofit2.http.Body
@@ -48,4 +49,7 @@ interface ApiBusco {
         @Header("Authorization") token: String,
         @Body user: User
     ): Response<Unit>
+
+    @POST(GOOGLE_LOGIN)
+    suspend fun googleLogin(@Body user: User): Response<LoginToken>
 }
