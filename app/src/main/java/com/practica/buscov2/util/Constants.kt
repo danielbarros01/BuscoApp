@@ -10,7 +10,10 @@ class Constants {
         const val ENDPOINT_REGISTER = "create"
         const val ENDPOINT_MY_PROFILE = "me"
         const val CONFIRM_REGISTER = "confirm-register-code"
+        const val CONFIRM_PASSWORD_CODE = "confirm-password-code"
         const val RESEND_CODE = "resend-code"
+        const val SEND_CODE = "send-code"
+        const val CHANGE_PASSWORD = "change-password"
         const val GOOGLE_LOGIN = "google/signin"
         const val ENDPOINT_PRUEBA = "weatherforecast"
     }

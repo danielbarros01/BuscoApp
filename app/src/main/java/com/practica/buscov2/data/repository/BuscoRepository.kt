@@ -1,7 +1,6 @@
 package com.practica.buscov2.data.repository
 
 import android.util.Log
-import androidx.room.util.copy
 import com.google.gson.Gson
 import com.practica.buscov2.data.ApiBusco
 import com.practica.buscov2.model.ErrorBusco
@@ -12,7 +11,6 @@ import com.practica.buscov2.model.RegisterRequest
 import com.practica.buscov2.model.User
 import com.practica.buscov2.model.UserResult
 import com.practica.buscov2.util.AppUtils.Companion.convertToIsoDate
-import retrofit2.Response
 import javax.inject.Inject
 
 class BuscoRepository @Inject constructor(private val api: ApiBusco) {
@@ -88,20 +86,42 @@ class BuscoRepository @Inject constructor(private val api: ApiBusco) {
         }
     }
 
-    suspend fun confirmCode(token: String, code: Int): Any {
-        val response = api.confirmRegister("Bearer $token", mapOf("code" to code))
-
-        return when (response.code()) {
-            200 -> true
-            400 -> {
-                val errorBody = response.errorBody()
-                val gson = Gson()
-                val errorResponse: ErrorBusco =
-                    gson.fromJson(errorBody?.charStream(), ErrorBusco::class.java)
-                ErrorBusco(errorResponse.code, "Error", message = errorResponse.message)
+    suspend fun confirmCode(isRegister: Boolean, token: String, code: Int, email: String): Any {
+        try {
+            val response = if (isRegister) {
+                api.confirmRegister("Bearer $token", mapOf("code" to code))
+            } else {
+                api.confirmCodeForPassword(email, code)
             }
 
-            else -> ErrorBusco(0, "Error", message = "Error desconocido, intentalo de nuevo")
+            // Log response code for debugging
+            Log.d("API Response", "Response code: ${response.code()}")
+
+            return when (response.code()) {
+                200 -> {
+                    if (!isRegister) {
+                        //Debemos devolver el token para que al cambiar el password tengamos la autenticacion
+                        LoginResult(response.body() as LoginToken?, null)
+                    } else {
+                        //Si es registro, ya tenemos el token, no hace falta devolverlo
+                        true
+                    }
+                }
+
+                400 -> {
+                    val errorBody = response.errorBody()
+                    val gson = Gson()
+                    val errorResponse: ErrorBusco =
+                        gson.fromJson(errorBody?.charStream(), ErrorBusco::class.java)
+                    ErrorBusco(errorResponse.code, "Error", message = errorResponse.message)
+                }
+
+                else -> ErrorBusco(0, "Error", message = "Error desconocido, intentalo de nuevo")
+            }
+
+        } catch (e: Exception) {
+            Log.d("Error", e.toString())
+            return ErrorBusco(0, "Error", message = "Error desconocido, intentalo de nuevo")
         }
     }
 
@@ -112,6 +132,16 @@ class BuscoRepository @Inject constructor(private val api: ApiBusco) {
             gsonError(response)
         } else {
             true
+        }
+    }
+
+    suspend fun sendCode(email: String): Any {
+        val response = api.sendCode(email)
+
+        return if (response.code() == 200) {
+            true
+        } else {
+            gsonError(response)
         }
     }
 
@@ -152,6 +182,30 @@ class BuscoRepository @Inject constructor(private val api: ApiBusco) {
             )
 
             else -> LoginResult(null, ErrorBusco(0, "Error", message = "Error desconocido"))
+        }
+    }
+
+    //Cambiar password
+    suspend fun changePassword(token: String, password: String): Any {
+
+        try {
+            val response = api.changePassword("Bearer $token", password)
+
+            return when (response.code()) {
+                200 -> true
+                400 -> {
+                    val errorBody = response.errorBody()
+                    val gson = Gson()
+                    val errorResponse: ErrorBusco =
+                        gson.fromJson(errorBody?.charStream(), ErrorBusco::class.java)
+                    ErrorBusco(errorResponse.code, "Error", message = errorResponse.message)
+                }
+
+                else -> ErrorBusco(0, "Error", message = "Error desconocido, intentalo de nuevo")
+            }
+        } catch (e: Exception) {
+            Log.d("Error", e.toString())
+            return ErrorBusco(0, "Error", message = "Error desconocido, intentalo de nuevo")
         }
     }
 

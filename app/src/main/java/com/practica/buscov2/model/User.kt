@@ -11,7 +11,6 @@ data class User(
     val province: String? = null,
     val department: String? = null,
     val city: String? = null,
-    val telephone: String? = null,
     val image: String? = null,
     val verificationCode: Int? = null,
     val confirmed: Boolean? = null,

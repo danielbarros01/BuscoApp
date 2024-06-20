@@ -1,5 +1,7 @@
 package com.practica.buscov2.navigation
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavType
@@ -15,7 +17,9 @@ import com.practica.buscov2.ui.viewModel.GeorefViewModel
 import com.practica.buscov2.ui.viewModel.GoogleLoginViewModel
 import com.practica.buscov2.ui.viewModel.HomeViewModel
 import com.practica.buscov2.ui.viewModel.LoginViewModel
+import com.practica.buscov2.ui.viewModel.RecoverPasswordViewModel
 import com.practica.buscov2.ui.viewModel.RegisterViewModel
+import com.practica.buscov2.ui.viewModel.ResetPasswordViewModel
 import com.practica.buscov2.ui.viewModel.StartViewModel
 import com.practica.buscov2.ui.viewModel.TokenViewModel
 import com.practica.buscov2.ui.viewModel.UserViewModel
@@ -23,10 +27,14 @@ import com.practica.buscov2.ui.views.CheckEmailView
 import com.practica.buscov2.ui.views.CompleteDataView
 import com.practica.buscov2.ui.views.HomeView
 import com.practica.buscov2.ui.views.LoginView
+import com.practica.buscov2.ui.views.OkResetPassword
+import com.practica.buscov2.ui.views.RecoverPassword
 import com.practica.buscov2.ui.views.RegisterView
+import com.practica.buscov2.ui.views.ResetPassword
 import com.practica.buscov2.ui.views.StartView
 
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun NavManager() {
     val navController = rememberNavController()
@@ -34,10 +42,6 @@ fun NavManager() {
     val loginGoogleViewModel: GoogleLoginViewModel = hiltViewModel()
 
     NavHost(navController = navController, startDestination = "Start") {
-        /*composable("Google"){
-            GoogleView()
-        }*/
-
         composable("Start") {
             val startViewModel: StartViewModel = hiltViewModel()
             val userViewModel: UserViewModel = hiltViewModel()
@@ -59,6 +63,7 @@ fun NavManager() {
             val georefViewModel: GeorefViewModel = hiltViewModel()
 
             val completeDataViewModel: CompleteDataViewModel = hiltViewModel()
+
             CompleteDataView(
                 completeDataViewModel,
                 navController,
@@ -68,9 +73,13 @@ fun NavManager() {
             )
         }
 
+        //for es para resend password o check email de registro
         composable(
-            "CheckEmailView/{userJson}",
-            arguments = listOf(navArgument("userJson") { type = NavType.StringType })
+            "CheckEmailView/{userJson}/{forView}",
+            arguments = listOf(
+                navArgument("userJson") { type = NavType.StringType },
+                navArgument("forView") { type = NavType.StringType }
+            )
         ) {
             //val email = it.arguments?.getString("email") ?: "su correo."
             val checkEmailViewModel: CheckEmailViewModel = hiltViewModel()
@@ -78,7 +87,9 @@ fun NavManager() {
             val userJson = it.arguments?.getString("userJson") ?: ""
             val user = Gson().fromJson(userJson, User::class.java)
 
-            CheckEmailView(checkEmailViewModel, tokenViewModel, navController, user)
+            val forView = it.arguments?.getString("forView") ?: "check-email"
+
+            CheckEmailView(checkEmailViewModel, tokenViewModel, navController, user, forView)
         }
 
         composable("RegisterView") {
@@ -90,6 +101,25 @@ fun NavManager() {
         composable("Home") {
             val homeViewModel: HomeViewModel = hiltViewModel()
             HomeView(homeViewModel, loginGoogleViewModel, navController)
+        }
+
+        composable("RecoverPassword") {
+            val userViewModel: UserViewModel = hiltViewModel()
+            val recoverPasswordViewModel: RecoverPasswordViewModel = hiltViewModel()
+            RecoverPassword(
+                vmUser = userViewModel,
+                vmRecover = recoverPasswordViewModel,
+                navController = navController
+            )
+        }
+
+        composable("ResetPassword") {
+            val resetPasswordViewModel: ResetPasswordViewModel = hiltViewModel()
+            ResetPassword(resetPasswordViewModel, tokenViewModel, navController)
+        }
+
+        composable("OkResetPassword"){
+            OkResetPassword(navController)
         }
     }
 }

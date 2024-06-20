@@ -36,7 +36,6 @@ import javax.inject.Inject
 @HiltViewModel
 class CompleteDataViewModel @Inject constructor(
     private val repo: BuscoRepository,
-    private val storeToken: StoreToken,
     private val repoGeoref: GeorefRepository
 ) : ViewModel() {
     //Para el progressIndicator
@@ -55,9 +54,6 @@ class CompleteDataViewModel @Inject constructor(
 
     private var _dateOfBirth = mutableStateOf("")
     val dateOfBirth: State<String> = _dateOfBirth
-
-    private var _telephone = mutableStateOf("")
-    val telephone: State<String> = _telephone
 
     private var _buttonNextEnable = mutableStateOf(false)
     val buttonEnable: State<Boolean> = _buttonNextEnable
@@ -187,20 +183,18 @@ class CompleteDataViewModel @Inject constructor(
     }
 
     //Cambiar los valores
-    fun onDateChanged(name: String, lastname: String, dateOfBirth: String, telephone: String) {
+    fun onDateChanged(name: String, lastname: String, dateOfBirth: String) {
         _name.value = name
         _lastname.value = lastname
         _dateOfBirth.value = dateOfBirth
-        _telephone.value = telephone
         _buttonNextEnable.value =
             isValidName(name) && isValidLastName(lastname)
-                    && isValidDateOfBirth(dateOfBirth) && isValidTelephone(telephone)
+                    && isValidDateOfBirth(dateOfBirth)
 
         user = user.copy(
             name = name,
             lastname = lastname,
             birthdate = dateOfBirth,
-            telephone = telephone
         )
     }
 
@@ -208,7 +202,7 @@ class CompleteDataViewModel @Inject constructor(
         _dateOfBirth.value = dateOfBirth
         _buttonNextEnable.value =
             isValidName(name.value) && isValidLastName(lastname.value)
-                    && isValidDateOfBirth(dateOfBirth) && isValidTelephone(telephone.value)
+                    && isValidDateOfBirth(dateOfBirth)
 
         user = user.copy(
             birthdate = dateOfBirth,
@@ -223,14 +217,15 @@ class CompleteDataViewModel @Inject constructor(
     private fun isValidName(name: String): Boolean = name.length > 3
     private fun isValidLastName(lastname: String): Boolean = lastname.length > 3
     private fun isValidDateOfBirth(date: String): Boolean = date.isNotEmpty()
-    private fun isValidTelephone(telephone: String): Boolean =
-        Patterns.PHONE.matcher(telephone).matches()
 
     fun saveCompleteData(token: String, user: User, onError: () -> Unit, onSuccess: () -> Unit) {
-        viewModelScope.launch(Dispatchers.IO) {
-            try {
-                //Activo el loading
-                _isLoading.value = true
+        try {
+            viewModelScope.launch(Dispatchers.IO) {
+                // Activo el loading
+                withContext(Dispatchers.Main) {
+                    _isLoading.value = true
+                    _error.value = ErrorBusco()
+                }
 
                 val response = repo.updateUser(token, user)
 
@@ -244,22 +239,25 @@ class CompleteDataViewModel @Inject constructor(
                     }
 
                     is ErrorBusco -> {
-                        _error.value = response
                         withContext(Dispatchers.Main) {
+                            _error.value = response
                             onError()
                         }
                     }
                 }
 
-                //Desactivo el loading
-                _isLoading.value = false
-            } catch (e: Exception) {
-                Log.e("Error", e.message.toString())
-                //Desactivo el loading
-                _isLoading.value = false
-                _error.value = ErrorBusco(message = "Ha ocurrido un error inesperado")
+                // Desactivo el loading
+                withContext(Dispatchers.Main) {
+                    _isLoading.value = false
+                }
             }
-        }
+        } catch (e: Exception) {
+            Log.e("Error", e.message.toString())
+            // Desactivo el loading y manejo el error
+            _isLoading.value = false
+            _error.value = ErrorBusco(message = "Ha ocurrido un error inesperado")
 
+        }
     }
+
 }

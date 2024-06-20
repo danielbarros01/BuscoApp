@@ -1,10 +1,6 @@
 package com.practica.buscov2.ui.views
 
-import android.graphics.drawable.shapes.Shape
-import android.os.CountDownTimer
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -25,15 +20,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -50,13 +42,10 @@ import com.practica.buscov2.ui.components.InsertImage
 import com.practica.buscov2.ui.components.LoaderMaxSize
 import com.practica.buscov2.ui.components.Space
 import com.practica.buscov2.ui.components.Title
-import com.practica.buscov2.ui.theme.GrayField
 import com.practica.buscov2.ui.theme.GrayPlaceholder
 import com.practica.buscov2.ui.theme.GrayText
 import com.practica.buscov2.ui.viewModel.CheckEmailViewModel
 import com.practica.buscov2.ui.viewModel.TokenViewModel
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
 
 @Composable
@@ -64,13 +53,14 @@ fun CheckEmailView(
     vm: CheckEmailViewModel,
     vmToken: TokenViewModel,
     navController: NavController,
-    user: User
+    user: User,
+    forView: String = "check-email" //or recover-password
 ) {
     Box(
         modifier = Modifier
             .fillMaxSize()
     ) {
-        CheckEmail(Modifier.align(Alignment.Center), vm, vmToken, navController, user)
+        CheckEmail(Modifier.align(Alignment.Center), vm, vmToken, navController, user, forView)
     }
 }
 
@@ -80,8 +70,12 @@ fun CheckEmail(
     vm: CheckEmailViewModel,
     vmToken: TokenViewModel,
     navController: NavController,
-    user: User
+    user: User,
+    forView: String
 ) {
+    //Si es para checkEmail debo reenviar el codigo, si es para recuperar la contraseña no(uso sendCode)
+    val resend = forView.equals("check-email", ignoreCase = true)
+
     val token by vmToken.token.collectAsState()
 
     val error = vm.error
@@ -185,31 +179,40 @@ fun CheckEmail(
             Space(size = 5.dp)
 
             ButtonTransparent(text = "Reenviar código", enabled = enabledSendCode) {
-                token?.let {
-                    vm.resendCode(it.token, {
-                        showError.value = true
-                    }) {
-                        vm.startTimer(vm.waitingTimeMillis)
-                        enabledSendCode = false
-                    }
+                //token?.let {
+                vm.resendCode(resend, token = token?.token, email = user.email ?: "", onError = {
+                    showError.value = true
+                }) {
+                    vm.startTimer(vm.waitingTimeMillis)
+                    enabledSendCode = false
                 }
+                //}
             }
             Space(size = 5.dp)
             ButtonPrincipal(text = "Verificar", enabled = enabledPrincipal) {
-                token?.let {
-                    vm.validateCode(it.token, vm.digitsString, {
+                //token?.let {
+                vm.validateCode(
+                    resend = resend,
+                    token = token?.token ?: "",
+                    code = vm.digitsString,
+                    email = user.email ?: "",
+                    {
                         showError.value = true
                     }) {
+                    if (resend) {
                         navController.navigate("CompleteData/${user.username}")
+                    } else {
+                        navController.navigate("ResetPassword")
                     }
                 }
+                //}
             }
             Space(size = 5.dp)
             ButtonTransparent(
                 text = "Cancelar",
                 textDecoration = TextDecoration.Underline
             ) {
-                navController.navigate("Login"){
+                navController.navigate("Login") {
                     // Pop up to the start destination and remove it from the back stack
                     popUpTo(navController.graph.startDestinationId) {
                         inclusive = true

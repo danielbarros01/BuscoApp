@@ -101,10 +101,10 @@ fun HaveAccount(onClick: () -> Unit) {
 }
 
 @Composable
-fun ForgotPassword() {
+fun ForgotPassword(onClick: () -> Unit) {
     Text(
         text = "Olvide mi contraseña",
-        modifier = Modifier.clickable { },
+        modifier = Modifier.clickable { onClick() },
         fontSize = 14.sp,
         fontWeight = FontWeight.Bold,
         color = Color(0xFF2F89FC)
@@ -155,7 +155,9 @@ fun Login(
         Space(8.dp)
         PasswordField(password) { viewModel.onLoginChanged(email, it) }
         Space(4.dp)
-        ForgotPassword()
+        ForgotPassword(){
+            navController.navigate("RecoverPassword")
+        }
         Space(16.dp)
 
         ButtonPrincipal("Iniciar Sesión", loginEnable) {
@@ -174,7 +176,7 @@ fun Login(
                     //Si no esta confirmado
                     else {
                         val userJson = Gson().toJson(it)
-                        navController.navigate("CheckEmailView/$userJson")
+                        navController.navigate("CheckEmailView/$userJson/check-email")
                     }
                 }
             }

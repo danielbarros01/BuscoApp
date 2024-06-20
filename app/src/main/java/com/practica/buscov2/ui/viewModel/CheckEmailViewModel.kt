@@ -21,13 +21,19 @@ import javax.inject.Inject
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewModelScope
+import com.practica.buscov2.data.dataStore.StoreToken
 import com.practica.buscov2.model.ErrorBusco
+import com.practica.buscov2.model.LoginResult
+import com.practica.buscov2.model.LoginToken
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 @HiltViewModel
-class CheckEmailViewModel @Inject constructor(private val repo: BuscoRepository) : ViewModel() {
+class CheckEmailViewModel @Inject constructor(
+    private val repo: BuscoRepository,
+    private val storeToken: StoreToken
+) : ViewModel() {
     private var waitingTime = mutableLongStateOf(10) //120''
     var waitingTimeMillis: Long = waitingTime.longValue * 1000
 
@@ -92,25 +98,41 @@ class CheckEmailViewModel @Inject constructor(private val repo: BuscoRepository)
     }
 
     fun validateCode(
-        token: String,
+        resend: Boolean = true,
+        token: String = "",
         code: String,
+        email: String = "",
         onError: () -> Unit,
         onSuccess: () -> Unit
     ) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                //Activo el loading
-                _isLoading.value = true
+                withContext(Dispatchers.Main) {
+                    //Activo el loading
+                    _isLoading.value = true
+                }
 
-                val response = repo.confirmCode(token, code.toInt())
+                val response = repo.confirmCode(resend, token, code.toInt(), email)
 
                 //Si no se pudo confirmar la cuenta
                 when (response) {
                     is Boolean -> {
-                        if (response) {
+                        if (response) { // si este Boolean es true:
                             withContext(Dispatchers.Main) {
+                                _isLoading.value = false
                                 onSuccess()
                             }
+                        }
+                    }
+
+                    is LoginResult -> {
+                        //Guardar el token
+                        val loginToken: LoginToken? = response.loginToken
+                        if (loginToken != null) storeToken.saveToken(loginToken)
+
+                        withContext(Dispatchers.Main) {
+                            _isLoading.value = false
+                            onSuccess()
                         }
                     }
 
@@ -121,13 +143,11 @@ class CheckEmailViewModel @Inject constructor(private val repo: BuscoRepository)
                             message = response.message
                         )
                         withContext(Dispatchers.Main) {
+                            _isLoading.value = false
                             onError()
                         }
                     }
                 }
-
-                //Desactivo el loading
-                _isLoading.value = false
             } catch (e: Exception) {
                 Log.e("Error", e.message.toString())
                 //Desactivo el loading
@@ -136,13 +156,25 @@ class CheckEmailViewModel @Inject constructor(private val repo: BuscoRepository)
         }
     }
 
-    fun resendCode(token: String, onError: () -> Unit, onSuccess: () -> Unit) {
+
+    /*
+    * resend en caso de que sea para registro
+    * send para recuperar contraseña
+    * */
+    fun resendCode(
+        resend: Boolean = true,
+        token: String? = "",
+        email: String = "",
+        onError: () -> Unit,
+        onSuccess: () -> Unit
+    ) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 //Activo el loading
                 _isLoading.value = true
 
-                val response = repo.resendCode(token)
+                val response =
+                    if (resend) token?.let { repo.resendCode(it) } else repo.sendCode(email)
 
                 when (response) {
                     is Boolean -> {

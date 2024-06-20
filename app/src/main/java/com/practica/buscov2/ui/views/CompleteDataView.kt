@@ -266,26 +266,37 @@ private fun PageOne(
     val name: String by viewModel.name
     val lastname: String by viewModel.lastname
     val dateOfBirth: String by viewModel.dateOfBirth
-    val telephone: String by viewModel.telephone
     val showDatePicker = remember { mutableStateOf(false) }
 
     Column {
-        CommonField(name, "Nombre") {
-            viewModel.onDateChanged(it, lastname, dateOfBirth, telephone)
+        Column {
+            Text(text = "Nombre", color = GrayText)
+            CommonField(name, "Nombre") {
+                viewModel.onDateChanged(it, lastname, dateOfBirth)
+            }
         }
         Space(8.dp)
-        CommonField(lastname, "Apellido") {
-            viewModel.onDateChanged(name, it, dateOfBirth, telephone)
+        Column {
+            Text(text = "Apellido", color = GrayText)
+            CommonField(lastname, "Apellido") {
+                viewModel.onDateChanged(name, it, dateOfBirth)
+            }
         }
+
         Space(8.dp)
-        DateField(
-            text = dateOfBirth,
-            R.drawable.calendar,
-            "Seleccionar Fecha de nacimiento",
-            "Fecha de nacimiento",
-        ) {
-            showDatePicker.value = true
+
+        Column {
+            Text(text = "Fecha de nacimiento", color = GrayText)
+            DateField(
+                text = dateOfBirth,
+                R.drawable.calendar,
+                "Seleccionar Fecha de nacimiento",
+                "Fecha de nacimiento",
+            ) {
+                showDatePicker.value = true
+            }
         }
+
 
         //Mostrar seleccionador de fecha
         if (showDatePicker.value) {
@@ -297,9 +308,6 @@ private fun PageOne(
             )
         }
         Space(8.dp)
-        CommonField(telephone, "Telefono", KeyboardType.Number) {
-            viewModel.onDateChanged(name, lastname, dateOfBirth, it)
-        }
     }
 }
 

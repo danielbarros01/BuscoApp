@@ -2,8 +2,11 @@ package com.practica.buscov2.data
 
 import com.practica.buscov2.model.LoginToken
 import com.practica.buscov2.model.LoginRequest
+import com.practica.buscov2.model.LoginResult
 import com.practica.buscov2.model.RegisterRequest
 import com.practica.buscov2.model.User
+import com.practica.buscov2.util.Constants.Companion.CHANGE_PASSWORD
+import com.practica.buscov2.util.Constants.Companion.CONFIRM_PASSWORD_CODE
 import com.practica.buscov2.util.Constants.Companion.CONFIRM_REGISTER
 import com.practica.buscov2.util.Constants.Companion.ENDPOINT_LOGIN
 import com.practica.buscov2.util.Constants.Companion.ENDPOINT_MY_PROFILE
@@ -11,8 +14,11 @@ import com.practica.buscov2.util.Constants.Companion.ENDPOINT_REGISTER
 import com.practica.buscov2.util.Constants.Companion.ENDPOINT_USERS
 import com.practica.buscov2.util.Constants.Companion.GOOGLE_LOGIN
 import com.practica.buscov2.util.Constants.Companion.RESEND_CODE
+import com.practica.buscov2.util.Constants.Companion.SEND_CODE
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.Field
+import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.PATCH
@@ -39,6 +45,13 @@ interface ApiBusco {
         @Body body: Map<String, Int>
     ): Response<Unit>
 
+    @FormUrlEncoded
+    @PATCH("$ENDPOINT_USERS/$CONFIRM_PASSWORD_CODE")
+    suspend fun confirmCodeForPassword(
+        @Field("email") email: String,
+        @Field("code") code: Int
+    ): Response<LoginToken>
+
     @PATCH("$ENDPOINT_USERS/$RESEND_CODE")
     suspend fun resendCode(
         @Header("Authorization") token: String
@@ -52,4 +65,18 @@ interface ApiBusco {
 
     @POST(GOOGLE_LOGIN)
     suspend fun googleLogin(@Body user: User): Response<LoginToken>
+
+    @FormUrlEncoded
+    @PATCH("$ENDPOINT_USERS/$SEND_CODE")
+    suspend fun sendCode(
+        @Field("email") email: String
+    ): Response<Unit>
+
+
+    @FormUrlEncoded
+    @PATCH("$ENDPOINT_USERS/$CHANGE_PASSWORD")
+    suspend fun changePassword(
+        @Header("Authorization") token: String,
+        @Field("password") password: String
+    ): Response<Unit>
 }

@@ -66,7 +66,7 @@ fun StartView(
                     //Si no esta confirmado
                     else {
                         val userJson = Gson().toJson(currentUser)
-                        navController.navigate("CheckEmailView/${userJson}")
+                        navController.navigate("CheckEmailView/${userJson}/check-email")
                     }
                 }
             }
