@@ -1,11 +1,10 @@
 package com.practica.buscov2.ui.views
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavController
 import com.practica.buscov2.ui.components.ButtonPrincipal
-import com.practica.buscov2.ui.viewModel.GoogleLoginViewModel
+import com.practica.buscov2.ui.viewModel.auth.GoogleLoginViewModel
 import com.practica.buscov2.ui.viewModel.HomeViewModel
 
 @Composable

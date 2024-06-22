@@ -4,7 +4,7 @@ import java.time.LocalDate
 
 class Constants {
     companion object{
-        const val BASE_URL = "http://192.168.100.7:5029/api/"
+        const val BASE_URL = "http://192.168.0.105:5029/api/"
         const val ENDPOINT_USERS = "users"
         const val ENDPOINT_LOGIN = "login"
         const val ENDPOINT_REGISTER = "create"

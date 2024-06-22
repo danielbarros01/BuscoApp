@@ -10,27 +10,25 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.google.gson.Gson
-import com.practica.buscov2.model.User
-import com.practica.buscov2.ui.viewModel.CheckEmailViewModel
-import com.practica.buscov2.ui.viewModel.CompleteDataViewModel
-import com.practica.buscov2.ui.viewModel.GeorefViewModel
-import com.practica.buscov2.ui.viewModel.GoogleLoginViewModel
+import com.practica.buscov2.model.busco.User
+import com.practica.buscov2.ui.viewModel.confirmation.CheckEmailViewModel
+import com.practica.buscov2.ui.viewModel.users.CompleteDataViewModel
+import com.practica.buscov2.ui.viewModel.auth.GoogleLoginViewModel
 import com.practica.buscov2.ui.viewModel.HomeViewModel
-import com.practica.buscov2.ui.viewModel.LoginViewModel
-import com.practica.buscov2.ui.viewModel.RecoverPasswordViewModel
-import com.practica.buscov2.ui.viewModel.RegisterViewModel
-import com.practica.buscov2.ui.viewModel.ResetPasswordViewModel
-import com.practica.buscov2.ui.viewModel.StartViewModel
-import com.practica.buscov2.ui.viewModel.TokenViewModel
-import com.practica.buscov2.ui.viewModel.UserViewModel
-import com.practica.buscov2.ui.views.CheckEmailView
-import com.practica.buscov2.ui.views.CompleteDataView
+import com.practica.buscov2.ui.viewModel.auth.LoginViewModel
+import com.practica.buscov2.ui.viewModel.auth.RecoverPasswordViewModel
+import com.practica.buscov2.ui.viewModel.auth.RegisterViewModel
+import com.practica.buscov2.ui.viewModel.auth.ResetPasswordViewModel
+import com.practica.buscov2.ui.viewModel.auth.TokenViewModel
+import com.practica.buscov2.ui.viewModel.users.UserViewModel
+import com.practica.buscov2.ui.views.confirmation.CheckEmailView
+import com.practica.buscov2.ui.views.users.CompleteDataView
 import com.practica.buscov2.ui.views.HomeView
-import com.practica.buscov2.ui.views.LoginView
-import com.practica.buscov2.ui.views.OkResetPassword
-import com.practica.buscov2.ui.views.RecoverPassword
-import com.practica.buscov2.ui.views.RegisterView
-import com.practica.buscov2.ui.views.ResetPassword
+import com.practica.buscov2.ui.views.auth.LoginView
+import com.practica.buscov2.ui.views.auth.OkResetPassword
+import com.practica.buscov2.ui.views.auth.RecoverPassword
+import com.practica.buscov2.ui.views.auth.RegisterView
+import com.practica.buscov2.ui.views.auth.ResetPassword
 import com.practica.buscov2.ui.views.StartView
 
 
@@ -43,9 +41,8 @@ fun NavManager() {
 
     NavHost(navController = navController, startDestination = "Start") {
         composable("Start") {
-            val startViewModel: StartViewModel = hiltViewModel()
             val userViewModel: UserViewModel = hiltViewModel()
-            StartView(startViewModel, tokenViewModel, userViewModel, navController)
+            StartView(tokenViewModel, userViewModel, navController)
         }
 
         composable("Login") {
@@ -59,15 +56,11 @@ fun NavManager() {
             arguments = listOf(navArgument("username") { type = NavType.StringType })
         ) {
             val username = it.arguments?.getString("username") ?: ""
-
-            val georefViewModel: GeorefViewModel = hiltViewModel()
-
             val completeDataViewModel: CompleteDataViewModel = hiltViewModel()
 
             CompleteDataView(
                 completeDataViewModel,
                 navController,
-                georefViewModel,
                 tokenViewModel,
                 username
             )
@@ -104,10 +97,8 @@ fun NavManager() {
         }
 
         composable("RecoverPassword") {
-            val userViewModel: UserViewModel = hiltViewModel()
             val recoverPasswordViewModel: RecoverPasswordViewModel = hiltViewModel()
             RecoverPassword(
-                vmUser = userViewModel,
                 vmRecover = recoverPasswordViewModel,
                 navController = navController
             )

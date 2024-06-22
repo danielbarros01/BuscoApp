@@ -12,29 +12,24 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.google.gson.Gson
 import com.practica.buscov2.R
-import com.practica.buscov2.ui.components.AlertError
 import com.practica.buscov2.ui.components.InsertImage
 import com.practica.buscov2.ui.components.Space
 import com.practica.buscov2.ui.theme.GrayPlaceholder
 import com.practica.buscov2.ui.theme.OrangePrincipal
-import com.practica.buscov2.ui.viewModel.StartViewModel
-import com.practica.buscov2.ui.viewModel.TokenViewModel
-import com.practica.buscov2.ui.viewModel.UserViewModel
+import com.practica.buscov2.ui.viewModel.auth.TokenViewModel
+import com.practica.buscov2.ui.viewModel.users.UserViewModel
 import com.practica.buscov2.util.AppUtils
 
 //Decidira a donde debemos ir
 
 @Composable
 fun StartView(
-    vm: StartViewModel,
     vmToken: TokenViewModel,
     vmUser: UserViewModel,
     navController: NavController

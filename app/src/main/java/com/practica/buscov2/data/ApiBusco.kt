@@ -1,10 +1,9 @@
 package com.practica.buscov2.data
 
-import com.practica.buscov2.model.LoginToken
-import com.practica.buscov2.model.LoginRequest
-import com.practica.buscov2.model.LoginResult
-import com.practica.buscov2.model.RegisterRequest
-import com.practica.buscov2.model.User
+import com.practica.buscov2.model.busco.auth.LoginToken
+import com.practica.buscov2.model.busco.auth.LoginRequest
+import com.practica.buscov2.model.busco.auth.RegisterRequest
+import com.practica.buscov2.model.busco.User
 import com.practica.buscov2.util.Constants.Companion.CHANGE_PASSWORD
 import com.practica.buscov2.util.Constants.Companion.CONFIRM_PASSWORD_CODE
 import com.practica.buscov2.util.Constants.Companion.CONFIRM_REGISTER
