@@ -23,7 +23,7 @@ class MainActivity : ComponentActivity() {
             BuscoV2Theme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
+                    color = MaterialTheme.colorScheme.background,
                 ) {
                     NavManager()
                 }

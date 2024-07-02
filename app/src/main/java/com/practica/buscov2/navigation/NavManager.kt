@@ -21,15 +21,20 @@ import com.practica.buscov2.ui.viewModel.auth.RegisterViewModel
 import com.practica.buscov2.ui.viewModel.auth.ResetPasswordViewModel
 import com.practica.buscov2.ui.viewModel.auth.TokenViewModel
 import com.practica.buscov2.ui.viewModel.users.UserViewModel
+import com.practica.buscov2.ui.viewModel.workers.RegisterWorkerViewModel
+import com.practica.buscov2.ui.views.BeWorkerView
+import com.practica.buscov2.ui.views.ChatView
 import com.practica.buscov2.ui.views.confirmation.CheckEmailView
 import com.practica.buscov2.ui.views.users.CompleteDataView
 import com.practica.buscov2.ui.views.HomeView
+import com.practica.buscov2.ui.views.NewPublicationView
 import com.practica.buscov2.ui.views.auth.LoginView
 import com.practica.buscov2.ui.views.auth.OkResetPassword
 import com.practica.buscov2.ui.views.auth.RecoverPassword
 import com.practica.buscov2.ui.views.auth.RegisterView
 import com.practica.buscov2.ui.views.auth.ResetPassword
 import com.practica.buscov2.ui.views.StartView
+import com.practica.buscov2.ui.views.workers.RegisterWorkerView
 
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -93,7 +98,14 @@ fun NavManager() {
 
         composable("Home") {
             val homeViewModel: HomeViewModel = hiltViewModel()
-            HomeView(homeViewModel, loginGoogleViewModel, navController)
+            val userViewModel: UserViewModel = hiltViewModel()
+            HomeView(
+                homeViewModel,
+                userViewModel,
+                tokenViewModel,
+                loginGoogleViewModel,
+                navController
+            )
         }
 
         composable("RecoverPassword") {
@@ -109,8 +121,25 @@ fun NavManager() {
             ResetPassword(resetPasswordViewModel, tokenViewModel, navController)
         }
 
-        composable("OkResetPassword"){
+        composable("OkResetPassword") {
             OkResetPassword(navController)
+        }
+
+        composable("BeWorker") {
+            BeWorkerView(navController)
+        }
+
+        composable("RegisterWorker") {
+            val registerWorkerViewModel: RegisterWorkerViewModel = hiltViewModel()
+            RegisterWorkerView(registerWorkerViewModel, tokenViewModel, navController)
+        }
+
+        composable("New") {
+            NewPublicationView(navController)
+        }
+
+        composable("Chat") {
+            ChatView(navController)
         }
     }
 }

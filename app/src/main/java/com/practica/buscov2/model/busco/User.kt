@@ -15,4 +15,5 @@ data class User(
     val verificationCode: Int? = null,
     val confirmed: Boolean? = null,
     val googleId: String? = null,
+    val worker: Worker? = null
 )

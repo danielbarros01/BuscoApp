@@ -538,7 +538,7 @@ private fun BottomBarPart(
                     showError.value = true
                 }) {
                     //En caso de exito navegar al home
-                    navController.navigate("Home")
+                    navController.navigate("BeWorker")
                 }
             }
         }

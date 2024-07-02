@@ -1,16 +1,21 @@
 package com.practica.buscov2.data
 
+import com.practica.buscov2.model.busco.ProfessionCategory
 import com.practica.buscov2.model.busco.auth.LoginToken
 import com.practica.buscov2.model.busco.auth.LoginRequest
 import com.practica.buscov2.model.busco.auth.RegisterRequest
 import com.practica.buscov2.model.busco.User
+import com.practica.buscov2.model.busco.Worker
 import com.practica.buscov2.util.Constants.Companion.CHANGE_PASSWORD
 import com.practica.buscov2.util.Constants.Companion.CONFIRM_PASSWORD_CODE
 import com.practica.buscov2.util.Constants.Companion.CONFIRM_REGISTER
+import com.practica.buscov2.util.Constants.Companion.ENDPOINT_CATEGORIES
 import com.practica.buscov2.util.Constants.Companion.ENDPOINT_LOGIN
 import com.practica.buscov2.util.Constants.Companion.ENDPOINT_MY_PROFILE
+import com.practica.buscov2.util.Constants.Companion.ENDPOINT_PROFESSIONS
 import com.practica.buscov2.util.Constants.Companion.ENDPOINT_REGISTER
 import com.practica.buscov2.util.Constants.Companion.ENDPOINT_USERS
+import com.practica.buscov2.util.Constants.Companion.ENDPOINT_WORKERS
 import com.practica.buscov2.util.Constants.Companion.GOOGLE_LOGIN
 import com.practica.buscov2.util.Constants.Companion.RESEND_CODE
 import com.practica.buscov2.util.Constants.Companion.SEND_CODE
@@ -23,6 +28,8 @@ import retrofit2.http.Header
 import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.PUT
+import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface ApiBusco {
     @POST("$ENDPOINT_USERS/$ENDPOINT_LOGIN")
@@ -77,5 +84,17 @@ interface ApiBusco {
     suspend fun changePassword(
         @Header("Authorization") token: String,
         @Field("password") password: String
+    ): Response<Unit>
+
+    @GET("$ENDPOINT_PROFESSIONS/$ENDPOINT_CATEGORIES/{categoryId}")
+    suspend fun getProfessionsForCategory(@Path("categoryId") categoryId: Int): Response<ProfessionCategory>
+
+    @GET("$ENDPOINT_PROFESSIONS/$ENDPOINT_CATEGORIES")
+    suspend fun getCategories(): Response<List<ProfessionCategory>>
+
+    @POST(ENDPOINT_WORKERS)
+    suspend fun addWorker(
+        @Header("Authorization") token: String,
+        @Body worker: Worker
     ): Response<Unit>
 }

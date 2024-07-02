@@ -54,6 +54,6 @@ fun BuscoV2Theme(
     MaterialTheme(
         colorScheme = colorScheme,
         typography = Typography,
-        content = content
+        content = content,
     )
 }

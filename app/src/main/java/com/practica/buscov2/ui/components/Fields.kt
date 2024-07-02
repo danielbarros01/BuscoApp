@@ -3,9 +3,12 @@ package com.practica.buscov2.ui.components
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -46,7 +49,7 @@ fun CommonField(
     OutlinedTextField(
         value = text, onValueChange = { onTextFieldChanged(it) },
         modifier = Modifier
-            .border(width = 2.dp, color = GrayField, shape = RoundedCornerShape(12.dp))
+            .border(width = 1.dp, color = GrayField, shape = RoundedCornerShape(12.dp))
             .fillMaxWidth(),
         placeholder = { Text(text = placeholder, color = GrayPlaceholder) },
         keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
@@ -71,7 +74,7 @@ fun PasswordField(password: String, onTextFieldChanged: (String) -> Unit) {
         onValueChange = { onTextFieldChanged(it) },
         placeholder = { Text(text = "Ingrese su contraseña", color = GrayPlaceholder) },
         modifier = Modifier
-            .border(width = 2.dp, color = GrayField, shape = RoundedCornerShape(12.dp))
+            .border(width = 1.dp, color = GrayField, shape = RoundedCornerShape(12.dp))
             .fillMaxWidth(),
         visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
@@ -128,9 +131,40 @@ fun DateField(
     );
 }
 
+@Composable
+fun CommonFieldArea(
+    text: String,
+    placeholder: String,
+    onTextFieldChanged: (String) -> Unit
+) {
+    val scrollState = rememberScrollState()
+
+    OutlinedTextField(
+        value = text, onValueChange = { onTextFieldChanged(it) },
+        modifier = Modifier
+            .border(width = 1.dp, color = GrayField, shape = RoundedCornerShape(12.dp))
+            .fillMaxWidth()
+            .height(104.dp)
+            .verticalScroll(scrollState),
+        placeholder = { Text(text = placeholder, color = GrayPlaceholder) },
+        maxLines = 3,
+        colors = OutlinedTextFieldDefaults.colors(
+            unfocusedTextColor = GrayText,
+            focusedTextColor = Color.Black
+        ),
+        shape = RoundedCornerShape(12.dp)
+    )
+}
+
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun OptionsField(options: List<String>, text: String, enabled:Boolean = true, onChanged: (String) -> Unit) {
+fun OptionsField(
+    options: List<String>,
+    text: String,
+    enabled: Boolean = true,
+    onChanged: (String) -> Unit
+) {
     var expanded by remember { mutableStateOf(false) }
 
     ExposedDropdownMenuBox(
@@ -179,3 +213,9 @@ fun OptionsField(options: List<String>, text: String, enabled:Boolean = true, on
         }
     }
 }
+
+/*
+@Composable
+fun SearchBar(){
+
+}*/

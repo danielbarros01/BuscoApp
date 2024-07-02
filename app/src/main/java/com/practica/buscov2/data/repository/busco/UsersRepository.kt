@@ -1,12 +1,16 @@
 package com.practica.buscov2.data.repository.busco
 
 import android.util.Log
+import androidx.lifecycle.viewModelScope
 import com.practica.buscov2.data.ApiBusco
 import com.practica.buscov2.model.busco.auth.ErrorBusco
 import com.practica.buscov2.model.busco.User
 import com.practica.buscov2.model.busco.UserResult
 import com.practica.buscov2.util.AppUtils.Companion.convertToIsoDate
 import com.practica.buscov2.util.ServerUtils.Companion.gsonError
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 
@@ -42,5 +46,4 @@ class UsersRepository @Inject constructor(private val api: ApiBusco) {
             return ErrorBusco(0, "Error", message = "Error desconocido, intentalo de nuevo")
         }
     }
-
 }

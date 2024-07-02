@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -20,6 +21,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardElevation
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -33,12 +35,14 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.practica.buscov2.R
 import com.practica.buscov2.ui.theme.GrayPlaceholder
+import com.practica.buscov2.ui.theme.GrayText
 import com.practica.buscov2.ui.theme.OrangePrincipal
 
 
@@ -82,6 +86,24 @@ fun ButtonGoogle(onClick: () -> Unit = {}) {
                 fontWeight = FontWeight.Bold
             )
         }
+    }
+}
+
+@Composable
+fun ButtonLine(text: String, onClick: () -> Unit = {}) {
+    OutlinedButton(
+        onClick = { onClick() },
+        shape = RoundedCornerShape(12.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(56.dp)
+    ) {
+        Text(
+            text = text,
+            color = GrayText,
+            fontWeight = FontWeight.SemiBold,
+            textAlign = TextAlign.Center
+        )
     }
 }
 
@@ -141,7 +163,6 @@ fun ArrowBack() {
 }
 
 @Composable
-@Preview(showBackground = true)
 fun ArrowCircleBack() {
     Box(
         modifier = Modifier
@@ -149,14 +170,49 @@ fun ArrowCircleBack() {
             .clip(CircleShape)
             .aspectRatio(1f)
             .background(Color.White)
-            //.border(1.dp, GrayPlaceholder, CircleShape),
+        //.border(1.dp, GrayPlaceholder, CircleShape),
     ) {
         Icon(
             painter = painterResource(id = R.drawable.arrow_back),
             contentDescription = "Volver",
-            modifier = Modifier.fillMaxSize().padding(10.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(10.dp),
             tint = OrangePrincipal
         )
     }
 
+}
+
+@Composable
+fun ArrowSquareBack(onClick: () -> Unit) {
+    IconButton(
+        modifier = Modifier
+            .height(56.dp)
+            .border(1.dp, OrangePrincipal, RoundedCornerShape(12.dp)),
+        onClick = { onClick() }) {
+        Icon(
+            painter = painterResource(id = R.drawable.arrow_back),
+            contentDescription = "Volver",
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(6.dp),
+            tint = OrangePrincipal
+        )
+    }
+
+}
+
+@Composable
+fun ButtonMenu(modifier: Modifier, onClick: () -> Unit) {
+    IconButton(
+        modifier = modifier.background(color = OrangePrincipal, shape = CircleShape),
+        onClick = { onClick() }) {
+        Icon(
+            painter = painterResource(id = R.drawable.burguer_menu),
+            contentDescription = "Menu",
+            tint = Color.White,
+            modifier = Modifier.fillMaxSize().padding(4.dp)
+        )
+    }
 }

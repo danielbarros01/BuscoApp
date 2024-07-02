@@ -79,14 +79,17 @@ dependencies {
     val dataStoreVersion = "1.0.0"
     implementation("androidx.datastore:datastore-preferences:$dataStoreVersion")
 
+    //accompanist
     //-- OnBoarding
     implementation("com.google.accompanist:accompanist-pager:0.15.0")
 
     implementation("androidx.compose.material3:material3:1.3.0-beta01")
 
-
     //auth google
     implementation("com.google.android.gms:play-services-auth:20.3.0")
+
+    //Coil
+    implementation("io.coil-kt:coil-compose:2.6.0")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
