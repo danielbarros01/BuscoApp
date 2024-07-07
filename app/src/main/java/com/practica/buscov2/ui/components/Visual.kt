@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -37,7 +38,9 @@ import coil.compose.rememberAsyncImagePainter
 import coil.compose.rememberImagePainter
 import coil.request.ImageRequest
 import com.practica.buscov2.R
+import com.practica.buscov2.ui.theme.GrayField
 import com.practica.buscov2.ui.theme.GrayPlaceholder
+import com.practica.buscov2.ui.theme.GrayText
 import com.practica.buscov2.util.Constants.Companion.API_URL
 import kotlin.io.path.Path
 
@@ -51,15 +54,14 @@ fun InsertImage(image: Int, modifier: Modifier) {
 }
 
 @Composable
-fun InsertCircleProfileImage(image: String, modifier: Modifier, onClick: () -> Unit = {}) {
+fun InsertAsyncImage(image: String, modifier: Modifier, onClick: () -> Unit = {}) {
     val defaultImage = painterResource(id = R.drawable.userpicnull)
 
-    val imageUrl = if(image.contains("localhost")){
+    val imageUrl = if (image.contains("localhost")) {
         image.replace("localhost", API_URL)
     } else {
         image
     }
-
 
     AsyncImage(
         model = ImageRequest.Builder(LocalContext.current)
@@ -68,17 +70,72 @@ fun InsertCircleProfileImage(image: String, modifier: Modifier, onClick: () -> U
             .build(),
         contentDescription = "Foto de perfil",
         placeholder = defaultImage,
-        modifier = modifier
-            .fillMaxSize()
-            .clip(CircleShape)
-            .border(1.dp, GrayPlaceholder, CircleShape)
-            .clickable { onClick() },
+        modifier = modifier.clickable { onClick() },
         contentScale = ContentScale.Crop,
         onError = {
             Log.d("ERROR", it.toString())
         }
     )
 }
+
+@Composable
+fun InsertCircleProfileImage(image: String, modifier: Modifier, onClick: () -> Unit = {}) {
+    val imagePainter = painterResource(id = R.drawable.userpicnull)
+
+    val imageUrl = if (image.contains("localhost")) {
+        image.replace("localhost", API_URL)
+    } else {
+        image
+    }
+
+    if (image.isNotEmpty()) {
+        AsyncImage(
+            model = ImageRequest.Builder(LocalContext.current)
+                .data(imageUrl)
+                .crossfade(true)
+                .build(),
+            contentDescription = "Foto de perfil",
+            placeholder = imagePainter,
+            modifier = modifier
+                .fillMaxSize()
+                .clip(CircleShape)
+                .border(1.dp, GrayPlaceholder, CircleShape)
+                .clickable { onClick() },
+            contentScale = ContentScale.Crop,
+            onError = {
+                Log.d("ERROR", it.toString())
+            }
+        )
+    } else {
+        Image(
+            painter = imagePainter, contentDescription = "Foto de perfil",
+            modifier = modifier
+                .fillMaxSize()
+                .clip(CircleShape)
+                .border(1.dp, GrayPlaceholder, CircleShape)
+                .clickable { onClick() },
+            contentScale = ContentScale.Crop,
+        )
+    }
+
+}
+
+
+@Composable
+fun InsertCirlceProfileEditImage(image: String, modifier: Modifier, onClick: () -> Unit) {
+    Box(){
+        InsertCircleProfileImage(image = image, modifier = modifier, onClick = onClick)
+        Box(modifier = Modifier.matchParentSize().clip(CircleShape).background(Color.Gray.copy(alpha = 0.5f))){
+            Icon(
+                painter = painterResource(id = R.drawable.edit),
+                contentDescription = "Editar Foto",
+                modifier = Modifier.align(Alignment.Center).size(80.dp),
+                tint = GrayText
+            )
+        }
+    }
+}
+
 
 @Composable
 fun SeparatoryLine() {

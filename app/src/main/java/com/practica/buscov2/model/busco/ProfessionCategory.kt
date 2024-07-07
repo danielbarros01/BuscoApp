@@ -1,7 +1,7 @@
 package com.practica.buscov2.model.busco
 
 data class ProfessionCategory(
-    val id: Int,
-    val name: String,
-    val professions: List<Profession>?
+    val id: Int? = null,
+    val name: String? = null,
+    val professions: List<Profession>? = null
 )

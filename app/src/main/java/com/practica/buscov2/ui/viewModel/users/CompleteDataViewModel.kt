@@ -92,7 +92,7 @@ class CompleteDataViewModel @Inject constructor(
         }
     }
 
-    fun fetchDepartamentos() {
+    fun fetchDepartamentos(ok:() -> Unit = {}) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 val result = repoGeoref.getDepartamentos(provincia.value)
@@ -103,10 +103,12 @@ class CompleteDataViewModel @Inject constructor(
                 _localidad.value = "Seleccione una localidad"
                 _buttonNextEnable.value = false
             }
+
+            ok()
         }
     }
 
-    fun fetchLocalidades() {
+    fun fetchLocalidades(ok:() -> Unit = {}) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 val result = repoGeoref.getLocalidades(provincia.value, departamento.value)
@@ -115,6 +117,30 @@ class CompleteDataViewModel @Inject constructor(
                 _localidad.value = "Seleccione una localidad"
                 if (_enableChooseCity.value) _buttonNextEnable.value = false
             }
+
+            ok()
+        }
+    }
+
+    fun onDateChangedInitializedData(userP: User) {
+        viewModelScope.launch {
+            val country = userP.country
+            val province = userP.province
+            val department = userP.department
+            val city = userP.city
+
+            _provincia.value = province ?: ""
+
+            fetchDepartamentos(ok = {
+                _departamento.value = department ?: ""
+                fetchLocalidades(ok = {
+                    _localidad.value = city ?: ""
+                })
+            })
+
+            user = user.copy(
+                country = country, province = province, department = department, city = city
+            )
         }
     }
 
@@ -209,7 +235,7 @@ class CompleteDataViewModel @Inject constructor(
     private fun isValidLastName(lastname: String): Boolean = lastname.length > 3
     private fun isValidDateOfBirth(date: String): Boolean = date.isNotEmpty()
 
-    fun saveCompleteData(token: String, user: User, onError: () -> Unit, onSuccess: () -> Unit) {
+    fun saveCompleteData(token: String, userP: User? = user, onError: () -> Unit, onSuccess: () -> Unit) {
         try {
             viewModelScope.launch(Dispatchers.IO) {
                 // Activo el loading
@@ -218,7 +244,7 @@ class CompleteDataViewModel @Inject constructor(
                     _error.value = ErrorBusco()
                 }
 
-                val response = repo.updateUser(token, user)
+                val response = userP?.let { repo.updateUser(token, it) }
 
                 when (response) {
                     is Boolean -> {

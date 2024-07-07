@@ -121,17 +121,7 @@ fun Home(
     user: User
 ) {
     //Rutas de navegacion bottom
-    val navigationRoutes = listOf(
-        RoutesBottom.Home,
-        RoutesBottom.New,
-        RoutesBottom.Chat
-    )
-    val navigationRoutesDrawer = listOf(
-        RoutesDrawer.Works,
-        RoutesDrawer.Applications,
-        RoutesDrawer.Proposals,
-        RoutesDrawer.Notifications,
-    )
+    val navigationRoutes = RoutesBottom.allRoutes
 
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -148,7 +138,7 @@ fun Home(
                 vmGoogle = vmGoogle,
                 user = user,
                 navController = navController,
-                routes = navigationRoutesDrawer
+                routes = RoutesDrawer.allRoutes
             )
         }
     ) {

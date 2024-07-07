@@ -11,10 +11,25 @@ import javax.inject.Inject
 class WorkersRepository @Inject constructor(private val api: ApiBusco) {
     suspend fun createWorker(token: String, worker: Worker): Any {
         try {
-            val response = api.addWorker("Bearer $token", worker)
+            val response = api.updateWorker("Bearer $token", worker)
 
             return when (response.code()) {
-                200 -> true
+                in 200..300 -> true
+                in 400..599 -> gsonError(response)
+                else -> ErrorBusco(0, "Error", message = "Error desconocido, intentalo de nuevo")
+            }
+        } catch (e: Exception) {
+            Log.d("Error", e.toString())
+            return ErrorBusco(0, "Error", message = "Error desconocido, intentalo de nuevo")
+        }
+    }
+
+    suspend fun updateWorker(token: String, worker: Worker):Any{
+        try {
+            val response = api.updateWorker("Bearer $token", worker)
+
+            return when (response.code()) {
+                in 200..300 -> true
                 in 400..599 -> gsonError(response)
                 else -> ErrorBusco(0, "Error", message = "Error desconocido, intentalo de nuevo")
             }

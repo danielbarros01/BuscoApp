@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.practica.buscov2.R
 import com.practica.buscov2.ui.components.AlertError
-import com.practica.buscov2.ui.components.ArrowCircleBack
+import com.practica.buscov2.ui.components.ButtonBack
 import com.practica.buscov2.ui.components.ButtonPrincipal
 import com.practica.buscov2.ui.components.InsertImage
 import com.practica.buscov2.ui.components.LoaderMaxSize
@@ -73,14 +73,12 @@ fun Reset(
         LoaderMaxSize()
     }
 
-    IconButton(
-        modifier = Modifier
-            .size(64.dp)
-            .padding(start = 15.dp, top = 10.dp),
-        onClick = {
-            navController.navigate("Login")
-        }) {
-        ArrowCircleBack()
+    ButtonBack(
+        modifier = Modifier.padding(start = 15.dp, top = 10.dp),
+        size = 64.dp,
+        navController = navController
+    ) {
+        navController.navigate("Login")
     }
 
     Column(modifier = modifier.padding(15.dp)) {

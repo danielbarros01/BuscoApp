@@ -1,11 +1,14 @@
 package com.practica.buscov2.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
@@ -22,7 +25,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.practica.buscov2.R
 
-@Preview(showBackground = true)
 @Composable
 fun AlertErrorPreview() {
     AlertDialog(
@@ -97,6 +99,44 @@ fun AlertError(
                 ) {
                     Text(text = "OK", color = Color.Black)
                 }
+            },
+        )
+    }
+}
+
+@Composable
+fun AlertSuccess(
+    showDialog: MutableState<Boolean>,
+    text: String,
+    onClick: () -> Unit = { showDialog.value = false }
+) {
+    if (showDialog.value) {
+        AlertDialog(
+            onDismissRequest = { /*TODO*/ },
+            title = {
+                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    InsertImage(
+                        image = R.drawable.beeconfirmed, modifier = Modifier
+                            .width(150.dp)
+                            .height(150.dp)
+                    )
+                }
+            },
+            text = {
+                Text(
+                    text = text,
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center,
+                    fontSize = 20.sp
+                )
+            },
+            confirmButton = {
+                ButtonPrincipal(
+                    onSelected = { onClick() },
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = true,
+                    text = "OK"
+                )
             },
         )
     }

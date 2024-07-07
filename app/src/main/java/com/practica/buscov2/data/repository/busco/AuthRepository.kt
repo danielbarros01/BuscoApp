@@ -11,7 +11,7 @@ import com.practica.buscov2.model.busco.User
 import javax.inject.Inject
 
 
-class AuthRepository @Inject constructor(private val api:ApiBusco){
+class AuthRepository @Inject constructor(private val api: ApiBusco) {
 
     suspend fun login(email: String, password: String): LoginResult? {
         val response = api.login(LoginRequest(email, password))
@@ -71,25 +71,30 @@ class AuthRepository @Inject constructor(private val api:ApiBusco){
     }
 
     suspend fun loginGoogle(user: User): LoginResult? {
-        val response = api.googleLogin(user)
+        try {
+            val response = api.googleLogin(user)
 
-        return when (response.code()) {
-            200 -> if (response.isSuccessful) response.body()
-                ?.let { LoginResult(it, null) } else LoginResult(
-                null,
-                ErrorBusco(0, "Error", message = "Error desconocido")
-            )
-
-            500 -> LoginResult(
-                null,
-                ErrorBusco(
-                    401,
-                    title = "Error en la autenticación",
-                    message = "Al parecer el error es nuestro, por favor, intentalo de nuevo más tarde."
+            return when (response.code()) {
+                200 -> if (response.isSuccessful) response.body()
+                    ?.let { LoginResult(it, null) } else LoginResult(
+                    null,
+                    ErrorBusco(0, "Error", message = "Error desconocido")
                 )
-            )
 
-            else -> LoginResult(null, ErrorBusco(0, "Error", message = "Error desconocido"))
+                500 -> LoginResult(
+                    null,
+                    ErrorBusco(
+                        401,
+                        title = "Error en la autenticación",
+                        message = "Al parecer el error es nuestro, por favor, intentalo de nuevo más tarde."
+                    )
+                )
+
+                else -> LoginResult(null, ErrorBusco(0, "Error", message = "Error desconocido"))
+            }
+        } catch (e: Exception) {
+            Log.d("Error", e.toString())
+            return LoginResult(null, ErrorBusco(0, "Error", message = "Error desconocido"))
         }
     }
 

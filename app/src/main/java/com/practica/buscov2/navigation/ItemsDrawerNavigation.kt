@@ -11,4 +11,13 @@ sealed class RoutesDrawer(
     object Applications : RoutesDrawer(R.drawable.briefcase_works, "Postulaciones", "Applications")
     object Proposals : RoutesDrawer(R.drawable.hand,"Propuestas", "Proposals")
     object Notifications : RoutesDrawer(R.drawable.notification, "Notificaciones", "Notifications")
+
+    companion object{
+        val allRoutes: List<RoutesDrawer> = listOf(
+            Works,
+            Applications,
+            Proposals,
+            Notifications
+        )
+    }
 }

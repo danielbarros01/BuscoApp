@@ -123,7 +123,7 @@ fun Register(
             }
             Space(10.dp)
 
-            ButtonPrincipal("Registrarse", buttonEnabled) {
+            ButtonPrincipal(text = "Registrarse", enabled = buttonEnabled) {
                 viewModel.register(onError = { showError.value = true }) {
                     val userJson = Gson().toJson(User(email = email, username = username))
                     navController.navigate("CheckEmailView/$userJson/check-email")

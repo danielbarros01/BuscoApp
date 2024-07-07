@@ -24,10 +24,13 @@ import com.practica.buscov2.ui.viewModel.users.UserViewModel
 import com.practica.buscov2.ui.viewModel.workers.RegisterWorkerViewModel
 import com.practica.buscov2.ui.views.BeWorkerView
 import com.practica.buscov2.ui.views.ChatView
+import com.practica.buscov2.ui.views.ConfigurationView
+import com.practica.buscov2.ui.views.EditUserView
 import com.practica.buscov2.ui.views.confirmation.CheckEmailView
 import com.practica.buscov2.ui.views.users.CompleteDataView
 import com.practica.buscov2.ui.views.HomeView
 import com.practica.buscov2.ui.views.NewPublicationView
+import com.practica.buscov2.ui.views.ProfileView
 import com.practica.buscov2.ui.views.auth.LoginView
 import com.practica.buscov2.ui.views.auth.OkResetPassword
 import com.practica.buscov2.ui.views.auth.RecoverPassword
@@ -44,7 +47,7 @@ fun NavManager() {
     val tokenViewModel: TokenViewModel = hiltViewModel()
     val loginGoogleViewModel: GoogleLoginViewModel = hiltViewModel()
 
-    NavHost(navController = navController, startDestination = "Start") {
+    NavHost(navController = navController, startDestination = "EditProfile") {
         composable("Start") {
             val userViewModel: UserViewModel = hiltViewModel()
             StartView(tokenViewModel, userViewModel, navController)
@@ -140,6 +143,32 @@ fun NavManager() {
 
         composable("Chat") {
             ChatView(navController)
+        }
+
+        composable("Configuration")
+        {
+            val userViewModel: UserViewModel = hiltViewModel()
+
+            ConfigurationView(userViewModel, loginGoogleViewModel, tokenViewModel, navController)
+        }
+
+        composable("Profile") {
+            val userViewModel: UserViewModel = hiltViewModel()
+            ProfileView(userViewModel, loginGoogleViewModel, tokenViewModel, navController)
+        }
+
+        composable("EditProfile") {
+            val userViewModel: UserViewModel = hiltViewModel()
+            val registerWorkerViewModel: RegisterWorkerViewModel = hiltViewModel()
+            val completeDataViewModel: CompleteDataViewModel = hiltViewModel()
+
+            EditUserView(
+                userViewModel,
+                tokenViewModel,
+                registerWorkerViewModel,
+                completeDataViewModel,
+                navController
+            )
         }
     }
 }

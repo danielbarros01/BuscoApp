@@ -21,13 +21,17 @@ class GoogleLoginViewModel @Inject constructor(
     private lateinit var googleSignInClient: GoogleSignInClient
 
     fun initialize(context: Context) {
-        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestEmail()
-            .requestIdToken(googleClientId)
-            .requestId()
-            .requestProfile()
-            .build()
-        googleSignInClient = GoogleSignIn.getClient(context, gso)
+        try {
+            val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestEmail()
+                .requestIdToken(googleClientId)
+                .requestId()
+                .requestProfile()
+                .build()
+            googleSignInClient = GoogleSignIn.getClient(context, gso)
+        }catch (e:Exception){
+            Log.d("Error", "Error al inicializar google + ${e.message}")
+        }
     }
 
     fun getSignInIntent(): Intent {

@@ -159,7 +159,7 @@ fun Login(
         }
         Space(16.dp)
 
-        ButtonPrincipal("Iniciar Sesión", loginEnable) {
+        ButtonPrincipal(text = "Iniciar Sesión", enabled = loginEnable) {
             viewModel.login(onError = { showError.value = true }) { token ->
                 vmUser.getMyProfile(token, {}) {
                     //En caso de obtener el usuario

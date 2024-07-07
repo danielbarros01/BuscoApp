@@ -193,7 +193,7 @@ fun CompleteData(
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
-private fun ConfigMinAndMaxDate(
+fun ConfigMinAndMaxDate(
     viewModel: CompleteDataViewModel,
     dateMillis: Long,
     selectedDateMillis: MutableState<Long?>,
@@ -250,7 +250,7 @@ private fun ConfigMinAndMaxDate(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun PageOne(
+fun PageOne(
     viewModel: CompleteDataViewModel,
     stateDataPicker: DatePickerState,
     showError: MutableState<Boolean>,
@@ -305,7 +305,7 @@ private fun PageOne(
 }
 
 @Composable
-private fun PageTwo(vm: CompleteDataViewModel) {
+fun PageTwo(vm: CompleteDataViewModel) {
     val provincias by vm.provincias.collectAsState()
     val departamentos by vm.departamentos.collectAsState()
     val localidades by vm.localidades.collectAsState()

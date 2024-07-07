@@ -4,10 +4,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -16,30 +16,32 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardElevation
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.practica.buscov2.R
 import com.practica.buscov2.ui.theme.GrayPlaceholder
 import com.practica.buscov2.ui.theme.GrayText
@@ -47,10 +49,10 @@ import com.practica.buscov2.ui.theme.OrangePrincipal
 
 
 @Composable
-fun ButtonPrincipal(text: String, enabled: Boolean, onSelected: () -> Unit) {
+fun ButtonPrincipal(modifier: Modifier = Modifier, text: String, enabled: Boolean, onSelected: () -> Unit) {
     Button(
         onClick = { onSelected() },
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .height(56.dp),
         colors = ButtonDefaults.buttonColors(
@@ -163,28 +165,6 @@ fun ArrowBack() {
 }
 
 @Composable
-fun ArrowCircleBack() {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .clip(CircleShape)
-            .aspectRatio(1f)
-            .background(Color.White)
-        //.border(1.dp, GrayPlaceholder, CircleShape),
-    ) {
-        Icon(
-            painter = painterResource(id = R.drawable.arrow_back),
-            contentDescription = "Volver",
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(10.dp),
-            tint = OrangePrincipal
-        )
-    }
-
-}
-
-@Composable
 fun ArrowSquareBack(onClick: () -> Unit) {
     IconButton(
         modifier = Modifier
@@ -212,7 +192,76 @@ fun ButtonMenu(modifier: Modifier, onClick: () -> Unit) {
             painter = painterResource(id = R.drawable.burguer_menu),
             contentDescription = "Menu",
             tint = Color.White,
-            modifier = Modifier.fillMaxSize().padding(4.dp)
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(4.dp)
         )
+    }
+}
+
+@Composable
+fun ButtonBack(
+    modifier: Modifier = Modifier,
+    size: Dp = 54.dp,
+    navController: NavController,
+    iconId: Int = R.drawable.arrow_back,
+    onClick: () -> Unit = { navController.popBackStack() }
+) {
+    IconButton(
+        modifier = modifier
+            .size(size)
+            .aspectRatio(1f)
+            .shadow(10.dp, shape = CircleShape),
+        colors = IconButtonDefaults.iconButtonColors(
+            containerColor = Color.White,
+            contentColor = OrangePrincipal
+        ),
+        onClick = { onClick() }) {
+        Icon(
+            painter = painterResource(id = iconId),
+            contentDescription = "Volver",
+            modifier = Modifier.size(size / 2)
+        )
+    }
+}
+
+@Composable
+fun ButtonWithIcon(
+    modifier: Modifier = Modifier,
+    iconId: Int,
+    text: String,
+    onClick: () -> Unit = {}
+) {
+    Button(
+        onClick = { onClick() },
+        modifier = modifier,
+        shape = RoundedCornerShape(20.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = Color.White,
+            contentColor = OrangePrincipal
+        ),
+        elevation = ButtonDefaults.elevatedButtonElevation(
+            defaultElevation = 10.dp
+        )
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Icon(
+                painter = painterResource(id = iconId),
+                contentDescription = "",
+                tint = OrangePrincipal
+            )
+            Text(text = text, color = OrangePrincipal)
+        }
+    }
+}
+
+
+@Composable
+fun ButtonClose(color: Color = Color.White, onClick: () -> Unit){
+    IconButton(onClick = { onClick() }) {
+        Icon(Icons.Default.Close, contentDescription = "Cerrar", tint = color)
     }
 }

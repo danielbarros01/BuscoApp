@@ -110,7 +110,7 @@ fun DateField(
         onValueChange = { },
         placeholder = { Text(text = placeholder, color = GrayPlaceholder) },
         modifier = Modifier
-            .border(width = 2.dp, color = GrayField, shape = RoundedCornerShape(12.dp))
+            .border(width = 1.dp, color = GrayField, shape = RoundedCornerShape(12.dp))
             .fillMaxWidth()
             .clickable { onClick() },
         singleLine = true,

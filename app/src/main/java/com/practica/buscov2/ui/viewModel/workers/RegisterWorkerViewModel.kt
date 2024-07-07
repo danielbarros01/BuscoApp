@@ -2,7 +2,6 @@ package com.practica.buscov2.ui.viewModel.workers
 
 import android.util.Log
 import android.util.Patterns
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -13,13 +12,13 @@ import com.practica.buscov2.data.repository.busco.ProfessionsRepository
 import com.practica.buscov2.data.repository.busco.WorkersRepository
 import com.practica.buscov2.model.busco.Profession
 import com.practica.buscov2.model.busco.ProfessionCategory
-import com.practica.buscov2.model.busco.User
 import com.practica.buscov2.model.busco.Worker
 import com.practica.buscov2.model.busco.auth.ErrorBusco
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.Locale.Category
 import javax.inject.Inject
 
 @HiltViewModel
@@ -69,6 +68,44 @@ class RegisterWorkerViewModel @Inject constructor(
         fetchCategories()
     }
 
+    fun getWorker(id:Int){
+        viewModelScope.launch {
+            try {
+                _isLoading.value = true
+
+                val response = withContext(Dispatchers.IO) {
+                    professionsRepo.getWorker(id)
+                }
+
+                val title = response?.title
+                val yearsExperience = response?.yearsExperience
+                val description = response?.description
+                val webPage = response?.webPage
+
+                worker = worker.copy(
+                    userId = response?.userId,
+                    title = title,
+                    yearsExperience = yearsExperience,
+                    description = description,
+                    webPage = webPage,
+                )
+
+                //onCategoryChange()
+                //onProfessionChange()
+                onTitleChange(title ?: "")
+                onYearsChange(yearsExperience.toString())
+                onDescriptionChange(description ?: "")
+                onWebpageChange(webPage ?: "")
+
+            }catch (e: Exception){
+                _error.value = ErrorBusco(message = "Ha ocurrido un error inesperado")
+                Log.e("Error", e.toString())
+            }finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
     private fun fetchCategories() {
         viewModelScope.launch {
             try {
@@ -88,7 +125,7 @@ class RegisterWorkerViewModel @Inject constructor(
         }
     }
 
-    fun fetchProfessions() {
+    fun fetchProfessions(ok: () -> Unit = {}) {
         val categoryId = categories.value.find { it.name == category.value }?.id ?: 1
 
         viewModelScope.launch {
@@ -99,11 +136,55 @@ class RegisterWorkerViewModel @Inject constructor(
                     professionsRepo.getProfessions(categoryId)
                 }
                 _professions.value = response ?: emptyList()
+
+                ok()
             } catch (e: Exception) {
                 _error.value = ErrorBusco(message = "Ha ocurrido un error inesperado")
                 Log.e("Error", e.toString())
             } finally {
                 _isLoading.value = false
+            }
+        }
+    }
+
+    fun updateWorker(token: String, onError: () -> Unit, onSuccess: () -> Unit) {
+        viewModelScope.launch {
+            try {
+                _isLoading.value = true
+
+                val response = withContext(Dispatchers.IO) {
+                    worker.let {
+                        //Validar pagina web
+                        addHttpsToWeb(worker)
+
+                        //Actualizar
+                        workersRepository.updateWorker(token, it)
+                    }
+                }
+
+                when (response) {
+                    is Boolean -> {
+                        if (response) onSuccess()
+                    }
+
+                    is ErrorBusco -> {
+                        _error.value = response
+                        onError()
+                    }
+                }
+            } catch (e: Exception) {
+                _error.value = ErrorBusco(message = "Ha ocurrido un error inesperado")
+                Log.e("Error", e.toString())
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    private fun addHttpsToWeb(worker: Worker) {
+        if (worker.webPage != null) {
+            if(!worker.webPage!!.startsWith("http://") && !worker.webPage!!.startsWith("https://")) {
+                worker.webPage = "https://${worker.webPage}"
             }
         }
     }
@@ -148,12 +229,22 @@ class RegisterWorkerViewModel @Inject constructor(
         _buttonEnabled.value = enabledButton()
     }
 
+    fun onCategoryChangeForId(categoryId: Int) {
+        if (isValidCategoryForId(categoryId)) {
+            _category.value = returnCategoryForId(categoryId).first().name.toString()
+            _profession.value = "Seleccione una profesión"
+        }
+
+        _buttonEnabled.value = enabledButton()
+    }
+
     fun onProfessionChange(profession: String) {
         if (isValidProfession(profession)) {
             val id = professions.value.find { it.name == profession }?.id
+            val list = listOf(id)
 
             _profession.value = profession
-            worker = worker.copy(professionId = id)
+            worker = worker.copy(professionsId = list)
         }
 
         _buttonEnabled.value = enabledButton()
@@ -170,6 +261,13 @@ class RegisterWorkerViewModel @Inject constructor(
     //Que la categoria seleccionada este entre las categorias disponibles
     private fun isValidCategory(category: String): Boolean {
         return categories.value.map { it.name }.contains(category)
+    }
+
+    private fun isValidCategoryForId(categoryId: Int): Boolean {
+        return categories.value.map { it.id }.contains(categoryId)
+    }
+    private fun returnCategoryForId(categoryId: Int): List<ProfessionCategory> {
+        return categories.value.filter { it.id == categoryId }
     }
 
     //Que la profesion seleccionada este entre las disponibles
@@ -191,7 +289,7 @@ class RegisterWorkerViewModel @Inject constructor(
 
     fun onWebpageChange(web: String) {
         _webpage.value = web
-        worker = worker.copy(webpage = web)
+        worker = worker.copy(webPage = web)
 
         _buttonEnabled.value = enabledButton()
     }

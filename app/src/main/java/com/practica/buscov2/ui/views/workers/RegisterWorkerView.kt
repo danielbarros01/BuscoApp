@@ -13,10 +13,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.paint
@@ -45,6 +47,7 @@ import com.practica.buscov2.ui.theme.GrayText
 import com.practica.buscov2.ui.theme.OrangePrincipal
 import com.practica.buscov2.ui.viewModel.auth.TokenViewModel
 import com.practica.buscov2.ui.viewModel.workers.RegisterWorkerViewModel
+import kotlinx.coroutines.launch
 
 @Composable
 fun RegisterWorkerView(
@@ -89,38 +92,28 @@ fun RegisterWorker(
         ) {
             Text(text = "Cuentanos un poco más sobre tí", fontSize = 18.sp)
             Space(size = 6.dp)
-            Column(
+
+            DataWorker(
                 modifier = Modifier
                     .weight(1f)
-                    .verticalScroll(rememberScrollState())
-            ) {
-                Space(size = 6.dp)
-                WorkSector(vmWorker)
-                Space(size = 6.dp)
-                WorkProfession(vmWorker)
-                Space(size = 6.dp)
-                WorkTitle(vmWorker)
-                Space(size = 6.dp)
-                WorkYears(vmWorker)
-                Space(size = 6.dp)
-                WorkDescription(vmWorker)
-                Space(size = 6.dp)
-                WorkPage(vmWorker)
-            }
+                    .verticalScroll(rememberScrollState()),
+                vmWorker
+            )
+
             Space(size = 8.dp)
 
             Row() {
-                ArrowSquareBack{
+                ArrowSquareBack {
                     navController.navigate("Start")
                 }
                 Space(size = 5.dp)
                 ButtonPrincipal(text = "Continuar", enabled = buttonEnabled) {
-                    token?.let{
+                    token?.let {
                         //Guardar datos de trabajador
                         vmWorker.registerWorker(it.token, {
                             //En caso de error
                             showError.value = true
-                        }){
+                        }) {
                             //Exito
                             navController.navigate("Home")
                         }
@@ -129,6 +122,26 @@ fun RegisterWorker(
             }
 
         }
+    }
+}
+
+@Composable
+fun DataWorker(modifier: Modifier = Modifier, vmWorker: RegisterWorkerViewModel) {
+    Column(
+        modifier = modifier
+    ) {
+        Space(size = 6.dp)
+        WorkSector(vmWorker)
+        Space(size = 6.dp)
+        WorkProfession(vmWorker)
+        Space(size = 6.dp)
+        WorkTitle(vmWorker)
+        Space(size = 6.dp)
+        WorkYears(vmWorker)
+        Space(size = 6.dp)
+        WorkDescription(vmWorker)
+        Space(size = 6.dp)
+        WorkPage(vmWorker)
     }
 }
 
@@ -206,7 +219,7 @@ fun WorkSector(vmWorker: RegisterWorkerViewModel) {
 
     Column {
         Text(text = "En que sector trabajas?", color = GrayText)
-        OptionsField(categories.map { it.name }, categorySelected, true) {
+        OptionsField(categories.map { it.name ?: "" }, categorySelected, true) {
             vmWorker.onCategoryChange(it)
             vmWorker.fetchProfessions()
         }

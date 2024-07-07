@@ -24,7 +24,7 @@ import com.google.gson.Gson
 import com.practica.buscov2.R
 import com.practica.buscov2.model.busco.User
 import com.practica.buscov2.ui.components.AlertError
-import com.practica.buscov2.ui.components.ArrowCircleBack
+import com.practica.buscov2.ui.components.ButtonBack
 import com.practica.buscov2.ui.components.ButtonPrincipal
 import com.practica.buscov2.ui.components.CommonField
 import com.practica.buscov2.ui.components.InsertImage
@@ -32,7 +32,6 @@ import com.practica.buscov2.ui.components.LoaderMaxSize
 import com.practica.buscov2.ui.components.Space
 import com.practica.buscov2.ui.components.Title
 import com.practica.buscov2.ui.viewModel.auth.RecoverPasswordViewModel
-import com.practica.buscov2.ui.viewModel.users.UserViewModel
 
 @Composable
 fun RecoverPassword(
@@ -65,14 +64,12 @@ fun Recover(modifier: Modifier, vmRecover: RecoverPasswordViewModel, navControll
         LoaderMaxSize()
     }
 
-    IconButton(
-        modifier = Modifier
-            .size(64.dp)
-            .padding(start = 15.dp, top = 10.dp),
-        onClick = {
-            navController.navigate("Login")
-        }) {
-        ArrowCircleBack()
+    ButtonBack(
+        modifier = Modifier.padding(start = 15.dp, top = 10.dp),
+        size = 64.dp,
+        navController = navController
+    ) {
+        navController.navigate("Login")
     }
 
     Column(modifier = modifier.padding(15.dp)) {
@@ -104,7 +101,7 @@ fun Recover(modifier: Modifier, vmRecover: RecoverPasswordViewModel, navControll
             vmRecover.sendCode({
                 //En caso de error
                 showError.value = true
-            }){
+            }) {
                 val userJson = Gson().toJson(User(email = email))
                 //En caso de exito
                 navController.navigate("CheckEmailView/$userJson/recover-password")

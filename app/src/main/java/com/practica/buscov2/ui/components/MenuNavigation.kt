@@ -14,15 +14,18 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.DrawerState
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalDrawerSheet
+import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -33,6 +36,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.google.gson.Gson
 import com.practica.buscov2.R
 import com.practica.buscov2.model.busco.User
 import com.practica.buscov2.navigation.RoutesBottom
@@ -44,6 +48,23 @@ import com.practica.buscov2.ui.viewModel.HomeViewModel
 import com.practica.buscov2.ui.viewModel.auth.GoogleLoginViewModel
 import com.practica.buscov2.ui.viewModel.auth.TokenViewModel
 import com.practica.buscov2.ui.viewModel.users.UserViewModel
+import kotlinx.coroutines.CoroutineScope
+
+@Composable
+fun LateralMenu(
+    drawerState: DrawerState,
+    drawerContent: @Composable (List<RoutesDrawer>) -> Unit,
+    content: @Composable (CoroutineScope) -> Unit
+) {
+    val scope = rememberCoroutineScope()
+    val menuItems = RoutesDrawer.allRoutes
+    
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = { drawerContent(menuItems) }) {
+        content(scope)
+    }
+}
 
 @Composable
 fun MenuNavigation(

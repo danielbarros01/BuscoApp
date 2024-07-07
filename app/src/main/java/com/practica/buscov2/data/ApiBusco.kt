@@ -97,4 +97,13 @@ interface ApiBusco {
         @Header("Authorization") token: String,
         @Body worker: Worker
     ): Response<Unit>
+
+    @GET("$ENDPOINT_WORKERS/{id}")
+    suspend fun getWorker(@Path("id") id: Int): Response<Worker>
+
+    @PUT(ENDPOINT_WORKERS)
+    suspend fun updateWorker(
+        @Header("Authorization") token: String,
+        @Body worker: Worker
+    ): Response<Unit>
 }

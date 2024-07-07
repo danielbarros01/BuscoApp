@@ -1,6 +1,8 @@
 package com.practica.buscov2.util
 
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -49,6 +51,11 @@ class AppUtils {
 
             // Convierte el objeto Date al formato de salida y devuelve la cadena resultante
             return outputFormat.format(date)
+        }
+
+        @RequiresApi(Build.VERSION_CODES.O)
+        fun String.toLocalDate(): LocalDate {
+            return LocalDate.parse(this, DateTimeFormatter.ISO_LOCAL_DATE_TIME)
         }
 
     }

@@ -13,6 +13,10 @@ sealed class RoutesBottom(
     val route: String
 ) {
     object Home : RoutesBottom(R.drawable.home, R.drawable.home_fill, "Inicio", "Home")
-    object New : RoutesBottom(R.drawable.add,R.drawable.add_fill, "Nuevo", "New")
-    object Chat : RoutesBottom(R.drawable.message,R.drawable.message_fill, "Nuevo", "Chat")
+    object New : RoutesBottom(R.drawable.add, R.drawable.add_fill, "Nuevo", "New")
+    object Chat : RoutesBottom(R.drawable.message, R.drawable.message_fill, "Nuevo", "Chat")
+
+    companion object {
+        val allRoutes: List<RoutesBottom> = listOf(Home, New, Chat)
+    }
 }

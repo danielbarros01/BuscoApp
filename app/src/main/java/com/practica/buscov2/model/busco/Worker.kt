@@ -4,7 +4,8 @@ data class Worker(
     val userId: Int? = null,
     val title: String? = null,
     val yearsExperience: Int? = null,
-    val webpage: String? = null,
+    var webPage: String? = null,
     val description: String? = null,
-    val professionId: Int? = null
+    val professionsId: List<Int?>? = null,
+    val workersProfessions: List<WorkersProfessions>? = null
 )
