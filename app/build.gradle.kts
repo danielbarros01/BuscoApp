@@ -91,6 +91,18 @@ dependencies {
     //Coil
     implementation("io.coil-kt:coil-compose:2.6.0")
 
+    //Permisos
+    implementation("com.google.accompanist:accompanist-permissions:0.35.1-alpha")
+
+
+    //Camara
+    // CameraX core library using the camera2 implementation
+    val camerax_version = "1.4.0-beta02"
+    implementation("androidx.camera:camera-camera2:${camerax_version}")
+    implementation("androidx.camera:camera-lifecycle:${camerax_version}")
+    implementation("androidx.camera:camera-view:${camerax_version}")
+
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)

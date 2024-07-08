@@ -45,7 +45,7 @@ import com.practica.buscov2.util.Constants.Companion.API_URL
 import kotlin.io.path.Path
 
 @Composable
-fun InsertImage(image: Int, modifier: Modifier) {
+fun InsertImage(image: Int, modifier: Modifier = Modifier) {
     Image(
         painter = painterResource(id = image),
         contentDescription = "Header",

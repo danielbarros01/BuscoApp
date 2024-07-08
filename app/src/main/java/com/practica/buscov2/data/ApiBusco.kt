@@ -12,6 +12,7 @@ import com.practica.buscov2.util.Constants.Companion.CONFIRM_REGISTER
 import com.practica.buscov2.util.Constants.Companion.ENDPOINT_CATEGORIES
 import com.practica.buscov2.util.Constants.Companion.ENDPOINT_LOGIN
 import com.practica.buscov2.util.Constants.Companion.ENDPOINT_MY_PROFILE
+import com.practica.buscov2.util.Constants.Companion.ENDPOINT_PHOTO
 import com.practica.buscov2.util.Constants.Companion.ENDPOINT_PROFESSIONS
 import com.practica.buscov2.util.Constants.Companion.ENDPOINT_REGISTER
 import com.practica.buscov2.util.Constants.Companion.ENDPOINT_USERS
@@ -19,15 +20,18 @@ import com.practica.buscov2.util.Constants.Companion.ENDPOINT_WORKERS
 import com.practica.buscov2.util.Constants.Companion.GOOGLE_LOGIN
 import com.practica.buscov2.util.Constants.Companion.RESEND_CODE
 import com.practica.buscov2.util.Constants.Companion.SEND_CODE
+import okhttp3.MultipartBody
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
 import retrofit2.http.Header
+import retrofit2.http.Multipart
 import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.PUT
+import retrofit2.http.Part
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -84,6 +88,13 @@ interface ApiBusco {
     suspend fun changePassword(
         @Header("Authorization") token: String,
         @Field("password") password: String
+    ): Response<Unit>
+
+    @Multipart
+    @PATCH("$ENDPOINT_USERS/$ENDPOINT_MY_PROFILE/$ENDPOINT_PHOTO")
+    suspend fun updatePhoto(
+        @Header("Authorization") token: String,
+        @Part image: MultipartBody.Part
     ): Response<Unit>
 
     @GET("$ENDPOINT_PROFESSIONS/$ENDPOINT_CATEGORIES/{categoryId}")

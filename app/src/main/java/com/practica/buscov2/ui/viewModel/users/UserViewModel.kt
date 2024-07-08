@@ -1,6 +1,7 @@
 package com.practica.buscov2.ui.viewModel.users
 
-import androidx.compose.runtime.Composable
+import android.content.Context
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.practica.buscov2.data.dataStore.StoreToken
@@ -8,6 +9,7 @@ import com.practica.buscov2.data.repository.busco.UsersRepository
 import com.practica.buscov2.model.busco.auth.ErrorBusco
 import com.practica.buscov2.model.busco.User
 import com.practica.buscov2.model.busco.UserResult
+import com.practica.buscov2.util.FilesUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -46,7 +48,38 @@ class UserViewModel @Inject constructor(
 
                     //Si tenemos un error
                     is UserResult.Error -> {
-                        val error = ErrorBusco(title = result.error.title, message = result.error.message)
+                        val error =
+                            ErrorBusco(title = result.error.title, message = result.error.message)
+                        onError(error)
+                    }
+                }
+            }
+        }
+    }
+
+    fun updatePictureProfile(
+        context: Context,
+        uri: Uri,
+        token: String,
+        onError: (ErrorBusco) -> Unit,
+        onSuccess: () -> Unit
+    ) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val filePart = FilesUtils.getFilePart(context, uri, "image")
+
+            val result = repo.updatePictureProfile(token, filePart)
+
+            withContext(Dispatchers.Main) {
+                when (result) {
+                    //Si tenemos un usuario
+                    is Boolean -> {
+                        onSuccess()
+                    }
+
+                    //Si tenemos un error
+                    is ErrorBusco -> {
+                        val error =
+                            ErrorBusco(title = result.title, message = result.message)
                         onError(error)
                     }
                 }

@@ -37,6 +37,7 @@ import com.practica.buscov2.ui.views.auth.RecoverPassword
 import com.practica.buscov2.ui.views.auth.RegisterView
 import com.practica.buscov2.ui.views.auth.ResetPassword
 import com.practica.buscov2.ui.views.StartView
+import com.practica.buscov2.ui.views.UseCamera
 import com.practica.buscov2.ui.views.workers.RegisterWorkerView
 
 

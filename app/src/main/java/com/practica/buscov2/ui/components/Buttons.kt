@@ -155,12 +155,12 @@ fun ButtonTransparent(
 
 
 @Composable
-fun ArrowBack() {
+fun ArrowBack(color: Color = OrangePrincipal) {
     Icon(
         painter = painterResource(id = R.drawable.arrow_back),
         contentDescription = "Volver",
         modifier = Modifier.size(60.dp),
-        tint = OrangePrincipal
+        tint = color
     )
 }
 

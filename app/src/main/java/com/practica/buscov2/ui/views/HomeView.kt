@@ -1,6 +1,10 @@
 package com.practica.buscov2.ui.views
 
+import android.Manifest
+import android.view.ViewGroup
 import android.widget.Toast
+import androidx.camera.view.LifecycleCameraController
+import androidx.camera.view.PreviewView
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -56,8 +60,13 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
 import com.practica.buscov2.R
 import com.practica.buscov2.model.busco.SimpleUbication
 import com.practica.buscov2.model.busco.User
@@ -83,6 +92,7 @@ import com.practica.buscov2.ui.viewModel.auth.TokenViewModel
 import com.practica.buscov2.ui.viewModel.users.UserViewModel
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun HomeView(
     homeVm: HomeViewModel,
@@ -102,6 +112,7 @@ fun HomeView(
             }) {}
         }
     }
+
 
     if (user != null) {
         Box(modifier = Modifier.fillMaxSize()) {

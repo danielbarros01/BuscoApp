@@ -1,5 +1,6 @@
 package com.practica.buscov2.ui.views
 
+import android.net.Uri
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Box
@@ -28,12 +29,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.practica.buscov2.R
 import com.practica.buscov2.model.busco.User
 import com.practica.buscov2.model.busco.auth.LoginToken
 import com.practica.buscov2.ui.components.AlertError
+import com.practica.buscov2.ui.components.AlertSelectPicture
+import com.practica.buscov2.ui.components.AlertShowPicture
 import com.practica.buscov2.ui.components.AlertSuccess
 import com.practica.buscov2.ui.components.ButtonBack
 import com.practica.buscov2.ui.components.ButtonPrincipal
@@ -147,6 +151,7 @@ fun EditUser(
     navController: NavHostController,
     stateDataPicker: DatePickerState
 ) {
+    val context = LocalContext.current
     // State variables
     val isLoading by vmWorker.isLoading
     val buttonEnabled by vmWorker.buttonEnabled
@@ -157,6 +162,16 @@ fun EditUser(
     val dataWorker = remember { mutableStateOf(false) }
     val selectedDateMillis = remember { mutableStateOf<Long?>(null) }
     val enabledButtonDate = remember { mutableStateOf(true) }
+    val openAlertSelectImage = remember { mutableStateOf(false) }
+    val openCamera = remember { mutableStateOf(false) }
+    val openAlertChangePicture = remember { mutableStateOf(false) }
+
+    val picture = remember {
+        mutableStateOf(user.image ?: "")
+    }
+    val newUriPicture = remember {
+        mutableStateOf(Uri.EMPTY)
+    }
 
     // Configure date picker limits
     LaunchedEffect(stateDataPicker.selectedDateMillis) {
@@ -176,6 +191,46 @@ fun EditUser(
     AlertError(showDialog = showError, error.value.title, error.value.message)
     AlertError(showDialog = showError, errorData.value.title, errorData.value.message)
     AlertSuccess(showDialog = showDialog, "Datos guardados con éxito")
+    AlertSelectPicture(
+        showDialog = openAlertSelectImage,
+        openCamera = {
+            openCamera.value = true
+            openAlertSelectImage.value = false
+        })
+
+    AlertShowPicture(openAlertChangePicture, picture.value, newUriPicture.value.toString()) {
+        //Que hacer en caso de que se acepte
+        //Cambiar en el editProfile
+        picture.value = newUriPicture.value.toString()
+
+        //Guardar
+        if (token != null) {
+            vmUser.updatePictureProfile(
+                context = context,
+                newUriPicture.value,
+                token.token,
+                onError = {
+                    showError.value = true
+                },
+                onSuccess = {
+                    showDialog.value = true
+                }
+            )
+        }
+
+        //Salir
+        openAlertChangePicture.value = false
+    }
+
+    if (openCamera.value) {
+        UseCamera(onBack = { openCamera.value = false }) { uri ->
+            //La logica cuando tengo la foto
+            //salgo de la camara
+            openCamera.value = false
+            newUriPicture.value = uri
+            openAlertChangePicture.value = true
+        }
+    }
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -207,11 +262,13 @@ fun EditUser(
         ) {
             // Profile Image
             InsertCirlceProfileEditImage(
-                image = user.image ?: "",
+                image = picture.value,
                 modifier = Modifier
                     .size(160.dp)
                     .shadow(10.dp, shape = CircleShape),
-                onClick = {}
+                onClick = {
+                    openAlertSelectImage.value = true
+                }
             )
 
             // Toggle between user and worker data
