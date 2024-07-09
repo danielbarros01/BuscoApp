@@ -155,6 +155,7 @@ fun AlertSuccess(
 fun AlertSelectPicture(
     showDialog: MutableState<Boolean>,
     openCamera: () -> Unit,
+    openGallery: () -> Unit
 ) {
     if (showDialog.value) {
         AlertDialog(
@@ -178,7 +179,7 @@ fun AlertSelectPicture(
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        IconButton(onClick = { /*TODO*/ }) {
+                        IconButton(onClick = { openGallery() }) {
                             InsertImage(R.drawable.gallery, modifier = Modifier.fillMaxSize())
                         }
                         Text(text = "Abrir galería", fontSize = 16.sp)

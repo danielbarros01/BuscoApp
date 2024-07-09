@@ -1,14 +1,12 @@
 package com.practica.buscov2.navigation
 
-import android.graphics.drawable.Icon
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.res.painterResource
 import com.practica.buscov2.R
 import com.practica.buscov2.model.busco.User
-import com.practica.buscov2.ui.views.Information
-import com.practica.buscov2.ui.views.Proposals
-import com.practica.buscov2.ui.views.Qualifications
-import com.practica.buscov2.ui.views.WorksCompletedProfile
+import com.practica.buscov2.ui.views.users.Information
+import com.practica.buscov2.ui.views.users.Proposals
+import com.practica.buscov2.ui.views.users.Qualifications
+import com.practica.buscov2.ui.views.users.WorksCompletedProfile
 
 sealed class ItemTabProfile(
     var title: String,

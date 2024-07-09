@@ -62,10 +62,23 @@ interface ApiBusco {
         @Field("code") code: Int
     ): Response<LoginToken>
 
+    /*
+    * resend code se usa si tenemos el token del usuario logueado
+    * send code se usa si no tenemos un token del usuario
+    *  */
+
     @PATCH("$ENDPOINT_USERS/$RESEND_CODE")
     suspend fun resendCode(
         @Header("Authorization") token: String
     ): Response<Unit>
+
+    @FormUrlEncoded
+    @PATCH("$ENDPOINT_USERS/$SEND_CODE")
+    suspend fun sendCode(
+        @Field("email") email: String
+    ): Response<Unit>
+
+    /* - - */
 
     @PUT(ENDPOINT_USERS)
     suspend fun updateUser(
@@ -75,13 +88,6 @@ interface ApiBusco {
 
     @POST(GOOGLE_LOGIN)
     suspend fun googleLogin(@Body user: User): Response<LoginToken>
-
-    @FormUrlEncoded
-    @PATCH("$ENDPOINT_USERS/$SEND_CODE")
-    suspend fun sendCode(
-        @Field("email") email: String
-    ): Response<Unit>
-
 
     @FormUrlEncoded
     @PATCH("$ENDPOINT_USERS/$CHANGE_PASSWORD")

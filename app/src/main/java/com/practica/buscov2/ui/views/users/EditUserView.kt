@@ -1,5 +1,6 @@
-package com.practica.buscov2.ui.views
+package com.practica.buscov2.ui.views.users
 
+import SelectImageFromGallery
 import android.net.Uri
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -25,12 +26,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.navigation.NavHostController
 import com.practica.buscov2.R
 import com.practica.buscov2.model.busco.User
@@ -48,14 +49,10 @@ import com.practica.buscov2.ui.viewModel.auth.TokenViewModel
 import com.practica.buscov2.ui.viewModel.users.CompleteDataViewModel
 import com.practica.buscov2.ui.viewModel.users.UserViewModel
 import com.practica.buscov2.ui.viewModel.workers.RegisterWorkerViewModel
-import com.practica.buscov2.ui.views.users.ConfigMinAndMaxDate
-import com.practica.buscov2.ui.views.users.PageOne
-import com.practica.buscov2.ui.views.users.PageTwo
+import com.practica.buscov2.ui.views.UseCamera
 import com.practica.buscov2.ui.views.workers.DataWorker
 import com.practica.buscov2.util.AppUtils.Companion.toLocalDate
-import java.time.LocalDate
 import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -164,6 +161,7 @@ fun EditUser(
     val enabledButtonDate = remember { mutableStateOf(true) }
     val openAlertSelectImage = remember { mutableStateOf(false) }
     val openCamera = remember { mutableStateOf(false) }
+    val openGallery = remember { mutableStateOf(false) }
     val openAlertChangePicture = remember { mutableStateOf(false) }
 
     val picture = remember {
@@ -196,7 +194,12 @@ fun EditUser(
         openCamera = {
             openCamera.value = true
             openAlertSelectImage.value = false
-        })
+        },
+        openGallery = {
+            openGallery.value = true
+            openAlertSelectImage.value = false
+        }
+    )
 
     AlertShowPicture(openAlertChangePicture, picture.value, newUriPicture.value.toString()) {
         //Que hacer en caso de que se acepte
@@ -229,6 +232,17 @@ fun EditUser(
             openCamera.value = false
             newUriPicture.value = uri
             openAlertChangePicture.value = true
+        }
+    }
+
+    if(openGallery.value){
+        Column (modifier = Modifier.fillMaxSize().zIndex(100f)){
+            SelectImageFromGallery(onGalleryClosed = {
+                openGallery.value = false
+            }) { uri ->
+                newUriPicture.value = uri
+                openAlertChangePicture.value = true
+            }
         }
     }
 

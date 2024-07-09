@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import com.google.gson.Gson
 import com.practica.buscov2.model.busco.User
 import com.practica.buscov2.navigation.RoutesBottom
 import com.practica.buscov2.navigation.RoutesConfiguration
@@ -120,6 +121,14 @@ fun ConfigurationV(
                         navController.navigate(item.route)
                     }
                 }
+
+                // Agregar ChangePassword como un caso especial
+                val userJson = Gson().toJson(User(email = user.email))
+                val changePasswordRoute = RoutesConfiguration.ChangePassword(userJson).route
+                ItemConfiguration(item = RoutesConfiguration.ChangePassword(userJson)) {
+                    navController.navigate(changePasswordRoute)
+                }
+
             }
         }
     }

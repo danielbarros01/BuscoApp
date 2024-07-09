@@ -41,6 +41,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.zIndex
@@ -138,14 +139,25 @@ fun UseCamera(onBack: () -> Unit, onImageCaptured: (Uri) -> Unit) {
                     lifecycle = lifecycle
                 )
             } else {
-                Text(text = "Denegado", modifier = Modifier.padding(it))
+                Text(
+                    text = "El permiso para acceder a la cámara es necesario, activelo en configuración",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(it)
+                        .padding(horizontal = 15.dp),
+                    textAlign = TextAlign.Center
+                )
             }
         }
     }
 
 }
 
-private fun takePicture(cameraController: LifecycleCameraController, executor: Executor, onImageCaptured: (Uri) -> Unit) {
+private fun takePicture(
+    cameraController: LifecycleCameraController,
+    executor: Executor,
+    onImageCaptured: (Uri) -> Unit
+) {
     val file = File.createTempFile("buscoimg", ".jpg")
     val outputDirectory = ImageCapture.OutputFileOptions.Builder(file).build()
 

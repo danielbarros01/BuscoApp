@@ -22,22 +22,21 @@ import com.practica.buscov2.ui.viewModel.auth.ResetPasswordViewModel
 import com.practica.buscov2.ui.viewModel.auth.TokenViewModel
 import com.practica.buscov2.ui.viewModel.users.UserViewModel
 import com.practica.buscov2.ui.viewModel.workers.RegisterWorkerViewModel
-import com.practica.buscov2.ui.views.BeWorkerView
+import com.practica.buscov2.ui.views.workers.BeWorkerView
 import com.practica.buscov2.ui.views.ChatView
 import com.practica.buscov2.ui.views.ConfigurationView
-import com.practica.buscov2.ui.views.EditUserView
+import com.practica.buscov2.ui.views.users.EditUserView
 import com.practica.buscov2.ui.views.confirmation.CheckEmailView
 import com.practica.buscov2.ui.views.users.CompleteDataView
 import com.practica.buscov2.ui.views.HomeView
 import com.practica.buscov2.ui.views.NewPublicationView
-import com.practica.buscov2.ui.views.ProfileView
+import com.practica.buscov2.ui.views.users.ProfileView
 import com.practica.buscov2.ui.views.auth.LoginView
 import com.practica.buscov2.ui.views.auth.OkResetPassword
 import com.practica.buscov2.ui.views.auth.RecoverPassword
 import com.practica.buscov2.ui.views.auth.RegisterView
 import com.practica.buscov2.ui.views.auth.ResetPassword
 import com.practica.buscov2.ui.views.StartView
-import com.practica.buscov2.ui.views.UseCamera
 import com.practica.buscov2.ui.views.workers.RegisterWorkerView
 
 
@@ -48,7 +47,8 @@ fun NavManager() {
     val tokenViewModel: TokenViewModel = hiltViewModel()
     val loginGoogleViewModel: GoogleLoginViewModel = hiltViewModel()
 
-    NavHost(navController = navController, startDestination = "EditProfile") {
+    NavHost(navController = navController, startDestination = "Start") {
+
         composable("Start") {
             val userViewModel: UserViewModel = hiltViewModel()
             StartView(tokenViewModel, userViewModel, navController)
