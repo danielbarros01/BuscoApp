@@ -44,7 +44,7 @@ class UsersRepository @Inject constructor(private val api: ApiBusco) {
         }
     }
 
-    suspend fun updatePictureProfile(token: String, filePart: MultipartBody.Part): Any{
+    suspend fun updatePictureProfile(token: String, filePart: MultipartBody.Part): Any {
         try {
             val response = api.updatePhoto("Bearer $token", filePart)
 
@@ -53,9 +53,24 @@ class UsersRepository @Inject constructor(private val api: ApiBusco) {
                 in 400..599 -> gsonError(response)
                 else -> ErrorBusco(0, "Error", message = "Error desconocido, intentalo de nuevo")
             }
-        }catch (e:Exception){
+        } catch (e: Exception) {
             Log.d("Error", e.toString())
             return ErrorBusco(0, "Error", message = "Error desconocido, intentalo de nuevo")
+        }
+    }
+
+    suspend fun getProfile(userId: Int): UserResult {
+        val response = api.getProfile(userId)
+
+        return if (response.isSuccessful) {
+            UserResult.Success(
+                response.body()?.copy()
+                    ?: return UserResult.Error(
+                        ErrorBusco(0, "Error", message = "Error desconocido")
+                    )
+            ) //si hay un cuerpo devuelvo el usuario, si no un error
+        } else {
+            UserResult.Error(ErrorBusco(0, "Error", message = "Error desconocido"))
         }
     }
 }

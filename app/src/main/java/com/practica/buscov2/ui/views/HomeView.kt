@@ -75,6 +75,7 @@ import com.practica.buscov2.navigation.RoutesDrawer
 import com.practica.buscov2.ui.components.BottomNav
 import com.practica.buscov2.ui.components.ButtonMenu
 import com.practica.buscov2.ui.components.ButtonPrincipal
+import com.practica.buscov2.ui.components.ButtonUbication
 import com.practica.buscov2.ui.components.InsertCircleProfileImage
 import com.practica.buscov2.ui.components.MenuNavigation
 import com.practica.buscov2.ui.components.SearchField
@@ -216,7 +217,7 @@ fun Home(
                             province = user.province,
                             department = user.department,
                             city = user.city
-                        )
+                        ), modifier = Modifier.offset(x = -(15.dp))
                     )
 
                     if (isSearchWork) {
@@ -224,38 +225,12 @@ fun Home(
 
                         }
                     } else {
-                        SearchField(context = LocalContext.current)
+                        SearchField(){}
                     }
                 }
             }
         }
 
-    }
-}
-
-@Composable
-fun ButtonUbication(ubication: SimpleUbication) {
-    Button(
-        onClick = { /*TODO*/ }, colors = ButtonDefaults.buttonColors(
-            containerColor = Color.Transparent,
-            contentColor = Color.Transparent,
-
-            ),
-        modifier = Modifier.offset(x = -(15.dp))
-    ) {
-        Row(verticalAlignment = Alignment.Bottom) {
-            Icon(
-                painter = painterResource(id = R.drawable.location),
-                contentDescription = "",
-                tint = GrayField,
-                modifier = Modifier.size(25.dp)
-            )
-            Text(
-                text = (ubication.city ?: ubication.department) + ", " + ubication.country,
-                color = GrayField,
-                fontSize = 15.sp
-            )
-        }
     }
 }
 

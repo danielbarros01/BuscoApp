@@ -69,6 +69,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun ProfileView(
+    id: Int,
     vmUser: UserViewModel,
     vmGoogle: GoogleLoginViewModel,
     vmToken: TokenViewModel,
@@ -76,13 +77,25 @@ fun ProfileView(
 ) {
     val token by vmToken.token.collectAsState()
     val user by vmUser.user.collectAsState()
+    val userProfile by vmUser.userProfile.collectAsState()
 
     //Ejecuto una unica vez
     LaunchedEffect(Unit) {
         token?.let {
             vmUser.getMyProfile(it.token, {
                 navController.navigate("Login")
-            }) {}
+            }) { user ->
+                if (user.id != id) {
+                    //Si yo no soy el usuario traer el perfil de ese usuario
+                    vmUser.getProfile(id, {}) { userProfile ->
+                        //Seteamos el valor del perfil de usuario
+                        vmUser.changeUserProfile(userProfile)
+                    }
+                } else {
+                    //Si yo soy el usuario
+                    vmUser.changeUserProfile(user)
+                }
+            }
         }
     }
 
@@ -94,6 +107,7 @@ fun ProfileView(
                 vmUser,
                 vmGoogle,
                 user!!,
+                userProfile!!,
                 navController
             )
         }
@@ -106,6 +120,7 @@ fun ProfileV(
     vmUser: UserViewModel,
     vmGoogle: GoogleLoginViewModel,
     user: User,
+    userProfile: User,
     navController: NavHostController
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
@@ -117,7 +132,7 @@ fun ProfileV(
     ) { scope ->
         //Mostrar foto en pantalla completa
         if (showPhotoFullScreen) {
-            PhotoFullScreen(user) { showPhotoFullScreen = it }
+            PhotoFullScreen(userProfile) { showPhotoFullScreen = it }
         }
 
         Scaffold(modifier = modifier
@@ -126,7 +141,7 @@ fun ProfileV(
                 BottomNav(navController, RoutesBottom.allRoutes)
             },
             topBar = {
-                TopBarProfile(navController)
+                TopBarProfile(navController, user, userProfile)
             }) {
             Column(
                 modifier = Modifier
@@ -139,7 +154,7 @@ fun ProfileV(
 
                 //Imagen de perfil
                 InsertCircleProfileImage(
-                    image = user.image ?: "",
+                    image = userProfile.image ?: "",
                     modifier = Modifier
                         .size(160.dp)
                         .shadow(10.dp, shape = CircleShape),
@@ -152,16 +167,16 @@ fun ProfileV(
 
                 Space(size = 4.dp)
 
-                Title(text = "${user.name} ${user.lastname}")
+                Title(text = "${userProfile.name} ${userProfile.lastname}")
 
-                TabsPages(user)
+                TabsPages(userProfile)
             }
         }
     }
 }
 
 @Composable
-fun TabsPages(user: User) {
+private fun TabsPages(user: User) {
     val tabs = if (user.worker == null) ItemTabProfile.pagesUser else ItemTabProfile.pagesWorker
 
     val pagerState = rememberPagerState(pageCount = { tabs.size })
@@ -173,7 +188,7 @@ fun TabsPages(user: User) {
 }
 
 @Composable
-fun TabsContent(tabs: List<ItemTabProfile>, pagerState: PagerState, user: User) {
+private fun TabsContent(tabs: List<ItemTabProfile>, pagerState: PagerState, user: User) {
     HorizontalPager(
         state = pagerState
     ) { page ->
@@ -182,7 +197,7 @@ fun TabsContent(tabs: List<ItemTabProfile>, pagerState: PagerState, user: User) 
 }
 
 @Composable
-fun Tabs(tabs: List<ItemTabProfile>, pagerState: PagerState) {
+private fun Tabs(tabs: List<ItemTabProfile>, pagerState: PagerState) {
     val selectedTab = pagerState.currentPage
     val scope = rememberCoroutineScope()
 
@@ -381,7 +396,7 @@ fun PhotoFullScreen(user: User, setShowPhotoFullScreen: (Boolean) -> Unit) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopBarProfile(navController: NavHostController) {
+fun TopBarProfile(navController: NavHostController, user: User, userProfile: User) {
     TopAppBar(
         modifier = Modifier.padding(top = 5.dp),
         title = { Text(text = "") },
@@ -390,17 +405,19 @@ fun TopBarProfile(navController: NavHostController) {
                 navController = navController,
                 size = 48.dp,
                 modifier = Modifier.padding(start = 10.dp)
-            ){
+            ) {
                 navController.navigate("Home")
             }
         },
         actions = {
-            ButtonWithIcon(
-                iconId = R.drawable.edit,
-                text = "Editar",
-                modifier = Modifier.padding(horizontal = 15.dp)
-            ){
-                navController.navigate("EditProfile")
+            if(user.id == userProfile.id){
+                ButtonWithIcon(
+                    iconId = R.drawable.edit,
+                    text = "Editar",
+                    modifier = Modifier.padding(horizontal = 15.dp)
+                ) {
+                    navController.navigate("EditProfile")
+                }
             }
         }
     )

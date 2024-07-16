@@ -23,6 +23,8 @@ class Constants {
 
         const val ENDPOINT_WORKERS = "workers"
 
+        const val ENDPOINT_PROPOSALS = "proposals"
+
         const val ENDPOINT_PRUEBA = "weatherforecast"
     }
 }

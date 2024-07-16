@@ -54,8 +54,14 @@ fun InsertImage(image: Int, modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun InsertAsyncImage(image: String, modifier: Modifier, onClick: () -> Unit = {}) {
-    val defaultImage = painterResource(id = R.drawable.userpicnull)
+fun InsertAsyncImage(
+    image: String,
+    defaultImg: Int = R.drawable.userpicnull,
+    modifier: Modifier,
+    contentScale: ContentScale = ContentScale.Crop,
+    onClick: () -> Unit = {}
+) {
+    val defaultImage = painterResource(id = defaultImg)
 
     val imageUrl = if (image.contains("localhost")) {
         image.replace("localhost", API_URL)
@@ -63,19 +69,27 @@ fun InsertAsyncImage(image: String, modifier: Modifier, onClick: () -> Unit = {}
         image
     }
 
-    AsyncImage(
-        model = ImageRequest.Builder(LocalContext.current)
-            .data(imageUrl)
-            .crossfade(true)
-            .build(),
-        contentDescription = "Foto de perfil",
-        placeholder = defaultImage,
-        modifier = modifier.clickable { onClick() },
-        contentScale = ContentScale.Crop,
-        onError = {
-            Log.d("ERROR", it.toString())
-        }
-    )
+    if (image.isNotEmpty()) {
+        AsyncImage(
+            model = ImageRequest.Builder(LocalContext.current)
+                .data(imageUrl)
+                .crossfade(true)
+                .build(),
+            contentDescription = "Foto de perfil",
+            placeholder = defaultImage,
+            modifier = modifier.clickable { onClick() },
+            contentScale = contentScale,
+            onError = {
+                Log.d("ERROR", it.toString())
+            }
+        )
+    } else {
+        Image(
+            painter = defaultImage, contentDescription = "",
+            modifier = modifier,
+            contentScale = ContentScale.Crop,
+        )
+    }
 }
 
 @Composable
@@ -123,13 +137,20 @@ fun InsertCircleProfileImage(image: String, modifier: Modifier, onClick: () -> U
 
 @Composable
 fun InsertCirlceProfileEditImage(image: String, modifier: Modifier, onClick: () -> Unit) {
-    Box(){
+    Box() {
         InsertCircleProfileImage(image = image, modifier = modifier, onClick = onClick)
-        Box(modifier = Modifier.matchParentSize().clip(CircleShape).background(Color.Gray.copy(alpha = 0.5f))){
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .clip(CircleShape)
+                .background(Color.Gray.copy(alpha = 0.5f))
+        ) {
             Icon(
                 painter = painterResource(id = R.drawable.edit),
                 contentDescription = "Editar Foto",
-                modifier = Modifier.align(Alignment.Center).size(80.dp),
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .size(80.dp),
                 tint = GrayText
             )
         }

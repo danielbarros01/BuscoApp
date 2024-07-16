@@ -214,8 +214,3 @@ fun OptionsField(
     }
 }
 
-/*
-@Composable
-fun SearchBar(){
-
-}*/

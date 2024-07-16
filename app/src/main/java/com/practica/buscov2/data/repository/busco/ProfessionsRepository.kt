@@ -18,6 +18,21 @@ class ProfessionsRepository @Inject constructor(private val api: ApiBusco) {
         return null
     }
 
+    suspend fun getProfessionsSearch(query:String): List<Profession>? {
+        try {
+            val response = api.getProfessionsSearch(query)
+
+            if(response.isSuccessful){
+                return response.body()
+            }
+
+            return null
+        }catch (e:Exception){
+            Log.d("Error", e.message.toString())
+            return null
+        }
+    }
+
     suspend fun getCategories(): List<ProfessionCategory>? {
         val response = api.getCategories()
 
@@ -42,4 +57,5 @@ class ProfessionsRepository @Inject constructor(private val api: ApiBusco) {
             return null;
         }
     }
+
 }

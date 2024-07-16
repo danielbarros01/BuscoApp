@@ -26,6 +26,9 @@ class UserViewModel @Inject constructor(
     private val _user = MutableStateFlow<User?>(null)
     val user: StateFlow<User?> = _user
 
+    private val _userProfile = MutableStateFlow<User?>(null)
+    val userProfile: StateFlow<User?> = _userProfile
+
     //Cerrar sesion
     fun logout(onSuccesss: () -> Unit) {
         viewModelScope.launch {
@@ -85,5 +88,38 @@ class UserViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+
+    fun getProfile(userId:Int, onError: (ErrorBusco) -> Unit, onSuccess: (User) -> Unit){
+        viewModelScope.launch{
+            try {
+                val response = withContext(Dispatchers.IO){
+                    repo.getProfile(userId)
+                }
+
+                when (response) {
+                    //Si tenemos un usuario
+                    is UserResult.Success -> {
+                        _user.value = response.user
+                        onSuccess(response.user)
+                    }
+
+                    //Si tenemos un error
+                    is UserResult.Error -> {
+                        val error =
+                            ErrorBusco(title = response.error.title, message = response.error.message)
+                        onError(error)
+                    }
+                }
+            }catch (e:Exception){
+                val error = ErrorBusco(title = "Error", message = "Ha ocurrido un error al obtener el perfil")
+                onError(error)
+            }
+        }
+    }
+
+    fun changeUserProfile(user:User){
+        _userProfile.value = user
     }
 }

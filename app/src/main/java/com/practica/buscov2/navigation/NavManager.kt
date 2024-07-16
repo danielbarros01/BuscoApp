@@ -15,13 +15,17 @@ import com.practica.buscov2.ui.viewModel.confirmation.CheckEmailViewModel
 import com.practica.buscov2.ui.viewModel.users.CompleteDataViewModel
 import com.practica.buscov2.ui.viewModel.auth.GoogleLoginViewModel
 import com.practica.buscov2.ui.viewModel.HomeViewModel
+import com.practica.buscov2.ui.viewModel.NewPublicationViewModel
 import com.practica.buscov2.ui.viewModel.auth.LoginViewModel
 import com.practica.buscov2.ui.viewModel.auth.RecoverPasswordViewModel
 import com.practica.buscov2.ui.viewModel.auth.RegisterViewModel
 import com.practica.buscov2.ui.viewModel.auth.ResetPasswordViewModel
 import com.practica.buscov2.ui.viewModel.auth.TokenViewModel
+import com.practica.buscov2.ui.viewModel.professions.ProfessionsViewModel
+import com.practica.buscov2.ui.viewModel.proposals.ProposalViewModel
 import com.practica.buscov2.ui.viewModel.users.UserViewModel
 import com.practica.buscov2.ui.viewModel.workers.RegisterWorkerViewModel
+import com.practica.buscov2.ui.viewModel.proposals.ProposalsViewModel
 import com.practica.buscov2.ui.views.workers.BeWorkerView
 import com.practica.buscov2.ui.views.ChatView
 import com.practica.buscov2.ui.views.ConfigurationView
@@ -29,7 +33,7 @@ import com.practica.buscov2.ui.views.users.EditUserView
 import com.practica.buscov2.ui.views.confirmation.CheckEmailView
 import com.practica.buscov2.ui.views.users.CompleteDataView
 import com.practica.buscov2.ui.views.HomeView
-import com.practica.buscov2.ui.views.NewPublicationView
+import com.practica.buscov2.ui.views.proposals.NewPublicationView
 import com.practica.buscov2.ui.views.users.ProfileView
 import com.practica.buscov2.ui.views.auth.LoginView
 import com.practica.buscov2.ui.views.auth.OkResetPassword
@@ -37,6 +41,8 @@ import com.practica.buscov2.ui.views.auth.RecoverPassword
 import com.practica.buscov2.ui.views.auth.RegisterView
 import com.practica.buscov2.ui.views.auth.ResetPassword
 import com.practica.buscov2.ui.views.StartView
+import com.practica.buscov2.ui.views.proposals.ProposalView
+import com.practica.buscov2.ui.views.proposals.ProposalsView
 import com.practica.buscov2.ui.views.workers.RegisterWorkerView
 
 
@@ -47,8 +53,7 @@ fun NavManager() {
     val tokenViewModel: TokenViewModel = hiltViewModel()
     val loginGoogleViewModel: GoogleLoginViewModel = hiltViewModel()
 
-    NavHost(navController = navController, startDestination = "Start") {
-
+    NavHost(navController = navController, startDestination = "Proposal") {
         composable("Start") {
             val userViewModel: UserViewModel = hiltViewModel()
             StartView(tokenViewModel, userViewModel, navController)
@@ -138,10 +143,6 @@ fun NavManager() {
             RegisterWorkerView(registerWorkerViewModel, tokenViewModel, navController)
         }
 
-        composable("New") {
-            NewPublicationView(navController)
-        }
-
         composable("Chat") {
             ChatView(navController)
         }
@@ -153,9 +154,13 @@ fun NavManager() {
             ConfigurationView(userViewModel, loginGoogleViewModel, tokenViewModel, navController)
         }
 
-        composable("Profile") {
+        composable("Profile/{id}",
+            arguments = listOf(navArgument("id") { type = NavType.IntType })
+        ) {
+            val id = it.arguments?.getInt("id") ?: 0
+
             val userViewModel: UserViewModel = hiltViewModel()
-            ProfileView(userViewModel, loginGoogleViewModel, tokenViewModel, navController)
+            ProfileView(id, userViewModel, loginGoogleViewModel, tokenViewModel, navController)
         }
 
         composable("EditProfile") {
@@ -168,6 +173,50 @@ fun NavManager() {
                 tokenViewModel,
                 registerWorkerViewModel,
                 completeDataViewModel,
+                navController
+            )
+        }
+
+        composable("New") {
+            val userViewModel: UserViewModel = hiltViewModel()
+            val professionsViewModel: ProfessionsViewModel = hiltViewModel()
+            val newPublicationViewModel: NewPublicationViewModel = hiltViewModel()
+
+            NewPublicationView(
+                userViewModel,
+                loginGoogleViewModel,
+                tokenViewModel,
+                professionsViewModel,
+                newPublicationViewModel,
+                navController
+            )
+        }
+
+        composable("Proposals") {
+            val userViewModel: UserViewModel = hiltViewModel()
+            val proposalsViewModel: ProposalsViewModel = hiltViewModel()
+            ProposalsView(
+                vmUser = userViewModel,
+                vmGoogle = loginGoogleViewModel,
+                vmToken = tokenViewModel,
+                vmProposals = proposalsViewModel,
+                navController = navController
+            )
+        }
+
+        composable(
+            "Proposal",
+            arguments = listOf(navArgument("id") { type = NavType.IntType })
+        ) {
+            val id = it.arguments?.getInt("id") ?: 0
+            val userViewModel: UserViewModel = hiltViewModel()
+            val proposalViewModel: ProposalViewModel = hiltViewModel()
+            ProposalView(
+                id,
+                userViewModel,
+                loginGoogleViewModel,
+                tokenViewModel,
+                proposalViewModel,
                 navController
             )
         }

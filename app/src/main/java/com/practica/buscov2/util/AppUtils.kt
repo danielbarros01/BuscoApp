@@ -3,6 +3,8 @@ package com.practica.buscov2.util
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
+import java.text.DecimalFormat
+import java.text.DecimalFormatSymbols
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -19,7 +21,7 @@ class AppUtils {
 
                 val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
                 return LocalDateTime.parse(dateWithoutMillis, formatter)
-            }catch (e: Exception) {
+            } catch (e: Exception) {
                 Log.e("Error", e.message.toString())
                 return null
             }
@@ -58,6 +60,59 @@ class AppUtils {
             return LocalDate.parse(this, DateTimeFormatter.ISO_LOCAL_DATE_TIME)
         }
 
-    }
+        /**
+         * Formatea un número representado como String agregando puntos como separadores de miles.
+         *
+         * @param value El número en formato de cadena.
+         * @return El número formateado con separadores de miles, o el valor original si ocurre un error.
+         */
+        fun formatNumber(value: String): String {
+            return try {
+                // Elimina los puntos existentes y convierte el valor a Long.
+                val number = value.replace(".", "").toLong()
+                // Crea un formato decimal que usa puntos como separadores de miles.
+                val decimalFormat = DecimalFormat("#,###", DecimalFormatSymbols(Locale.GERMAN))
+                // Formatea el número y lo devuelve como String.
+                decimalFormat.format(number)
+            } catch (e: NumberFormatException) {
+                // Si ocurre un error (por ejemplo, si el valor no es un número válido), devuelve el valor original.
+                value
+            }
+        }
 
+
+        /**
+         * Compara dos valores numéricos representados como String para verificar si el segundo es mayor que el primero.
+         *
+         * @param from El valor inicial en formato de cadena.
+         * @param to El valor final en formato de cadena.
+         * @return true si el valor final es mayor que el valor inicial, false en caso contrario.
+         */
+        fun isGreaterThan(from: String, to: String): Boolean {
+            return try {
+                // Elimina los puntos y convierte los valores a Long, utilizando 0 si la conversión falla.
+                val fromValue = from.replace(".", "").toLongOrNull() ?: 0L
+                val toValue = to.replace(".", "").toLongOrNull() ?: 0L
+                // Compara los valores y devuelve true si el valor final es mayor que el inicial.
+                toValue > fromValue
+            } catch (e: NumberFormatException) {
+                // Si ocurre un error (por ejemplo, si los valores no son números válidos), devuelve false.
+                false
+            }
+        }
+
+        /**
+         * Transforma fecha en mes MMM y dia D
+         * */
+
+
+        fun formatDateCard(inputDate: String): String {
+            //Parseo de string a fecha
+            val localDate = LocalDate.parse(inputDate.substring(0, 10))
+            //Defino el formato de salida
+            val formatter = DateTimeFormatter.ofPattern("MMM dd")
+
+            return localDate.format(formatter)
+        }
+    }
 }

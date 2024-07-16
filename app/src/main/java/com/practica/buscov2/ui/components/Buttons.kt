@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -43,13 +44,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.practica.buscov2.R
+import com.practica.buscov2.model.busco.SimpleUbication
+import com.practica.buscov2.ui.theme.GrayField
 import com.practica.buscov2.ui.theme.GrayPlaceholder
 import com.practica.buscov2.ui.theme.GrayText
 import com.practica.buscov2.ui.theme.OrangePrincipal
 
 
 @Composable
-fun ButtonPrincipal(modifier: Modifier = Modifier, text: String, enabled: Boolean, onSelected: () -> Unit) {
+fun ButtonPrincipal(
+    modifier: Modifier = Modifier,
+    text: String,
+    enabled: Boolean,
+    onSelected: () -> Unit
+) {
     Button(
         onClick = { onSelected() },
         modifier = modifier
@@ -260,8 +268,38 @@ fun ButtonWithIcon(
 
 
 @Composable
-fun ButtonClose(color: Color = Color.White, onClick: () -> Unit){
+fun ButtonClose(color: Color = Color.White, onClick: () -> Unit) {
     IconButton(onClick = { onClick() }) {
         Icon(Icons.Default.Close, contentDescription = "Cerrar", tint = color)
+    }
+}
+
+@Composable
+fun ButtonUbication(
+    ubication: SimpleUbication,
+    modifier: Modifier = Modifier,
+    textColor: Color = GrayField,
+    onClick: () -> Unit = {}
+) {
+    Button(
+        onClick = { /*TODO*/ }, colors = ButtonDefaults.buttonColors(
+            containerColor = Color.Transparent,
+            contentColor = Color.Transparent,
+        ),
+        modifier = modifier
+    ) {
+        Row(verticalAlignment = Alignment.Bottom) {
+            Icon(
+                painter = painterResource(id = R.drawable.location),
+                contentDescription = "",
+                tint = textColor,
+                modifier = Modifier.size(25.dp).padding(end = 5.dp)
+            )
+            Text(
+                text = (ubication.city ?: ubication.department) + ", " + ubication.country,
+                color = textColor,
+                fontSize = 15.sp
+            )
+        }
     }
 }
