@@ -14,8 +14,10 @@ import com.practica.buscov2.data.repository.busco.ProfessionsRepository
 import com.practica.buscov2.data.repository.busco.ProposalsRepository
 import com.practica.buscov2.model.busco.Profession
 import com.practica.buscov2.model.busco.Proposal
+import com.practica.buscov2.model.busco.ResponseCreatedId
 import com.practica.buscov2.model.busco.auth.ErrorBusco
 import com.practica.buscov2.util.AppUtils.Companion.isGreaterThan
+import com.practica.buscov2.util.Constants.Companion.ESQ_HOST
 import com.practica.buscov2.util.FilesUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -61,6 +63,9 @@ class NewPublicationViewModel @Inject constructor(
     private val _priceUntil: MutableState<String> = mutableStateOf("")
     var priceUntil: State<String> = _priceUntil
 
+    private val _image: MutableState<Uri> = mutableStateOf(Uri.EMPTY)
+    var image: State<Uri> = _image
+
     fun setData(title: String, description: String, requirements: String) {
         _title.value = title
         _description.value = description
@@ -72,12 +77,38 @@ class NewPublicationViewModel @Inject constructor(
         _buttonEnabled.value = enabledButton()
     }
 
-    fun setBudget(from: String, to: String) {
-        _priceStart.value = from
-        _priceUntil.value = to
+    fun setId(id: Int) {
+        proposal = proposal.copy(id = id)
+    }
 
-        val priceMin = from.replace(".", "").toDoubleOrNull() ?: 0.0
-        val priceMax = to.replace(".", "").toDoubleOrNull() ?: 0.0
+    fun setBudget(from: String, to: String) {
+        // Establecer límites
+        val maxLimit = 1000000
+
+        // Intentar convertir 'from' a Double y manejar posibles excepciones
+        val fromValue = try {
+            from.replace(".", "").toDoubleOrNull()
+        } catch (e: NumberFormatException) {
+            null
+        } ?: 0.0
+
+        // Intentar convertir 'to' a Double y manejar posibles excepciones
+        val toValue = try {
+            to.replace(".", "").toDoubleOrNull()
+        } catch (e: NumberFormatException) {
+            null
+        } ?: 0.0
+
+        _priceStart.value = if (fromValue > maxLimit) maxLimit.toString() else from
+        _priceUntil.value = if (toValue > maxLimit) maxLimit.toString() else to
+
+        // Reemplazar los puntos (separadores de miles) por nada
+        val fromCleaned = from.replace(".", "")
+        val toCleaned = to.replace(".", "")
+
+        // Reemplazar las comas (separadores decimales) por puntos
+        var priceMin = fromCleaned.replace(",", ".").toDoubleOrNull() ?: 0.0
+        var priceMax = toCleaned.replace(",", ".").toDoubleOrNull() ?: 0.0
 
         proposal = proposal.copy(minBudget = priceMin, maxBudget = priceMax)
 
@@ -87,6 +118,12 @@ class NewPublicationViewModel @Inject constructor(
     fun setProfession(profession: Profession?) {
         _profession.value = profession
         proposal = proposal.copy(professionId = profession?.id)
+        _buttonEnabled.value = enabledButton()
+    }
+
+    fun setImage(uri: Uri?) {
+        val fullImageUrl = "$ESQ_HOST${uri?.path}"
+        _image.value = Uri.parse(fullImageUrl)
         _buttonEnabled.value = enabledButton()
     }
 
@@ -106,7 +143,7 @@ class NewPublicationViewModel @Inject constructor(
         uri: Uri,
         token: String,
         onError: () -> Unit,
-        onSuccess: () -> Unit
+        onSuccess: (Int) -> Unit
     ) {
         viewModelScope.launch {
             try {
@@ -125,8 +162,8 @@ class NewPublicationViewModel @Inject constructor(
                 }
 
                 when (response) {
-                    is Boolean -> {
-                        if (response) onSuccess()
+                    is ResponseCreatedId -> {
+                       onSuccess(response.id)
                     }
 
                     is ErrorBusco -> {
@@ -137,6 +174,62 @@ class NewPublicationViewModel @Inject constructor(
             } catch (e: Exception) {
                 _error.value = ErrorBusco(message = "Ha ocurrido un error inesperado")
                 Log.e("Error", e.toString())
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    fun editProposal(
+        context: Context,
+        uri: Uri,
+        token: String,
+        onError: () -> Unit,
+        onSuccess: () -> Unit
+    ) {
+        viewModelScope.launch {
+            try {
+                _isLoading.value = true
+
+                var uriModified: Uri? = uri
+
+                /**Esto es porque si tiene http, la imagen no se modifico
+                 * Es la que ya venia del servidor, por eso no hay que volver a enviarla y
+                 * el valor es nulo*/
+                if (uri.toString().contains("http")) {
+                    uriModified = null
+                }
+
+                val filePart =
+                    if (!uriModified?.scheme.isNullOrEmpty() && !uriModified?.path.isNullOrEmpty()) {
+                        FilesUtils.getFilePart(context, uri, "image")
+                    } else {
+                        null
+                    }
+
+                val response = withContext(Dispatchers.IO) {
+                    proposalsRepository.editProposal(proposal, filePart, token)
+                }
+
+                when (response) {
+                    is Boolean -> {
+                        if (response) {
+                            onSuccess()
+                        }
+                    }
+
+                    is ErrorBusco -> {
+                        _error.value = response
+                        onError()
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("Error", e.message.toString())
+                _error.value = ErrorBusco(
+                    title = "Error",
+                    message = "Ha ocurrido un error inesperado, intentalo de nuevo más tarde"
+                )
+                onError()
             } finally {
                 _isLoading.value = false
             }

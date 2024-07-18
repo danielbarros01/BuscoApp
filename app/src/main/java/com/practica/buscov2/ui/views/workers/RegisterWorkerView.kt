@@ -13,12 +13,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.paint
@@ -32,10 +30,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.practica.buscov2.R
-import com.practica.buscov2.model.busco.ProfessionCategory
-import com.practica.buscov2.model.busco.Worker
 import com.practica.buscov2.ui.components.AlertError
-import com.practica.buscov2.ui.components.ArrowSquareBack
+import com.practica.buscov2.ui.components.ButtonSquareSmall
 import com.practica.buscov2.ui.components.ButtonPrincipal
 import com.practica.buscov2.ui.components.CommonField
 import com.practica.buscov2.ui.components.CommonFieldArea
@@ -47,7 +43,6 @@ import com.practica.buscov2.ui.theme.GrayText
 import com.practica.buscov2.ui.theme.OrangePrincipal
 import com.practica.buscov2.ui.viewModel.auth.TokenViewModel
 import com.practica.buscov2.ui.viewModel.workers.RegisterWorkerViewModel
-import kotlinx.coroutines.launch
 
 @Composable
 fun RegisterWorkerView(
@@ -103,7 +98,7 @@ fun RegisterWorker(
             Space(size = 8.dp)
 
             Row() {
-                ArrowSquareBack {
+                ButtonSquareSmall {
                     navController.navigate("Start")
                 }
                 Space(size = 5.dp)

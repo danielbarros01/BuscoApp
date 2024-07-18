@@ -8,6 +8,16 @@ import com.practica.buscov2.model.busco.Worker
 import javax.inject.Inject
 
 class ProfessionsRepository @Inject constructor(private val api: ApiBusco) {
+    suspend fun getProfession(id: Int): Profession?{
+        val response = api.getProfession(id)
+
+        if (response.isSuccessful) {
+            return response.body()
+        }
+
+        return null
+    }
+
     suspend fun getProfessions(categoryId: Int): List<Profession>? {
         val response = api.getProfessionsForCategory(categoryId)
 

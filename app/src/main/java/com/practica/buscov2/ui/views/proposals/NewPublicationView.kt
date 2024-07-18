@@ -129,6 +129,7 @@ fun NewPublication(
     vmNewPublication: NewPublicationViewModel,
     navController: NavHostController
 ) {
+    val context = LocalContext.current
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
 
     val isLoading by vmNewPublication.isLoading
@@ -142,6 +143,8 @@ fun NewPublication(
     val newUriPicture = remember {
         mutableStateOf(Uri.EMPTY)
     }
+
+    val buttonEnabled by vmNewPublication.buttonEnabled
 
     //Mostrar error
     AlertError(showDialog = showError, error.value.title, error.value.message)
@@ -222,13 +225,7 @@ fun NewPublication(
                     .verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(
-                    text = "Cuenta de que trata tu propuesta",
-                    color = OrangePrincipal,
-                    textAlign = TextAlign.Center,
-                    fontWeight = FontWeight.Medium,
-                    modifier = Modifier.padding(top = 10.dp)
-                )
+                TitleNewPublication()
                 Space(size = 5.dp)
                 DataProposal(
                     vmProfession,
@@ -237,10 +234,37 @@ fun NewPublication(
                     showError,
                     openAlertSelectImage,
                     newUriPicture
-                )
+                ) {
+                    ButtonPrincipal(text = "Publicar", enabled = buttonEnabled) {
+                        token?.let { loginToken ->
+                            vmNewPublication.createProposal(
+                                context,
+                                newUriPicture.value,
+                                token = loginToken.token,
+                                {
+                                    //MOSTRAR ERROR
+                                    showError.value = true
+                                }) { id ->
+                                //IR A LA NUEVA PROPUESTA
+                                navController.navigate("Proposal/${id}")
+                            }
+                        }
+                    }
+                }
             }
         }
     }
+}
+
+@Composable
+fun TitleNewPublication() {
+    Text(
+        text = "Cuenta de que trata tu propuesta",
+        color = OrangePrincipal,
+        textAlign = TextAlign.Center,
+        fontWeight = FontWeight.Medium,
+        modifier = Modifier.padding(top = 10.dp)
+    )
 }
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -251,16 +275,14 @@ fun DataProposal(
     token: LoginToken?,
     showError: MutableState<Boolean>,
     openAlertSelectImage: MutableState<Boolean>,
-    newUriPicture: MutableState<Uri>
+    newUriPicture: MutableState<Uri>,
+    bottomPart: @Composable () -> Unit
 ) {
-    val context = LocalContext.current
     val title: String by vmNewPublication.title
     val description: String by vmNewPublication.description
     val requirements: String by vmNewPublication.requirements
     val priceFrom: String by vmNewPublication.priceStart
     val priceTo: String by vmNewPublication.priceUntil
-
-    val buttonEnabled by vmNewPublication.buttonEnabled
 
     Box() {
         SearchField(vmProfession = vmProfession, vmNewPublication = vmNewPublication)
@@ -303,20 +325,8 @@ fun DataProposal(
             }
 
             Space(size = 8.dp)
-            ButtonPrincipal(text = "Publicar", enabled = buttonEnabled) {
-                token?.let {
-                    vmNewPublication.createProposal(
-                        context,
-                        newUriPicture.value,
-                        token = it.token,
-                        {
-                            //MOSTRAR ERROR
-                            showError.value = true
-                        }) {
-                        //IR A LA NUEVA PROPUESTA
-                    }
-                }
-            }
+
+            bottomPart()
 
             Space(size = 50.dp)
         }

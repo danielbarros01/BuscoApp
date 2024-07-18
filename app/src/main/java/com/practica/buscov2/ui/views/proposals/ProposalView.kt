@@ -37,10 +37,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import com.practica.buscov2.R
 import com.practica.buscov2.model.busco.Proposal
 import com.practica.buscov2.model.busco.User
+import com.practica.buscov2.model.busco.auth.LoginToken
 import com.practica.buscov2.navigation.ItemTabOnlyProposal
 import com.practica.buscov2.navigation.RoutesBottom
+import com.practica.buscov2.ui.components.AlertError
+import com.practica.buscov2.ui.components.AlertVerificationDelete
+import com.practica.buscov2.ui.components.ButtonSquareSmall
 import com.practica.buscov2.ui.components.BottomNav
 import com.practica.buscov2.ui.components.ButtonBack
 import com.practica.buscov2.ui.components.ButtonPrincipal
@@ -55,6 +60,7 @@ import com.practica.buscov2.ui.theme.BlueLink
 import com.practica.buscov2.ui.theme.GrayField
 import com.practica.buscov2.ui.theme.GrayText
 import com.practica.buscov2.ui.theme.OrangePrincipal
+import com.practica.buscov2.ui.theme.RedBusco
 import com.practica.buscov2.ui.viewModel.auth.GoogleLoginViewModel
 import com.practica.buscov2.ui.viewModel.auth.TokenViewModel
 import com.practica.buscov2.ui.viewModel.proposals.ProposalViewModel
@@ -92,6 +98,7 @@ fun ProposalView(
                 vmGoogle,
                 user!!,
                 vmProposal,
+                token,
                 navController
             )
         }
@@ -106,10 +113,14 @@ fun ProposalV(
     vmGoogle: GoogleLoginViewModel,
     user: User,
     vmProposal: ProposalViewModel,
+    token: LoginToken?,
     navController: NavHostController
 ) {
     val error by vmProposal.error
-    var showError by remember {
+    var showError = remember {
+        mutableStateOf(false)
+    }
+    var showErrorClient by remember {
         mutableStateOf(false)
     }
     var showSuccess by remember {
@@ -121,10 +132,34 @@ fun ProposalV(
 
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
 
+    val showVerificationDelete = remember {
+        mutableStateOf(false)
+    }
+
+    AlertError(showError, "Error", message = error.message)
+
+    AlertVerificationDelete(
+        showVerificationDelete,
+        "¿Desea eliminar esta propuesta?",
+        message = "Una vez eliminada no podras recuperarla"
+    ) {
+        token?.let { loginToken ->
+            proposal?.id?.let { proposalId ->
+                //Eliminar propuesta
+                vmProposal.deleteProposal(proposalId, loginToken.token, onError = {
+                    showError.value = true
+                }) {
+                    //Exito
+                    navController.navigate("Proposals")
+                }
+            }
+        }
+    }
+
     LaunchedEffect(Unit) {
-        vmProposal.getProposal(8, onError = {
+        vmProposal.getProposal(proposalId, onError = {
             // Manejo de error
-            showError = true
+            showErrorClient = true
         }) {
             // Manejo de éxito
             showSuccess = true
@@ -146,15 +181,27 @@ fun ProposalV(
             .fillMaxSize(),
             bottomBar = {
                 Column {
-                    ButtonPrincipal(
-                        text = if (user.id == userOwnerProposal?.id) "Editar" else "Aplicar",
-                        enabled = true,
-                        modifier = Modifier.padding(15.dp)
+                    Row(
+                        modifier = Modifier.padding(15.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        if (user.id == userOwnerProposal?.id){
-                            //Ir a editar propuesta
-                        }else{
-                            //Aplicar e ir a aplicaciones
+                        if (user.id == userOwnerProposal?.id) {
+                            ButtonSquareSmall(color = RedBusco, iconId = R.drawable.delete) {
+                                //Activar verificacion de eliminar
+                                showVerificationDelete.value = true
+                            }
+                            Space(size = 5.dp)
+                        }
+                        ButtonPrincipal(
+                            text = if (user.id == userOwnerProposal?.id) "Editar" else "Aplicar",
+                            enabled = true
+                        ) {
+                            if (user.id == userOwnerProposal?.id) {
+                                //Ir a editar propuesta
+                                navController.navigate("EditProposal/${proposal?.id}")
+                            } else {
+                                //Aplicar e ir a aplicaciones
+                            }
                         }
                     }
                     BottomNav(navController, RoutesBottom.allRoutes)
@@ -166,7 +213,7 @@ fun ProposalV(
                     .padding(it)
                     .fillMaxSize()
             ) {
-                if (showError) {
+                if (showErrorClient) {
                     Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                         Text(text = error.message, color = GrayText)
                     }
@@ -208,7 +255,8 @@ fun Header(proposal: Proposal, navController: NavHostController) {
         InsertAsyncImage(
             image = proposal.image ?: "",
             modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.FillBounds
+            contentScale = ContentScale.FillBounds,
+            defaultImg = R.drawable.camerapicnull
         )
         ButtonBack(
             modifier = Modifier.padding(15.dp),
@@ -231,11 +279,8 @@ fun PriceAndDate(proposal: Proposal) {
                 fontSize = 12.sp
             )
             Text(
-                text = " $${AppUtils.formatNumber(proposal.minBudget.toString())} a $${
-                    AppUtils.formatNumber(
-                        proposal.maxBudget.toString()
-                    )
-                }", fontSize = 14.sp, color = GrayField, fontWeight = FontWeight.Medium,
+                text = " $${proposal.minBudget.toString()} a $${proposal.maxBudget.toString()}",
+                fontSize = 14.sp, color = GrayField, fontWeight = FontWeight.Medium,
                 modifier = Modifier.offset(y = -(5).dp)
             )
         }

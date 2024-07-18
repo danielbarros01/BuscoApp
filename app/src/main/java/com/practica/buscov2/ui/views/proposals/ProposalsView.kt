@@ -181,7 +181,7 @@ fun ShowProposals(proposalsPage: LazyPagingItems<Proposal>, navController: NavCo
                 CardProposal(
                     image = item.image ?: "",
                     title = item.title ?: "",
-                    price = "$${formatNumber(item.minBudget.toString())} a $${formatNumber(item.maxBudget.toString())}",
+                    price = "$${item.minBudget.toString()} a $${item.maxBudget.toString()}",
                     date = formatDateCard("${item.date}"),
                 ) {
                     //Onclick

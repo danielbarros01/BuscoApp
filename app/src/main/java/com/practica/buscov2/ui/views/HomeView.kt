@@ -185,7 +185,7 @@ fun Home(
                             image = user.image ?: "",
                             modifier = Modifier
                         ){
-                            navController.navigate("Profile")
+                            navController.navigate("Profile/${user.id}")
                         }
                     }
                 }

@@ -3,6 +3,7 @@ package com.practica.buscov2.data
 import com.practica.buscov2.model.busco.Profession
 import com.practica.buscov2.model.busco.ProfessionCategory
 import com.practica.buscov2.model.busco.Proposal
+import com.practica.buscov2.model.busco.ResponseCreatedId
 import com.practica.buscov2.model.busco.auth.LoginToken
 import com.practica.buscov2.model.busco.auth.LoginRequest
 import com.practica.buscov2.model.busco.auth.RegisterRequest
@@ -27,6 +28,7 @@ import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
@@ -110,6 +112,10 @@ interface ApiBusco {
         @Part image: MultipartBody.Part
     ): Response<Unit>
 
+
+    @GET("$ENDPOINT_PROFESSIONS/{id}")
+    suspend fun getProfession(@Path("id") id: Int): Response<Profession>
+
     @GET("$ENDPOINT_PROFESSIONS/$ENDPOINT_CATEGORIES/{categoryId}")
     suspend fun getProfessionsForCategory(@Path("categoryId") categoryId: Int): Response<ProfessionCategory>
 
@@ -145,7 +151,7 @@ interface ApiBusco {
         @Part("maxBudget") maxBudget: RequestBody?,
         @Part image: MultipartBody.Part?,
         @Part("professionId") professionId: RequestBody?
-    ): Response<Unit>
+    ): Response<ResponseCreatedId>
 
     @GET("$ENDPOINT_PROPOSALS/all/{userId}")
     suspend fun getProposalsOfUser(
@@ -159,4 +165,24 @@ interface ApiBusco {
     suspend fun getProposal(
         @Path("id") id: Int
     ): Response<Proposal>
+
+    @DELETE("$ENDPOINT_PROPOSALS/{id}")
+    suspend fun deleteProposal(
+        @Header("Authorization") token: String,
+        @Path("id") id: Int
+    ): Response<Unit>
+
+    @Multipart
+    @PUT("$ENDPOINT_PROPOSALS/{id}")
+    suspend fun editProposal(
+        @Header("Authorization") token: String,
+        @Path("id") id: Int,
+        @Part("title") title: RequestBody?,
+        @Part("description") description: RequestBody?,
+        @Part("requirements") requirements: RequestBody?,
+        @Part("minBudget") minBudget: RequestBody?,
+        @Part("maxBudget") maxBudget: RequestBody?,
+        @Part image: MultipartBody.Part?,
+        @Part("professionId") professionId: RequestBody?
+    ): Response<Unit>
 }

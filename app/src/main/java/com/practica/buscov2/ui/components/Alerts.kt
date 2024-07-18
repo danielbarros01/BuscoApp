@@ -1,6 +1,7 @@
 package com.practica.buscov2.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,7 +16,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedButton
@@ -27,12 +30,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.practica.buscov2.R
 import com.practica.buscov2.ui.theme.OrangePrincipal
+import com.practica.buscov2.ui.theme.RedBusco
 
 @Composable
 fun AlertErrorPreview() {
@@ -218,9 +223,11 @@ fun AlertShowPicture(
                         painter = painterResource(id = R.drawable.arrowmultiple),
                         contentDescription = "",
                         tint = OrangePrincipal,
-                        modifier = Modifier.size(80.dp).padding(vertical = 15.dp),
+                        modifier = Modifier
+                            .size(80.dp)
+                            .padding(vertical = 15.dp),
 
-                    )
+                        )
                     InsertCircleProfileImage(
                         image = actualImage, modifier = Modifier
                             .size(160.dp)
@@ -238,6 +245,54 @@ fun AlertShowPicture(
                     changePicture()
                 }
             }
+        )
+    }
+}
+
+@Composable
+fun AlertVerificationDelete(
+    showDialog: MutableState<Boolean>,
+    title: String,
+    message: String,
+    onClick: () -> Unit
+) {
+    if (showDialog.value) {
+        AlertDialog(
+            onDismissRequest = { showDialog.value = false },
+            title = {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.delete),
+                        contentDescription = "Eliminar",
+                        tint = Color.Red,
+                        modifier = Modifier.size(60.dp)
+                    )
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Text(
+                        text = title, Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center,
+                        fontSize = 16.sp
+                    )
+                }
+            },
+            text = { Text(text = message) },
+            confirmButton = {
+                Button(
+                    onClick = { onClick() },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = RedBusco,
+                        contentColor = Color.White
+                    )
+                ) {
+                    Text(text = "Eliminar", color = Color.White, fontWeight = FontWeight.Bold)
+                }
+            },
+            modifier = Modifier.border(1.dp, RedBusco, shape = AlertDialogDefaults.shape)
         )
     }
 }

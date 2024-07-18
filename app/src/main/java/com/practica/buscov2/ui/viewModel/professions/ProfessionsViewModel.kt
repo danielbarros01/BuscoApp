@@ -37,4 +37,23 @@ class ProfessionsViewModel @Inject constructor(
             }
         }
     }
+
+    fun getProfession(id:Int, onError: () -> Unit, onSuccess: (Profession) -> Unit){
+        viewModelScope.launch {
+            try {
+                val response = withContext(Dispatchers.IO) {
+                    professionsRepo.getProfession(id)
+                }
+
+                if (response != null) {
+                    return@launch onSuccess(response)
+                }
+
+                onError()
+            } catch (e: Exception) {
+                onError()
+                Log.e("Error", e.toString())
+            }
+        }
+    }
 }

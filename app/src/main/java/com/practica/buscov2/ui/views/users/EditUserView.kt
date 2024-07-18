@@ -260,7 +260,7 @@ fun EditUser(
                         iconId = R.drawable.close,
                         modifier = Modifier.padding(start = 10.dp),
                         onClick = {
-                            navController.navigate("Profile")
+                            navController.navigate("Profile/${user.id}")
                         }
                     )
                 }

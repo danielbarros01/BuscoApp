@@ -128,7 +128,7 @@ fun MenuNavigation(
                 }
                 HorizontalDivider(thickness = 3.dp)
                 ItemProfileNavigation(user) {
-                    navController.navigate("Profile")
+                    navController.navigate("Profile/${user.id}")
                 }
             }
 

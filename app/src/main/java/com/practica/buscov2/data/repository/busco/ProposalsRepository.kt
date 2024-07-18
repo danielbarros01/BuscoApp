@@ -16,7 +16,7 @@ class ProposalsRepository @Inject constructor(private val api: ApiBusco) {
         token: String,
         proposal: Proposal,
         filePart: MultipartBody.Part?
-    ): Any {
+    ): Any? {
         try {
             /*Convertir */
             val titleRequestBody = proposal.title?.toRequestBody("text/plain".toMediaTypeOrNull())
@@ -44,7 +44,7 @@ class ProposalsRepository @Inject constructor(private val api: ApiBusco) {
             )
 
             return when (response.code()) {
-                in 200..300 -> true
+                in 200..299 -> response.body()
                 in 400..599 -> ServerUtils.gsonError(response) //return ErrorBusco
                 else -> ErrorBusco(0, "Error", message = "Error desconocido, intentalo de nuevo")
             }
@@ -73,5 +73,63 @@ class ProposalsRepository @Inject constructor(private val api: ApiBusco) {
         }
 
         return null
+    }
+
+    suspend fun deleteProposal(proposalId: Int, token: String): Any {
+        try {
+            val response = api.deleteProposal("Bearer $token", proposalId)
+
+            return when (response.code()) {
+                in 200..300 -> true
+                in 400..599 -> ServerUtils.gsonError(response) //return ErrorBusco
+                else -> ErrorBusco(0, "Error", message = "Error desconocido, intentalo de nuevo")
+            }
+        } catch (e: Exception) {
+            Log.d("Error", e.toString())
+            return ErrorBusco(0, "Error", message = "Error desconocido, intentalo de nuevo")
+        }
+    }
+
+    suspend fun editProposal(
+        proposal: Proposal,
+        filePart: MultipartBody.Part?,
+        token: String
+    ): Any {
+        try {
+            /*Convertir */
+            val titleRequestBody = proposal.title?.toRequestBody("text/plain".toMediaTypeOrNull())
+            val descriptionRequestBody =
+                proposal.description?.toRequestBody("text/plain".toMediaTypeOrNull())
+            val requirementsRequestBody =
+                proposal.requirements?.toRequestBody("text/plain".toMediaTypeOrNull())
+            val minBudgetRequestBody =
+                proposal.minBudget?.toString()?.toRequestBody("text/plain".toMediaTypeOrNull())
+            val maxBudgetRequestBody =
+                proposal.maxBudget?.toString()?.toRequestBody("text/plain".toMediaTypeOrNull())
+            val professionIdRequestBody =
+                proposal.professionId?.toString()?.toRequestBody("text/plain".toMediaTypeOrNull())
+
+
+            val response = api.editProposal(
+                token = "Bearer $token",
+                id = proposal.id!!,
+                title = titleRequestBody,
+                description = descriptionRequestBody,
+                requirements = requirementsRequestBody,
+                minBudget = minBudgetRequestBody,
+                maxBudget = maxBudgetRequestBody,
+                image = filePart, // Tu MultipartBody.Part para la imagen
+                professionId = professionIdRequestBody
+            )
+
+            return when (response.code()) {
+                in 200..300 -> true
+                in 400..599 -> ServerUtils.gsonError(response) //return ErrorBusco
+                else -> ErrorBusco(0, "Error", message = "Error desconocido, intentalo de nuevo")
+            }
+        } catch (e: Exception) {
+            Log.d("Error", e.toString())
+            return ErrorBusco(0, "Error", message = "Error desconocido, intentalo de nuevo")
+        }
     }
 }

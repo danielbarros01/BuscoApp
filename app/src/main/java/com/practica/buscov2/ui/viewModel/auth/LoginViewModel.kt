@@ -94,10 +94,12 @@ class LoginViewModel @Inject constructor(
                 loginToken?.let { onSuccess(it.token) }
             } catch (e: Exception) {
                 Log.d("Error", "Error: $e")
+            }finally {
+                //Desactivo el loading
+                _isLoading.value = false
             }
         }
-        //Desactivo el loading
-        _isLoading.value = false
+
     }
 
     fun loginWithGoogle(

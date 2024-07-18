@@ -1,5 +1,7 @@
 package com.practica.buscov2.ui.viewModel.proposals
 
+import android.content.Context
+import android.net.Uri
 import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
@@ -11,6 +13,7 @@ import com.practica.buscov2.data.repository.busco.ProposalsRepository
 import com.practica.buscov2.model.busco.Proposal
 import com.practica.buscov2.model.busco.User
 import com.practica.buscov2.model.busco.auth.ErrorBusco
+import com.practica.buscov2.util.FilesUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -46,13 +49,13 @@ class ProposalViewModel @Inject constructor(
                     repo.getProposal(id)
                 }
 
-                if(response is Proposal){
+                if (response is Proposal) {
                     _proposal.value = response
                     onSuccess(response)
                 }
 
                 //Si la respuesta es nula ocurrio un error
-                if(response == null){
+                if (response == null) {
                     throw Exception()
                 }
             } catch (e: Exception) {
@@ -68,7 +71,92 @@ class ProposalViewModel @Inject constructor(
         }
     }
 
-    fun changeUserOwner(user: User){
+    fun deleteProposal(id: Int, token: String, onError: () -> Unit, onSuccess: () -> Unit) {
+        viewModelScope.launch {
+            try {
+                _isLoading.value = true
+
+                val response = withContext(Dispatchers.IO) {
+                    repo.deleteProposal(id, token)
+                }
+
+                when (response) {
+                    is Boolean -> {
+                        if (response) {
+                            onSuccess()
+                        }
+                    }
+
+                    is ErrorBusco -> {
+                        _error.value = response
+                        onError()
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("Error", e.message.toString())
+                _error.value = ErrorBusco(
+                    title = "Error",
+                    message = "Ha ocurrido un error inesperado, intentalo de nuevo más tarde"
+                )
+                onError()
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    fun editProposal(
+        context: Context,
+        proposal: Proposal,
+        uri: Uri,
+        token: String,
+        onError: () -> Unit,
+        onSuccess: () -> Unit
+    ) {
+        viewModelScope.launch {
+            try {
+                _isLoading.value = true
+
+                val filePart = if (!uri.scheme.isNullOrEmpty() && !uri.path.isNullOrEmpty()) {
+                    FilesUtils.getFilePart(context, uri, "image")
+                } else {
+                    null
+                }
+
+                val response = withContext(Dispatchers.IO) {
+                    repo.editProposal(proposal, filePart, token)
+                }
+
+                when (response) {
+                    is Boolean -> {
+                        if (response) {
+                            onSuccess()
+                        }
+                    }
+
+                    is ErrorBusco -> {
+                        _error.value = response
+                        onError()
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("Error", e.message.toString())
+                _error.value = ErrorBusco(
+                    title = "Error",
+                    message = "Ha ocurrido un error inesperado, intentalo de nuevo más tarde"
+                )
+                onError()
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    fun changeProposal(proposal: Proposal) {
+        _proposal.value = proposal
+    }
+
+    fun changeUserOwner(user: User) {
         _userOwner.value = user
     }
 }
