@@ -63,7 +63,11 @@ class ProposalsViewModel @Inject constructor(
     @OptIn(ExperimentalCoroutinesApi::class)
     val proposalsPage = _refreshTrigger.flatMapLatest {
         Pager(PagingConfig(pageSize = 6)) {
-            ProposalsDataSource(repo, userId.value, status.value)
+            ProposalsDataSource(
+                repo,
+                userId.value,
+                status.value
+            )
         }.flow.cachedIn(viewModelScope)
     }
 

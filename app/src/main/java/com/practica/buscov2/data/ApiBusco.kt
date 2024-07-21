@@ -140,6 +140,13 @@ interface ApiBusco {
         @Body worker: Worker
     ): Response<Unit>
 
+    @GET("$ENDPOINT_WORKERS/recommendations")
+    suspend fun getRecommendedWorkers(
+        @Header("Authorization") token: String,
+        @Query("page") page: Int?,
+        @Query("NumberRecordsPerPage") pageSize: Int?,
+    ): Response<List<User>>
+
     @Multipart
     @POST(ENDPOINT_PROPOSALS)
     suspend fun createProposal(
@@ -185,4 +192,12 @@ interface ApiBusco {
         @Part image: MultipartBody.Part?,
         @Part("professionId") professionId: RequestBody?
     ): Response<Unit>
+
+    @GET("$ENDPOINT_PROPOSALS/recommendations")
+    suspend fun getRecommendedProposals(
+        @Header("Authorization") token: String,
+        @Query("page") page: Int?,
+        @Query("NumberRecordsPerPage") pageSize: Int?,
+    ): Response<List<Proposal>>
+
 }

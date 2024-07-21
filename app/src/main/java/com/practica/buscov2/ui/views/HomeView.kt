@@ -21,12 +21,14 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -64,10 +66,14 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import androidx.paging.LoadState
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.practica.buscov2.R
+import com.practica.buscov2.model.busco.Proposal
 import com.practica.buscov2.model.busco.SimpleUbication
 import com.practica.buscov2.model.busco.User
 import com.practica.buscov2.navigation.RoutesBottom
@@ -76,7 +82,11 @@ import com.practica.buscov2.ui.components.BottomNav
 import com.practica.buscov2.ui.components.ButtonMenu
 import com.practica.buscov2.ui.components.ButtonPrincipal
 import com.practica.buscov2.ui.components.ButtonUbication
+import com.practica.buscov2.ui.components.CardProposalRecommendation
+import com.practica.buscov2.ui.components.CardWorkerRecommendation
 import com.practica.buscov2.ui.components.InsertCircleProfileImage
+import com.practica.buscov2.ui.components.ItemsInLazy
+import com.practica.buscov2.ui.components.LoaderMaxSize
 import com.practica.buscov2.ui.components.MenuNavigation
 import com.practica.buscov2.ui.components.SearchField
 import com.practica.buscov2.ui.components.Space
@@ -90,7 +100,9 @@ import com.practica.buscov2.ui.theme.ShadowColor
 import com.practica.buscov2.ui.viewModel.auth.GoogleLoginViewModel
 import com.practica.buscov2.ui.viewModel.HomeViewModel
 import com.practica.buscov2.ui.viewModel.auth.TokenViewModel
+import com.practica.buscov2.ui.viewModel.proposals.ProposalsViewModel
 import com.practica.buscov2.ui.viewModel.users.UserViewModel
+import com.practica.buscov2.util.AppUtils
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalPermissionsApi::class)
@@ -111,6 +123,8 @@ fun HomeView(
             vmUser.getMyProfile(it.token, {
                 navController.navigate("Login")
             }) {}
+            homeVm.setToken(it.token)
+            homeVm.refreshWorkers()
         }
     }
 
@@ -135,11 +149,16 @@ fun Home(
     //Rutas de navegacion bottom
     val navigationRoutes = RoutesBottom.allRoutes
 
+    val isLoading by homeVm.isLoading.collectAsState()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
     var isSearchWork by remember {
         mutableStateOf(false)
+    }
+
+    if (isLoading) {
+        LoaderMaxSize()
     }
 
     ModalNavigationDrawer(
@@ -184,7 +203,7 @@ fun Home(
                         InsertCircleProfileImage(
                             image = user.image ?: "",
                             modifier = Modifier
-                        ){
+                        ) {
                             navController.navigate("Profile/${user.id}")
                         }
                     }
@@ -199,9 +218,10 @@ fun Home(
                     Title()
                     TriangleShape(modifier.size(32.dp), color = OrangePrincipal)
                     ButtonsChangeType(onClickWorker = {
-                        if(user.worker != null){
+                        if (user.worker != null) {
                             isSearchWork = true
-                        }else{
+
+                        } else {
                             navController.navigate("BeWorker")
                         }
                     }, onClickClient = {
@@ -221,16 +241,55 @@ fun Home(
                     )
 
                     if (isSearchWork) {
-                        ButtonPrincipal(text = "Buscar", enabled = true) {
-
+                        val proposalsPage = homeVm.proposalsPage.collectAsLazyPagingItems()
+                        activeLoaderMax(proposalsPage, homeVm)
+                        ButtonPrincipal(
+                            text = "Buscar",
+                            enabled = true,
+                            modifier = Modifier.padding(bottom = 15.dp)
+                        ) {
                         }
+
+                        ShowProposals(proposalsPage, navController)
                     } else {
-                        SearchField(){}
+                        val workersPage = homeVm.workersPage.collectAsLazyPagingItems()
+                        activeLoaderMax(workersPage, homeVm)
+
+                        SearchField() {}
+                        Space(size = 10.dp)
+                        ShowWorkers(workersPage, navController)
                     }
                 }
             }
         }
 
+    }
+}
+
+@Composable
+fun ShowWorkers(workersPage: LazyPagingItems<User>, navController: NavController) {
+    ItemsInLazy(workersPage) {
+        CardWorkerRecommendation(
+            modifier = Modifier.padding(vertical = 10.dp),
+            user = it,
+            qualification = 99
+        ) {
+            // Ir al perfil del usuario
+            navController.navigate("Profile/${it.id}")
+        }
+    }
+}
+
+@Composable
+fun ShowProposals(proposalsPage: LazyPagingItems<Proposal>, navController: NavController) {
+    ItemsInLazy(proposalsPage) {
+        CardProposalRecommendation(
+            modifier = Modifier.padding(vertical = 10.dp),
+            proposal = it
+        ) {
+            //Ir a la propuesta
+            navController.navigate("Proposal/${it.id}")
+        }
     }
 }
 
@@ -342,4 +401,13 @@ fun OutlinedTitle(text: String) {
             )
         )
     }
+}
+
+fun <T:Any>activeLoaderMax(
+    itemsPage: LazyPagingItems<T>,
+    vmHomeViewModel: HomeViewModel
+) {
+    val loadState = itemsPage.loadState
+    val isLoading = loadState.refresh is LoadState.Loading || loadState.prepend is LoadState.Loading
+    vmHomeViewModel.setLoading(isLoading)
 }

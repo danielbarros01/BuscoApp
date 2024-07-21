@@ -7,11 +7,15 @@ import com.practica.buscov2.model.busco.Proposal
 
 class ProposalsDataSource(
     private val repo: ProposalsRepository,
-    userId: Int,
-    status: Boolean?
+    userId: Int = 0,
+    status: Boolean?,
+    tokenP: String? = null,
+    function: String? = null
 ) : PagingSource<Int, Proposal>() {
     private val userId2 = userId
     private val status2 = status
+    private val functionCall = function
+    private val token = tokenP
 
     //controla el estado de paginacion
     override fun getRefreshKey(state: PagingState<Int, Proposal>): Int? {
@@ -30,11 +34,15 @@ class ProposalsDataSource(
             // Obtiene el número de la siguiente página o comienza con la página 1 si es nulo
             val nextPageNumber = params.key ?: 1
             // Hace una solicitud al repositorio para obtener las propuestas del usuario
-            val response = repo.getProposalsOfUser(
+            val response = if(functionCall != "getRecommendedProposals") repo.getProposalsOfUser(
                 userId2,
                 page = nextPageNumber,
                 pageSize = 6,
                 status = status2
+            ) else repo.getRecommendedProposals(
+                token!!,
+                page = nextPageNumber,
+                pageSize = 6
             )
             // Devuelve los resultados cargados en una página
             LoadResult.Page(

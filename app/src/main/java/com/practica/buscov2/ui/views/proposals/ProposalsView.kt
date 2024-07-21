@@ -42,6 +42,8 @@ import com.practica.buscov2.navigation.ItemTabProposal
 import com.practica.buscov2.navigation.RoutesBottom
 import com.practica.buscov2.ui.components.BottomNav
 import com.practica.buscov2.ui.components.CardProposal
+import com.practica.buscov2.ui.components.CardWorkerRecommendation
+import com.practica.buscov2.ui.components.ItemsInLazy
 import com.practica.buscov2.ui.components.LateralMenu
 import com.practica.buscov2.ui.components.LoaderMaxSize
 import com.practica.buscov2.ui.components.MenuNavigation
@@ -111,7 +113,7 @@ fun ProposalsV(
     val isLoading by vmProposals.isLoading.collectAsState()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
 
-    if(isLoading){
+    if (isLoading) {
         LoaderMaxSize()
     }
 
@@ -132,7 +134,7 @@ fun ProposalsV(
                     .padding(it)
                     .padding(15.dp)
             ) {
-                TabsPages(vmProposals,navController)
+                TabsPages(vmProposals, navController)
             }
         }
     }
@@ -141,7 +143,7 @@ fun ProposalsV(
 @Composable
 fun ExpiredProposals(vmProposals: ProposalsViewModel, navController: NavHostController) {
     val proposalsPage = vmProposals.proposalsPage.collectAsLazyPagingItems()
-    activeLoaderMax(proposalsPage, vmProposals)
+    activeLoaderMaxProposals(proposalsPage, vmProposals)
 
     if (proposalsPage.itemCount == 0) {
         NoProposals()
@@ -153,7 +155,7 @@ fun ExpiredProposals(vmProposals: ProposalsViewModel, navController: NavHostCont
 @Composable
 fun ActiveProposals(vmProposals: ProposalsViewModel, navController: NavHostController) {
     val proposalsPage = vmProposals.proposalsPage.collectAsLazyPagingItems()
-    activeLoaderMax(proposalsPage, vmProposals)
+    activeLoaderMaxProposals(proposalsPage, vmProposals)
 
     if (proposalsPage.itemCount == 0) {
         NoProposals()
@@ -163,7 +165,7 @@ fun ActiveProposals(vmProposals: ProposalsViewModel, navController: NavHostContr
 }
 
 //Para activar el loader completo la primera vez que traigo datos
-private fun activeLoaderMax(
+fun activeLoaderMaxProposals(
     proposalsPage: LazyPagingItems<Proposal>,
     vmProposals: ProposalsViewModel
 ) {
@@ -174,42 +176,15 @@ private fun activeLoaderMax(
 
 @Composable
 fun ShowProposals(proposalsPage: LazyPagingItems<Proposal>, navController: NavController) {
-    LazyColumn {
-        items(proposalsPage.itemCount) { index ->
-            val item = proposalsPage[index]
-            if (item != null) {
-                CardProposal(
-                    image = item.image ?: "",
-                    title = item.title ?: "",
-                    price = "$${item.minBudget.toString()} a $${item.maxBudget.toString()}",
-                    date = formatDateCard("${item.date}"),
-                ) {
-                    //Onclick
-                    navController.navigate("Proposal/${item.id}")
-                }
-            }
-        }
-
-        when (proposalsPage.loadState.append) {
-            is LoadState.NotLoading -> Unit
-            LoadState.Loading -> {
-                item {
-                    Box(modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 10.dp), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator(
-                            strokeWidth = 6.dp,
-                            modifier = Modifier.size(40.dp)
-                        )
-                    }
-                }
-            }
-
-            is LoadState.Error -> {
-                item {
-                    Text(text = "Error al cargar")
-                }
-            }
+    ItemsInLazy(proposalsPage) { item ->
+        CardProposal(
+            image = item.image ?: "",
+            title = item.title ?: "",
+            price = "$${item.minBudget.toString()} a $${item.maxBudget.toString()}",
+            date = formatDateCard("${item.date}"),
+        ) {
+            //Onclick
+            navController.navigate("Proposal/${item.id}")
         }
     }
 }
@@ -228,13 +203,17 @@ private fun TabsPages(vmProposals: ProposalsViewModel, navController: NavHostCon
 
     Column {
         Tabs(tabs, pagerState, vmProposals)
-        TabsContent(tabs, pagerState, vmProposals,navController)
+        TabsContent(tabs, pagerState, vmProposals, navController)
     }
 }
 
 
 @Composable
-private fun Tabs(tabs: List<ItemTabProposal>, pagerState: PagerState, vmProposals: ProposalsViewModel) {
+private fun Tabs(
+    tabs: List<ItemTabProposal>,
+    pagerState: PagerState,
+    vmProposals: ProposalsViewModel
+) {
     val selectedTab = pagerState.currentPage
     val scope = rememberCoroutineScope()
 

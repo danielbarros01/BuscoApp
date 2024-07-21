@@ -11,8 +11,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
@@ -33,6 +35,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
+import androidx.paging.LoadState
+import androidx.paging.compose.LazyPagingItems
 import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
 import coil.compose.rememberImagePainter
@@ -102,36 +106,27 @@ fun InsertCircleProfileImage(image: String, modifier: Modifier, onClick: () -> U
         image
     }
 
-    if (image.isNotEmpty()) {
-        AsyncImage(
-            model = ImageRequest.Builder(LocalContext.current)
-                .data(imageUrl)
-                .crossfade(true)
-                .build(),
-            contentDescription = "Foto de perfil",
-            placeholder = imagePainter,
-            modifier = modifier
-                .fillMaxSize()
-                .clip(CircleShape)
-                .border(1.dp, GrayPlaceholder, CircleShape)
-                .clickable { onClick() },
-            contentScale = ContentScale.Crop,
-            onError = {
-                Log.d("ERROR", it.toString())
-            }
-        )
+    val request = if (image.isNotEmpty()) {
+        ImageRequest.Builder(LocalContext.current)
+            .data(imageUrl)
+            .crossfade(true)
+            .build()
     } else {
-        Image(
-            painter = imagePainter, contentDescription = "Foto de perfil",
-            modifier = modifier
-                .fillMaxSize()
-                .clip(CircleShape)
-                .border(1.dp, GrayPlaceholder, CircleShape)
-                .clickable { onClick() },
-            contentScale = ContentScale.Crop,
-        )
+        null
     }
 
+    AsyncImage(
+        model = request,
+        contentDescription = "Foto de perfil",
+        placeholder = imagePainter,
+        error = imagePainter,
+        modifier = modifier
+            .fillMaxSize()
+            .clip(CircleShape)
+            .border(1.dp, GrayPlaceholder, CircleShape)
+            .clickable { onClick() },
+        contentScale = ContentScale.Crop
+    )
 }
 
 
@@ -216,4 +211,39 @@ fun TriangleShape(modifier: Modifier, color: Color) {
             path = trianglePath
         )
     })
+}
+
+@Composable
+fun <T : Any> ItemsInLazy(itemsPage: LazyPagingItems<T>, view: @Composable (T) -> Unit) {
+    LazyColumn {
+        items(itemsPage.itemCount) { index ->
+            val item = itemsPage[index]
+            if (item != null) {
+                view(item)
+            }
+        }
+        when (itemsPage.loadState.append) {
+            is LoadState.NotLoading -> Unit
+            LoadState.Loading -> {
+                item {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 10.dp), contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(
+                            strokeWidth = 6.dp,
+                            modifier = Modifier.size(40.dp)
+                        )
+                    }
+                }
+            }
+
+            is LoadState.Error -> {
+                item {
+                    Text(text = "Error al cargar")
+                }
+            }
+        }
+    }
 }

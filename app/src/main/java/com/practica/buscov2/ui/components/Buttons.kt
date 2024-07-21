@@ -59,7 +59,7 @@ fun ButtonPrincipal(
             .fillMaxWidth()
             .height(56.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = Color(0xFFFF6422),
+            containerColor = OrangePrincipal,
             contentColor = Color.White
         ),
         shape = RoundedCornerShape(12.dp),

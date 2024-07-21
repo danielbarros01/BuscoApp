@@ -85,6 +85,8 @@ fun ProfileView(
             vmUser.getMyProfile(it.token, {
                 navController.navigate("Login")
             }) { user ->
+                vmUser.changeUser(user)
+
                 if (user.id != id) {
                     //Si yo no soy el usuario traer el perfil de ese usuario
                     vmUser.getProfile(id, {}) { userProfile ->
@@ -100,7 +102,7 @@ fun ProfileView(
     }
 
 
-    if (user != null) {
+    if (userProfile != null) {
         Box(modifier = Modifier.fillMaxSize()) {
             ProfileV(
                 Modifier.align(Alignment.Center),
@@ -163,7 +165,7 @@ fun ProfileV(
 
                 Space(size = 4.dp)
 
-                BoxUsername(user)
+                BoxUsername(userProfile)
 
                 Space(size = 4.dp)
 

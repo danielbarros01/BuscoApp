@@ -3,6 +3,7 @@ package com.practica.buscov2.data.repository.busco
 import android.util.Log
 import com.practica.buscov2.data.ApiBusco
 import com.practica.buscov2.model.busco.Proposal
+import com.practica.buscov2.model.busco.User
 import com.practica.buscov2.model.busco.auth.ErrorBusco
 import com.practica.buscov2.util.ServerUtils
 import kotlinx.coroutines.delay
@@ -60,7 +61,7 @@ class ProposalsRepository @Inject constructor(private val api: ApiBusco) {
         pageSize: Int? = null,
         status: Boolean? = null
     ): List<Proposal> {
-        //delay(3000)
+        delay(2000) //para demostracion
         val response = api.getProposalsOfUser(userId, page, pageSize, status)
         return response.body() ?: emptyList()
     }
@@ -131,5 +132,15 @@ class ProposalsRepository @Inject constructor(private val api: ApiBusco) {
             Log.d("Error", e.toString())
             return ErrorBusco(0, "Error", message = "Error desconocido, intentalo de nuevo")
         }
+    }
+
+    suspend fun getRecommendedProposals(
+        token:String,
+        page: Int? = null,
+        pageSize: Int? = null,
+    ): List<Proposal> {
+        delay(2000) //para demostracion
+        val response = api.getRecommendedProposals("Bearer $token",page, pageSize)
+        return response.body() ?: emptyList()
     }
 }

@@ -101,7 +101,7 @@ class UserViewModel @Inject constructor(
                 when (response) {
                     //Si tenemos un usuario
                     is UserResult.Success -> {
-                        _user.value = response.user
+                        //_user.value = response.user
                         onSuccess(response.user)
                     }
 
@@ -117,6 +117,10 @@ class UserViewModel @Inject constructor(
                 onError(error)
             }
         }
+    }
+
+    fun changeUser(user:User){
+        _user.value = user
     }
 
     fun changeUserProfile(user:User){
