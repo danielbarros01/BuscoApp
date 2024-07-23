@@ -120,6 +120,39 @@ class ApplicationsViewModel @Inject constructor(
         }
     }
 
+    fun applyToProposal(proposalId: Int, onError: (ErrorBusco) -> Unit, onSuccess: () -> Unit) {
+        viewModelScope.launch {
+            try {
+                _isLoading.value = true
+
+                val response = withContext(Dispatchers.IO) {
+                    repo.createApplication(token.value!!, proposalId)
+                }
+
+                when (response) {
+                    is Boolean -> {
+                        if (response) {
+                            onSuccess()
+                        }
+                    }
+
+                    is ErrorBusco -> {
+                        _error.value = response
+                        onError(response)
+                    }
+                }
+            } catch (e: Exception) {
+                _error.value = ErrorBusco(
+                    title = "Error",
+                    message = "Ha ocurrido un error inesperado, intentalo de nuevo más tarde"
+                )
+                onError(error.value)
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
     fun refreshProposals() {
         _refreshTrigger.value++
     }

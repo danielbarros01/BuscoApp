@@ -159,4 +159,8 @@ class ProposalViewModel @Inject constructor(
     fun changeUserOwner(user: User) {
         _userOwner.value = user
     }
+
+    fun setError(error: ErrorBusco) {
+     _error.value = error
+    }
 }

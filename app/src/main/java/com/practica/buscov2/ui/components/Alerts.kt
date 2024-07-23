@@ -1,6 +1,5 @@
 package com.practica.buscov2.ui.components
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,7 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
+import androidx.compose.foundation.text.BasicText
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.Button
@@ -30,12 +29,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.practica.buscov2.R
+import com.practica.buscov2.model.busco.Application
+import com.practica.buscov2.model.busco.Proposal
+import com.practica.buscov2.model.busco.User
 import com.practica.buscov2.ui.theme.OrangePrincipal
 import com.practica.buscov2.ui.theme.RedBusco
 
@@ -296,3 +301,81 @@ fun AlertVerificationDelete(
         )
     }
 }
+
+@Composable
+fun AlertDifferentJob(
+    showDialog: MutableState<Boolean>,
+    proposal:Proposal,
+    user: User?,
+    onDismiss: () -> Unit = { showDialog.value = false },
+    onClick: () -> Unit
+) {
+    val forJob = proposal.profession?.name ?: ""
+    val youAre = user?.worker?.workersProfessions?.first()?.profession?.name ?: ""
+
+    if (showDialog.value) {
+        AlertDialog(
+            onDismissRequest = { showDialog.value = false },
+            icon = {
+                Icon(
+                    painter = painterResource(id = R.drawable.alertcircle),
+                    contentDescription = "",
+                    tint = OrangePrincipal,
+                    modifier = Modifier.size(90.dp)
+                )
+            },
+            title = {
+                BasicText(
+                    buildAnnotatedString {
+                        append("Esta propuesta es para un ")
+                        withStyle(
+                            style = SpanStyle(
+                                fontWeight = FontWeight.Bold,
+                                color = OrangePrincipal
+                            )
+                        ) {
+                            append(forJob)
+                        }
+                        append(", pero tú eres un ")
+                        withStyle(
+                            style = SpanStyle(
+                                fontWeight = FontWeight.Bold,
+                                color = OrangePrincipal
+                            )
+                        ) {
+                            append(youAre)
+                        }
+                        append(". ¿Aún así deseas aplicar?")
+                    },
+                    style = TextStyle(fontSize = 24.sp, textAlign = TextAlign.Center)
+                )
+            },
+            confirmButton = {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 10.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Box(modifier = Modifier.weight(1f)){
+                        ButtonLine(text = "No") {
+                            onDismiss()
+                        }
+                    }
+                    Space(size = 5.dp)
+                    Box(modifier = Modifier.weight(1f)){
+                        ButtonPrincipal(text = "Si", enabled = true) {
+                            onClick()
+                        }
+                    }
+                }
+            })
+    }
+}
+
+
+
+
+
+

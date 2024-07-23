@@ -58,4 +58,22 @@ class ApplicationsRepository @Inject constructor(private val api: ApiBusco) {
             return ErrorBusco(0, "Error", message = "Error desconocido, intentalo de nuevo")
         }
     }
+
+    suspend fun createApplication(
+        token: String,
+        proposalId: Int
+    ):Any {
+        try {
+            val response = api.createApplication("Bearer $token", proposalId)
+
+            return when (response.code()) {
+                in 200..299 -> true
+                in 400..599 -> ServerUtils.gsonError(response) //return ErrorBusco
+                else -> ErrorBusco(0, "Error", message = "Error desconocido, intentalo de nuevo")
+            }
+        }catch (e: Exception){
+            Log.d("Error", e.toString())
+            return ErrorBusco(0, "Error", message = "Error desconocido, intentalo de nuevo")
+        }
+    }
 }

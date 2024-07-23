@@ -1,11 +1,5 @@
 package com.practica.buscov2.ui.views.proposals
 
-import android.media.Rating
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -26,7 +20,6 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.DrawerValue
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
@@ -39,9 +32,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -57,6 +48,7 @@ import com.practica.buscov2.model.busco.Worker
 import com.practica.buscov2.model.busco.auth.LoginToken
 import com.practica.buscov2.navigation.ItemTabOnlyProposal
 import com.practica.buscov2.navigation.RoutesBottom
+import com.practica.buscov2.ui.components.AlertDifferentJob
 import com.practica.buscov2.ui.components.AlertError
 import com.practica.buscov2.ui.components.AlertVerificationDelete
 import com.practica.buscov2.ui.components.ButtonSquareSmall
@@ -83,7 +75,6 @@ import com.practica.buscov2.ui.viewModel.auth.TokenViewModel
 import com.practica.buscov2.ui.viewModel.proposals.ApplicationsViewModel
 import com.practica.buscov2.ui.viewModel.proposals.ProposalViewModel
 import com.practica.buscov2.ui.viewModel.users.UserViewModel
-import com.practica.buscov2.util.AppUtils
 import com.practica.buscov2.util.AppUtils.Companion.convertToIsoDate
 
 @Composable
@@ -105,6 +96,8 @@ fun ProposalView(
             vmUser.getMyProfile(it.token, {
                 navController.navigate("Login")
             }) {}
+
+            applicationsViewModel.setToken(it.token)
         }
     }
 
@@ -159,25 +152,10 @@ fun ProposalV(
 
     val application by applicationsViewModel.applicant
 
-    AlertError(showError, "Error", message = error.message)
-
-    AlertVerificationDelete(
-        showVerificationDelete,
-        "¿Desea eliminar esta propuesta?",
-        message = "Una vez eliminada no podras recuperarla"
-    ) {
-        token?.let { loginToken ->
-            proposal?.id?.let { proposalId ->
-                //Eliminar propuesta
-                vmProposal.deleteProposal(proposalId, loginToken.token, onError = {
-                    showError.value = true
-                }) {
-                    //Exito
-                    navController.navigate("Proposals")
-                }
-            }
-        }
+    val showAlertDifferentJob = remember {
+        mutableStateOf(false)
     }
+
 
     LaunchedEffect(Unit) {
         vmProposal.getProposal(proposalId, onError = {
@@ -203,6 +181,52 @@ fun ProposalV(
             }
         }
     }
+
+
+    AlertError(showError, "Error", message = error.message)
+
+    AlertVerificationDelete(
+        showVerificationDelete,
+        "¿Desea eliminar esta propuesta?",
+        message = "Una vez eliminada no podras recuperarla"
+    ) {
+        token?.let { loginToken ->
+            proposal?.id?.let { proposalId ->
+                //Eliminar propuesta
+                vmProposal.deleteProposal(proposalId, loginToken.token, onError = {
+                    showError.value = true
+                }) {
+                    //Exito
+                    navController.navigate("Proposals")
+                }
+            }
+        }
+    }
+
+
+    proposal?.let {
+        AlertDifferentJob(
+            showAlertDifferentJob,
+            it,
+            user,
+            onClick = {
+                //Aplicar e ir a aplicaciones
+                applicationsViewModel.applyToProposal(
+                    proposalId,
+                    onError = {
+                        vmProposal.setError(it)
+                        showError.value = true
+                    },
+                    onSuccess = {
+                        //Ir a mis trabajos
+                        navController.navigate("Jobs/me")
+                    })
+            })
+    }
+
+
+
+
 
     LateralMenu(
         drawerState = drawerState,
@@ -239,7 +263,26 @@ fun ProposalV(
                                     //Ver postulantes
                                     navController.navigate("Applicants/${proposalId}")
                                 } else {
-                                    //Aplicar e ir a aplicaciones
+                                    //Verificar el tipo de trabajador que buscan
+                                    if (user.worker?.workersProfessions?.firstOrNull()?.professionId?.equals(
+                                            proposal?.professionId
+                                        ) == false
+                                    ) {
+                                        //Si es distinto mostrar un cuadro de aviso
+                                        showAlertDifferentJob.value = true
+                                    } else {
+                                        //Aplicar e ir a aplicaciones
+                                        applicationsViewModel.applyToProposal(
+                                            proposalId,
+                                            onError = {
+                                                vmProposal.setError(it)
+                                                showError.value = true
+                                            },
+                                            onSuccess = {
+                                                //Ir a mis trabajos
+                                                navController.navigate("Jobs/me")
+                                            })
+                                    }
                                 }
                             }
                         }

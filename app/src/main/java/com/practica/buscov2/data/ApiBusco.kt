@@ -221,5 +221,11 @@ interface ApiBusco {
         @Path("proposalId") proposalId: Int,
         @Path("applicationId") applicationId: Int,
         @Query("status") status: Boolean? //TRUE ACEPTAR, FALSE RECHAZAR
+    ): Response<Unit>
+
+    @POST("$ENDPOINT_APPLICATIONS/{proposalId}")
+    suspend fun createApplication(
+        @Header("Authorization") token: String,
+        @Path("proposalId") proposalId: Int,
     ):Response<Unit>
 }
