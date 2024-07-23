@@ -1,16 +1,24 @@
 package com.practica.buscov2.ui.views.proposals
 
+import android.media.Rating
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
@@ -18,6 +26,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
@@ -30,7 +39,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -38,8 +49,11 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.practica.buscov2.R
+import com.practica.buscov2.model.busco.Application
 import com.practica.buscov2.model.busco.Proposal
+import com.practica.buscov2.model.busco.Qualification
 import com.practica.buscov2.model.busco.User
+import com.practica.buscov2.model.busco.Worker
 import com.practica.buscov2.model.busco.auth.LoginToken
 import com.practica.buscov2.navigation.ItemTabOnlyProposal
 import com.practica.buscov2.navigation.RoutesBottom
@@ -49,6 +63,8 @@ import com.practica.buscov2.ui.components.ButtonSquareSmall
 import com.practica.buscov2.ui.components.BottomNav
 import com.practica.buscov2.ui.components.ButtonBack
 import com.practica.buscov2.ui.components.ButtonPrincipal
+import com.practica.buscov2.ui.components.CardWorker
+import com.practica.buscov2.ui.components.InfiniteRotationIcon
 import com.practica.buscov2.ui.components.InsertAsyncImage
 import com.practica.buscov2.ui.components.InsertCircleProfileImage
 import com.practica.buscov2.ui.components.LateralMenu
@@ -59,10 +75,12 @@ import com.practica.buscov2.ui.components.Title
 import com.practica.buscov2.ui.theme.BlueLink
 import com.practica.buscov2.ui.theme.GrayField
 import com.practica.buscov2.ui.theme.GrayText
+import com.practica.buscov2.ui.theme.GreenBusco
 import com.practica.buscov2.ui.theme.OrangePrincipal
 import com.practica.buscov2.ui.theme.RedBusco
 import com.practica.buscov2.ui.viewModel.auth.GoogleLoginViewModel
 import com.practica.buscov2.ui.viewModel.auth.TokenViewModel
+import com.practica.buscov2.ui.viewModel.proposals.ApplicationsViewModel
 import com.practica.buscov2.ui.viewModel.proposals.ProposalViewModel
 import com.practica.buscov2.ui.viewModel.users.UserViewModel
 import com.practica.buscov2.util.AppUtils
@@ -75,6 +93,7 @@ fun ProposalView(
     vmGoogle: GoogleLoginViewModel,
     vmToken: TokenViewModel,
     vmProposal: ProposalViewModel,
+    applicationsViewModel: ApplicationsViewModel,
     navController: NavHostController
 ) {
     val token by vmToken.token.collectAsState()
@@ -99,6 +118,7 @@ fun ProposalView(
                 user!!,
                 vmProposal,
                 token,
+                applicationsViewModel,
                 navController
             )
         }
@@ -114,10 +134,11 @@ fun ProposalV(
     user: User,
     vmProposal: ProposalViewModel,
     token: LoginToken?,
+    applicationsViewModel: ApplicationsViewModel,
     navController: NavHostController
 ) {
     val error by vmProposal.error
-    var showError = remember {
+    val showError = remember {
         mutableStateOf(false)
     }
     var showErrorClient by remember {
@@ -135,6 +156,8 @@ fun ProposalV(
     val showVerificationDelete = remember {
         mutableStateOf(false)
     }
+
+    val application by applicationsViewModel.applicant
 
     AlertError(showError, "Error", message = error.message)
 
@@ -170,6 +193,14 @@ fun ProposalV(
                     vmProposal.changeUserOwner(user)
                 }
             }
+
+            if (it.status != null) {
+                if (!it.status) {
+                    //en proceso de trabajo
+                    //Traigo la aplicacion que contiene al trabajador
+                    applicationsViewModel.getAcceptedApplication(it.id!!)
+                }
+            }
         }
     }
 
@@ -191,16 +222,25 @@ fun ProposalV(
                                 showVerificationDelete.value = true
                             }
                             Space(size = 5.dp)
-                        }
-                        ButtonPrincipal(
-                            text = if (user.id == userOwnerProposal?.id) "Editar" else "Aplicar",
-                            enabled = true
-                        ) {
-                            if (user.id == userOwnerProposal?.id) {
-                                //Ir a editar propuesta
+
+                            //Boton para editar
+                            ButtonSquareSmall(color = OrangePrincipal, iconId = R.drawable.edit) {
                                 navController.navigate("EditProposal/${proposal?.id}")
-                            } else {
-                                //Aplicar e ir a aplicaciones
+                            }
+
+                            Space(size = 5.dp)
+                        }
+                        if (userOwnerProposal != null) {
+                            ButtonPrincipal(
+                                text = if (user.id == userOwnerProposal?.id) "Ver postulantes" else "Aplicar",
+                                enabled = true
+                            ) {
+                                if (user.id == userOwnerProposal?.id) {
+                                    //Ver postulantes
+                                    navController.navigate("Applicants/${proposalId}")
+                                } else {
+                                    //Aplicar e ir a aplicaciones
+                                }
                             }
                         }
                     }
@@ -236,7 +276,12 @@ fun ProposalV(
                                 textAlign = TextAlign.Start,
                                 modifier = Modifier.padding(vertical = 8.dp)
                             )
-                            TabsPages(proposal, userOwnerProposal, navController)
+
+                            if (proposal.status == false) {
+                                Working()
+                            }
+
+                            TabsPages(proposal, application, userOwnerProposal, navController)
                         }
                     }
                 }
@@ -311,8 +356,25 @@ fun ProposalDescription(proposal: Proposal, user: User?, navController: NavContr
 }
 
 @Composable
-fun ProposalMoreInfo(proposal: Proposal, user: User?, navController: NavController?) {
-    Column(modifier = Modifier.fillMaxSize()) {
+fun ProposalMoreInfo(
+    proposal: Proposal,
+    application: Application? = null,
+    user: User?,
+    navController: NavController?
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+    ) {
+        if (proposal.status == false && application != null) {
+            application.worker?.let {
+                DataWorker(it, Qualification(5f, 20)) {
+                    navController?.navigate("Profile/${it.user?.id}")
+                }
+            }
+        }
+
         Text(text = "Acerca del cliente:", color = OrangePrincipal)
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -348,7 +410,12 @@ fun ProposalMoreInfo(proposal: Proposal, user: User?, navController: NavControll
 }
 
 @Composable
-private fun TabsPages(proposal: Proposal, user: User?, navController: NavController) {
+private fun TabsPages(
+    proposal: Proposal,
+    application: Application?,
+    user: User?,
+    navController: NavController
+) {
     val tabs = ItemTabOnlyProposal.pagesProposal
     val pagerState = rememberPagerState(pageCount = { tabs.size })
 
@@ -359,7 +426,7 @@ private fun TabsPages(proposal: Proposal, user: User?, navController: NavControl
             modifier = Modifier.padding(horizontal = 40.dp, vertical = 5.dp),
             fontSize = 14.sp
         )
-        TabsContent(tabs, pagerState, proposal, user, navController)
+        TabsContent(tabs, pagerState, proposal, application, user, navController)
     }
 }
 
@@ -369,12 +436,36 @@ private fun TabsContent(
     tabs: List<ItemTabOnlyProposal>,
     pagerState: PagerState,
     proposal: Proposal,
+    application: Application? = null,
     user: User?,
     navController: NavController
 ) {
     HorizontalPager(
         state = pagerState
     ) { page ->
-        tabs[page].screen(proposal, user, navController)
+        tabs[page].screen(proposal, application, user, navController)
+    }
+}
+
+@Composable
+private fun Working() {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        InfiniteRotationIcon(modifier = Modifier.size(30.dp))
+        Spacer(modifier = Modifier.width(5.dp))
+        Text(text = "En proceso de trabajo", color = GreenBusco, fontWeight = FontWeight.Medium)
+    }
+}
+
+@Composable
+private fun DataWorker(worker: Worker, qualification: Qualification, onClick: () -> Unit) {
+    Column(modifier = Modifier.padding(bottom = 10.dp)) {
+        Text(text = "Trabajador asignado:", color = OrangePrincipal)
+        Space(size = 5.dp)
+        CardWorker(
+            worker = worker,
+            rating = qualification,
+            modifier = Modifier.height(140.dp),
+            onClickName = { onClick() },
+            onClick = { onClick() })
     }
 }

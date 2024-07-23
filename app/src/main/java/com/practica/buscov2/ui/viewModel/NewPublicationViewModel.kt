@@ -86,15 +86,15 @@ class NewPublicationViewModel @Inject constructor(
         val maxLimit = 1000000
 
         // Intentar convertir 'from' a Double y manejar posibles excepciones
-        val fromValue = try {
-            from.replace(".", "").toDoubleOrNull()
+       val fromValue = try {
+            from.toDoubleOrNull()
         } catch (e: NumberFormatException) {
             null
         } ?: 0.0
 
         // Intentar convertir 'to' a Double y manejar posibles excepciones
         val toValue = try {
-            to.replace(".", "").toDoubleOrNull()
+            to.toDoubleOrNull()
         } catch (e: NumberFormatException) {
             null
         } ?: 0.0
@@ -102,15 +102,7 @@ class NewPublicationViewModel @Inject constructor(
         _priceStart.value = if (fromValue > maxLimit) maxLimit.toString() else from
         _priceUntil.value = if (toValue > maxLimit) maxLimit.toString() else to
 
-        // Reemplazar los puntos (separadores de miles) por nada
-        val fromCleaned = from.replace(".", "")
-        val toCleaned = to.replace(".", "")
-
-        // Reemplazar las comas (separadores decimales) por puntos
-        var priceMin = fromCleaned.replace(",", ".").toDoubleOrNull() ?: 0.0
-        var priceMax = toCleaned.replace(",", ".").toDoubleOrNull() ?: 0.0
-
-        proposal = proposal.copy(minBudget = priceMin, maxBudget = priceMax)
+        proposal = proposal.copy(minBudget = fromValue, maxBudget = toValue)
 
         _buttonEnabled.value = enabledButton()
     }

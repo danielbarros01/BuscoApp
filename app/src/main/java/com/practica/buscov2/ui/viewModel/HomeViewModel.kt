@@ -34,18 +34,23 @@ class HomeViewModel @Inject constructor(
     private val _token = MutableStateFlow<String?>(null)
     private val token = _token
 
+    private val _userId = MutableStateFlow<Int?>(null)
+    private val userId = _userId
+
     private val _refreshTriggerWorkers = MutableStateFlow(0)
     private val _refreshTriggerProposals = MutableStateFlow(0)
 
     val workersPage = _refreshTriggerWorkers.flatMapLatest {
         Pager(PagingConfig(pageSize = 6)) {
+            //Traer trabajadores recomendadas para mi
             UsersDataSource(repoWorkers, token.value!!)
         }.flow.cachedIn(viewModelScope)
     }
 
     val proposalsPage = _refreshTriggerProposals.flatMapLatest {
         Pager(PagingConfig(pageSize = 6)) {
-            ProposalsDataSource(repoProposals, 2, true, token.value,"getRecommendedProposals")
+            //Traer propuestas recomendadas para mi
+            ProposalsDataSource(repoProposals, status =  true, tokenP =  token.value, function = "getRecommendedProposals")
         }.flow.cachedIn(viewModelScope)
     }
 

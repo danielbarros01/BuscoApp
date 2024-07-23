@@ -2,6 +2,11 @@ package com.practica.buscov2.ui.components
 
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -15,18 +20,25 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -45,6 +57,8 @@ import com.practica.buscov2.R
 import com.practica.buscov2.ui.theme.GrayField
 import com.practica.buscov2.ui.theme.GrayPlaceholder
 import com.practica.buscov2.ui.theme.GrayText
+import com.practica.buscov2.ui.theme.GreenBusco
+import com.practica.buscov2.ui.theme.YellowStar
 import com.practica.buscov2.util.Constants.Companion.API_URL
 import kotlin.io.path.Path
 
@@ -244,6 +258,60 @@ fun <T : Any> ItemsInLazy(itemsPage: LazyPagingItems<T>, view: @Composable (T) -
                     Text(text = "Error al cargar")
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun InfiniteRotationIcon(modifier: Modifier = Modifier, iconId:Int = R.drawable.working){
+    val rotation = remember {
+        Animatable(0f)
+    }
+
+    LaunchedEffect(Unit) {
+        rotation.animateTo(
+            targetValue = 360f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(durationMillis = 2000, easing = LinearEasing),
+                repeatMode = RepeatMode.Restart
+            )
+        )
+    }
+
+    Icon(
+        painter = painterResource(id = iconId),
+        contentDescription = "",
+        tint = GreenBusco,
+        modifier = modifier.graphicsLayer { rotationZ = rotation.value })
+}
+
+@Composable
+fun StarRatingBar(
+    maxStars: Int = 5,
+    rating: Float,
+    onRatingChanged: (Float) -> Unit
+) {
+    Row(
+        modifier = Modifier.selectableGroup(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        for (i in 1..maxStars) {
+            val isSelected = i <= rating
+            val icon = if (isSelected) Icons.Filled.Star else Icons.Default.Star
+            val iconTintColor = if (isSelected) YellowStar else GrayPlaceholder
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = iconTintColor,
+                modifier = Modifier
+                    .size(36.dp)
+                    .selectable(
+                        selected = isSelected,
+                        onClick = {
+                            onRatingChanged(i.toFloat())
+                        }
+                    )
+            )
         }
     }
 }

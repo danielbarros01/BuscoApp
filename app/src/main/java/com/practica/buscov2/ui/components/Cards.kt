@@ -7,15 +7,24 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -24,8 +33,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -34,14 +45,21 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.practica.buscov2.R
+import com.practica.buscov2.model.busco.Application
 import com.practica.buscov2.model.busco.Profession
 import com.practica.buscov2.model.busco.Proposal
+import com.practica.buscov2.model.busco.Qualification
 import com.practica.buscov2.model.busco.User
+import com.practica.buscov2.model.busco.Worker
+import com.practica.buscov2.ui.theme.GrayField
+import com.practica.buscov2.ui.theme.GrayPlaceholder
 import com.practica.buscov2.ui.theme.GrayText
+import com.practica.buscov2.ui.theme.GreenBusco
 import com.practica.buscov2.ui.theme.OrangePrincipal
 import com.practica.buscov2.ui.theme.RedBusco
 import com.practica.buscov2.ui.theme.Rubik
 import com.practica.buscov2.ui.theme.YellowGold
+import com.practica.buscov2.ui.theme.YellowStar
 
 @Composable
 fun CardProposal(image: String, title: String, price: String, date: String, onClick: () -> Unit) {
@@ -286,3 +304,163 @@ fun CardProposalRecommendation(
         }
     }
 }
+
+@Composable
+fun CardApplicant(
+    item: Application,
+    rating: Qualification,
+    onDecline: () -> Unit,
+    onChoose: () -> Unit,
+    onClickName: () -> Unit
+) {
+    CardWorker(
+        modifier = if (item.status == true) Modifier
+            .height(140.dp)
+            .border(2.dp, YellowStar, RoundedCornerShape(10.dp)) else Modifier.height(180.dp),
+        item.worker ?: Worker(),
+        rating,
+        onClickName
+    ) {
+        //BUTTONS
+        Row(modifier = Modifier.offset(y = 4.dp)) {
+
+            if (item.status == null) {
+                Button(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(50.dp),
+                    shape = RectangleShape,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = GreenBusco
+                    ),
+                    onClick = { onChoose() }) {
+                    Text(
+                        text = "Elegir",
+                        fontSize = 16.sp,
+                        modifier = Modifier.padding(bottom = 4.dp)
+                    )
+                }
+                Button(modifier = Modifier
+                    .weight(1f)
+                    .height(50.dp),
+                    shape = RectangleShape,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = RedBusco
+                    ),
+                    onClick = { onDecline() }) {
+                    Text(
+                        text = "Rechazar",
+                        fontSize = 16.sp,
+                        modifier = Modifier.padding(bottom = 4.dp)
+                    )
+                }
+            }
+            if (item.status == false) {
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(50.dp)
+                        .background(GrayField),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Rechazado",
+                        color = Color.White,
+                        fontSize = 16.sp,
+                        modifier = Modifier.padding(bottom = 4.dp)
+                    )
+                }
+            }
+        }
+    }
+}
+
+
+@Composable
+fun CardWorker(
+    modifier: Modifier = Modifier,
+    worker: Worker,
+    rating: Qualification,
+    onClickName: () -> Unit = {},
+    onClick: () -> Unit = {},
+    buttons: @Composable () -> Unit = {}
+) {
+    val nameComplete = "${worker.user?.name} ${worker.user?.lastname}"
+    val yearsExperience = worker.yearsExperience ?: 0
+    val image = worker.user?.image ?: ""
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(10.dp))
+            .shadow(5.dp, RoundedCornerShape(10.dp))
+            .background(Color.White)
+            .border(1.dp, Color.LightGray, RoundedCornerShape(10.dp))
+            .clickable { onClick() }
+    ) {
+        Column {
+
+            //Data
+            Row(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(start = 15.dp, end = 15.dp, top = 15.dp, bottom = 5.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+
+                //FOTO
+                InsertCircleProfileImage(
+                    image = image,
+                    modifier = Modifier
+                        .width(90.dp)
+                        .height(90.dp)
+                )
+
+
+                //DATA
+                Column(
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.Start,
+                    modifier = Modifier
+                        .padding(start = 10.dp)
+                        .fillMaxSize()
+                ) {
+                    //NAME
+                    Text(
+                        text = nameComplete,
+                        fontSize = 26.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.clickable {
+                            onClickName()
+                        })
+                    //YEARS
+                    Text(
+                        text = "$yearsExperience años de experiencia",
+                        fontSize = 16.sp,
+                        color = GrayText,
+                        modifier = Modifier.padding(start = 5.dp, bottom = 5.dp)
+                    )
+
+                    //EXPERIENCE
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        StarRatingBar(5, rating.rating) {
+
+                        }
+                        Text(
+                            text = "${rating.rating} (${rating.quantity})",
+                            fontSize = 12.sp,
+                            color = GrayPlaceholder,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+
+                }
+            }
+
+            buttons()
+        }
+    }
+}
+

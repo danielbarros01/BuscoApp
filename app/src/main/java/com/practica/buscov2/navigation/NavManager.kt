@@ -22,6 +22,7 @@ import com.practica.buscov2.ui.viewModel.auth.RegisterViewModel
 import com.practica.buscov2.ui.viewModel.auth.ResetPasswordViewModel
 import com.practica.buscov2.ui.viewModel.auth.TokenViewModel
 import com.practica.buscov2.ui.viewModel.professions.ProfessionsViewModel
+import com.practica.buscov2.ui.viewModel.proposals.ApplicationsViewModel
 import com.practica.buscov2.ui.viewModel.proposals.ProposalViewModel
 import com.practica.buscov2.ui.viewModel.users.UserViewModel
 import com.practica.buscov2.ui.viewModel.workers.RegisterWorkerViewModel
@@ -41,6 +42,7 @@ import com.practica.buscov2.ui.views.auth.RecoverPassword
 import com.practica.buscov2.ui.views.auth.RegisterView
 import com.practica.buscov2.ui.views.auth.ResetPassword
 import com.practica.buscov2.ui.views.StartView
+import com.practica.buscov2.ui.views.proposals.ApplicantsView
 import com.practica.buscov2.ui.views.proposals.EditProposalView
 import com.practica.buscov2.ui.views.proposals.ProposalView
 import com.practica.buscov2.ui.views.proposals.ProposalsView
@@ -54,7 +56,7 @@ fun NavManager() {
     val tokenViewModel: TokenViewModel = hiltViewModel()
     val loginGoogleViewModel: GoogleLoginViewModel = hiltViewModel()
 
-    NavHost(navController = navController, startDestination = "Start") {
+    NavHost(navController = navController, startDestination = "Proposals") {
         composable("Start") {
             val userViewModel: UserViewModel = hiltViewModel()
             StartView(tokenViewModel, userViewModel, navController)
@@ -194,7 +196,8 @@ fun NavManager() {
             )
         }
 
-        composable("EditProposal/{id}",
+        composable(
+            "EditProposal/{id}",
             arguments = listOf(navArgument("id") { type = NavType.IntType })
         ) {
             val id = it.arguments?.getInt("id") ?: 0
@@ -234,12 +237,32 @@ fun NavManager() {
             val id = it.arguments?.getInt("id") ?: 0
             val userViewModel: UserViewModel = hiltViewModel()
             val proposalViewModel: ProposalViewModel = hiltViewModel()
+            val applicantsViewModel: ApplicationsViewModel = hiltViewModel()
+
             ProposalView(
                 id,
                 userViewModel,
                 loginGoogleViewModel,
                 tokenViewModel,
                 proposalViewModel,
+                applicantsViewModel,
+                navController
+            )
+        }
+
+
+        composable("Applicants/{proposalId}",
+            arguments = listOf(navArgument("proposalId") { type = NavType.IntType })
+        ) {
+            val proposalId = it.arguments?.getInt("proposalId") ?: 0
+            val userViewModel: UserViewModel = hiltViewModel()
+            val applicantsViewModel: ApplicationsViewModel = hiltViewModel()
+            ApplicantsView(
+                proposalId,
+                userViewModel,
+                loginGoogleViewModel,
+                tokenViewModel,
+                applicantsViewModel,
                 navController
             )
         }

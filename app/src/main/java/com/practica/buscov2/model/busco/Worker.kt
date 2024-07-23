@@ -7,5 +7,7 @@ data class Worker(
     var webPage: String? = null,
     val description: String? = null,
     val professionsId: List<Int?>? = null,
-    val workersProfessions: List<WorkersProfessions>? = null
+    val workersProfessions: List<WorkersProfessions>? = null,
+
+    val user:User? = null
 )

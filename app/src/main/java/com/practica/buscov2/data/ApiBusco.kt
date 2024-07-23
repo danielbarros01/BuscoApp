@@ -1,5 +1,6 @@
 package com.practica.buscov2.data
 
+import com.practica.buscov2.model.busco.Application
 import com.practica.buscov2.model.busco.Profession
 import com.practica.buscov2.model.busco.ProfessionCategory
 import com.practica.buscov2.model.busco.Proposal
@@ -12,6 +13,7 @@ import com.practica.buscov2.model.busco.Worker
 import com.practica.buscov2.util.Constants.Companion.CHANGE_PASSWORD
 import com.practica.buscov2.util.Constants.Companion.CONFIRM_PASSWORD_CODE
 import com.practica.buscov2.util.Constants.Companion.CONFIRM_REGISTER
+import com.practica.buscov2.util.Constants.Companion.ENDPOINT_APPLICATIONS
 import com.practica.buscov2.util.Constants.Companion.ENDPOINT_CATEGORIES
 import com.practica.buscov2.util.Constants.Companion.ENDPOINT_LOGIN
 import com.practica.buscov2.util.Constants.Companion.ENDPOINT_MY_PROFILE
@@ -200,4 +202,24 @@ interface ApiBusco {
         @Query("NumberRecordsPerPage") pageSize: Int?,
     ): Response<List<Proposal>>
 
+    @GET("$ENDPOINT_APPLICATIONS/{proposalId}")
+    suspend fun getApplicationsForProposal(
+        @Header("Authorization") token: String,
+        @Path("proposalId") proposalId: Int,
+        @Query("page") page: Int?,
+        @Query("NumberRecordsPerPage") pageSize: Int?
+    ): Response<List<Application>>
+
+    @GET("$ENDPOINT_APPLICATIONS/{proposalId}/accepted")
+    suspend fun getApplicationAccepted(
+        @Path("proposalId") proposalId: Int
+    ): Response<Application>
+
+    @PATCH("$ENDPOINT_APPLICATIONS/{proposalId}/{applicationId}")
+    suspend fun acceptOrDeclineApplication(
+        @Header("Authorization") token: String,
+        @Path("proposalId") proposalId: Int,
+        @Path("applicationId") applicationId: Int,
+        @Query("status") status: Boolean? //TRUE ACEPTAR, FALSE RECHAZAR
+    ):Response<Unit>
 }
