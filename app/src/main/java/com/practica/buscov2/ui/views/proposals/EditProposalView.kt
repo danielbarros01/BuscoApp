@@ -1,6 +1,6 @@
 package com.practica.buscov2.ui.views.proposals
 
-import SelectImageFromGallery
+import com.practica.buscov2.ui.views.images.SelectImageFromGallery
 import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -47,9 +47,7 @@ import com.practica.buscov2.ui.viewModel.auth.TokenViewModel
 import com.practica.buscov2.ui.viewModel.professions.ProfessionsViewModel
 import com.practica.buscov2.ui.viewModel.proposals.ProposalViewModel
 import com.practica.buscov2.ui.viewModel.users.UserViewModel
-import com.practica.buscov2.ui.views.UseCamera
-import com.practica.buscov2.util.AppUtils.Companion.formatNumber
-import java.net.URI
+import com.practica.buscov2.ui.views.images.UseCamera
 
 @Composable
 fun EditProposalView(

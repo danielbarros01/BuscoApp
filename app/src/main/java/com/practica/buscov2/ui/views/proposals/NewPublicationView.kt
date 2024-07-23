@@ -1,6 +1,6 @@
 package com.practica.buscov2.ui.views.proposals
 
-import SelectImageFromGallery
+import com.practica.buscov2.ui.views.images.SelectImageFromGallery
 import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -77,7 +77,7 @@ import com.practica.buscov2.ui.viewModel.auth.GoogleLoginViewModel
 import com.practica.buscov2.ui.viewModel.auth.TokenViewModel
 import com.practica.buscov2.ui.viewModel.professions.ProfessionsViewModel
 import com.practica.buscov2.ui.viewModel.users.UserViewModel
-import com.practica.buscov2.ui.views.UseCamera
+import com.practica.buscov2.ui.views.images.UseCamera
 import com.practica.buscov2.util.AppUtils.Companion.formatNumber
 
 @Composable

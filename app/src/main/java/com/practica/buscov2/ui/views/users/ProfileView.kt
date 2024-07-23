@@ -44,7 +44,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import androidx.paging.compose.collectAsLazyPagingItems
 import com.practica.buscov2.R
 import com.practica.buscov2.model.busco.User
 import com.practica.buscov2.navigation.ItemTabProfile
@@ -56,6 +58,7 @@ import com.practica.buscov2.ui.components.ButtonWithIcon
 import com.practica.buscov2.ui.components.InsertCircleProfileImage
 import com.practica.buscov2.ui.components.LateralMenu
 import com.practica.buscov2.ui.components.LinkText
+import com.practica.buscov2.ui.components.LoaderMaxSize
 import com.practica.buscov2.ui.components.MenuNavigation
 import com.practica.buscov2.ui.components.Space
 import com.practica.buscov2.ui.components.Title
@@ -64,7 +67,11 @@ import com.practica.buscov2.ui.theme.GrayText
 import com.practica.buscov2.ui.theme.OrangePrincipal
 import com.practica.buscov2.ui.viewModel.auth.GoogleLoginViewModel
 import com.practica.buscov2.ui.viewModel.auth.TokenViewModel
+import com.practica.buscov2.ui.viewModel.proposals.ProposalsViewModel
 import com.practica.buscov2.ui.viewModel.users.UserViewModel
+import com.practica.buscov2.ui.views.proposals.NoProposals
+import com.practica.buscov2.ui.views.proposals.ShowProposals
+import com.practica.buscov2.ui.views.proposals.activeLoaderMaxProposals
 import kotlinx.coroutines.launch
 
 @Composable
@@ -73,6 +80,7 @@ fun ProfileView(
     vmUser: UserViewModel,
     vmGoogle: GoogleLoginViewModel,
     vmToken: TokenViewModel,
+    vmProposals: ProposalsViewModel,
     navController: NavHostController
 ) {
     val token by vmToken.token.collectAsState()
@@ -92,10 +100,17 @@ fun ProfileView(
                     vmUser.getProfile(id, {}) { userProfile ->
                         //Seteamos el valor del perfil de usuario
                         vmUser.changeUserProfile(userProfile)
+                        //proposals para traer las propuestas
+                        userProfile.id?.let { userId ->
+                            vmProposals.changeUserId(userId)
+                        }
                     }
                 } else {
                     //Si yo soy el usuario
                     vmUser.changeUserProfile(user)
+                    user.id.let { userId ->
+                        vmProposals.changeUserId(userId)
+                    }
                 }
             }
         }
@@ -110,6 +125,7 @@ fun ProfileView(
                 vmGoogle,
                 user!!,
                 userProfile!!,
+                vmProposals,
                 navController
             )
         }
@@ -123,10 +139,16 @@ fun ProfileV(
     vmGoogle: GoogleLoginViewModel,
     user: User,
     userProfile: User,
+    vmProposals: ProposalsViewModel,
     navController: NavHostController
 ) {
+    val isLoading by vmProposals.isLoading.collectAsState()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     var showPhotoFullScreen by remember { mutableStateOf(false) }
+
+    if (isLoading) {
+        LoaderMaxSize()
+    }
 
     LateralMenu(
         drawerState = drawerState,
@@ -150,8 +172,8 @@ fun ProfileV(
                     .fillMaxSize()
                     .padding(it)
                     .padding(horizontal = 15.dp)
-                    .verticalScroll(rememberScrollState()),
-                horizontalAlignment = Alignment.CenterHorizontally
+                    //.verticalScroll(rememberScrollState()),
+                ,horizontalAlignment = Alignment.CenterHorizontally
             ) {
 
                 //Imagen de perfil
@@ -171,30 +193,36 @@ fun ProfileV(
 
                 Title(text = "${userProfile.name} ${userProfile.lastname}")
 
-                TabsPages(userProfile)
+                TabsPages(userProfile, vmProposals, navController)
             }
         }
     }
 }
 
 @Composable
-private fun TabsPages(user: User) {
+private fun TabsPages(user: User, vmProposals: ProposalsViewModel, navController: NavController) {
     val tabs = if (user.worker == null) ItemTabProfile.pagesUser else ItemTabProfile.pagesWorker
 
     val pagerState = rememberPagerState(pageCount = { tabs.size })
 
-    Column {
+    Column(modifier = Modifier.fillMaxSize()) {
         Tabs(tabs, pagerState)
-        TabsContent(tabs, pagerState, user)
+        TabsContent(tabs, pagerState, user, vmProposals, navController)
     }
 }
 
 @Composable
-private fun TabsContent(tabs: List<ItemTabProfile>, pagerState: PagerState, user: User) {
+private fun TabsContent(
+    tabs: List<ItemTabProfile>,
+    pagerState: PagerState,
+    user: User,
+    vmProposals: ProposalsViewModel,
+    navController: NavController
+) {
     HorizontalPager(
         state = pagerState
     ) { page ->
-        tabs[page].screen(user)
+        tabs[page].screen(user, vmProposals, navController)
     }
 }
 
@@ -331,19 +359,14 @@ fun ElementRowInformation(
 }
 
 @Composable
-fun Proposals(user: User) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Yellow)
-    ) {
+fun Proposals(vmProposals: ProposalsViewModel, navController: NavController) {
+    val proposalsPage = vmProposals.proposalsPage.collectAsLazyPagingItems()
+    activeLoaderMaxProposals(proposalsPage, vmProposals)
 
-        Icon(
-            painter = painterResource(id = R.drawable.hand),
-            contentDescription = "Propuestas",
-            modifier = Modifier.size(30.dp)
-        )
-        Text(text = "No existen propuestas, crea una nueva.", color = GrayText)
+    if (proposalsPage.itemCount == 0) {
+        NoProposals()
+    } else {
+        ShowProposals(proposalsPage, navController)
     }
 }
 
@@ -412,7 +435,7 @@ fun TopBarProfile(navController: NavHostController, user: User, userProfile: Use
             }
         },
         actions = {
-            if(user.id == userProfile.id){
+            if (user.id == userProfile.id) {
                 ButtonWithIcon(
                     iconId = R.drawable.edit,
                     text = "Editar",

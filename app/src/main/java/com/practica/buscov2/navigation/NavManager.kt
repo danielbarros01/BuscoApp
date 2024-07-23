@@ -165,7 +165,16 @@ fun NavManager() {
             val id = it.arguments?.getInt("id") ?: 0
 
             val userViewModel: UserViewModel = hiltViewModel()
-            ProfileView(id, userViewModel, loginGoogleViewModel, tokenViewModel, navController)
+            val proposalsViewModel: ProposalsViewModel = hiltViewModel()
+
+            ProfileView(
+                id,
+                userViewModel,
+                loginGoogleViewModel,
+                tokenViewModel,
+                proposalsViewModel,
+                navController
+            )
         }
 
         composable("EditProfile") {
@@ -252,7 +261,8 @@ fun NavManager() {
         }
 
 
-        composable("Applicants/{proposalId}",
+        composable(
+            "Applicants/{proposalId}",
             arguments = listOf(navArgument("proposalId") { type = NavType.IntType })
         ) {
             val proposalId = it.arguments?.getInt("proposalId") ?: 0

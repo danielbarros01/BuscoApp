@@ -1,4 +1,4 @@
-package com.practica.buscov2.ui.views
+package com.practica.buscov2.ui.views.images
 
 import android.Manifest
 import android.net.Uri

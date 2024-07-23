@@ -1,6 +1,6 @@
 package com.practica.buscov2.ui.views.users
 
-import SelectImageFromGallery
+import com.practica.buscov2.ui.views.images.SelectImageFromGallery
 import android.net.Uri
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -49,7 +49,7 @@ import com.practica.buscov2.ui.viewModel.auth.TokenViewModel
 import com.practica.buscov2.ui.viewModel.users.CompleteDataViewModel
 import com.practica.buscov2.ui.viewModel.users.UserViewModel
 import com.practica.buscov2.ui.viewModel.workers.RegisterWorkerViewModel
-import com.practica.buscov2.ui.views.UseCamera
+import com.practica.buscov2.ui.views.images.UseCamera
 import com.practica.buscov2.ui.views.workers.DataWorker
 import com.practica.buscov2.util.AppUtils.Companion.toLocalDate
 import java.time.ZoneId
