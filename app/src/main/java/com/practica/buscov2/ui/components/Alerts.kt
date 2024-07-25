@@ -35,50 +35,16 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.practica.buscov2.R
 import com.practica.buscov2.model.busco.Application
 import com.practica.buscov2.model.busco.Proposal
 import com.practica.buscov2.model.busco.User
+import com.practica.buscov2.ui.theme.GreenBusco
 import com.practica.buscov2.ui.theme.OrangePrincipal
 import com.practica.buscov2.ui.theme.RedBusco
-
-@Composable
-fun AlertErrorPreview() {
-    AlertDialog(
-        onDismissRequest = {},
-        title = {
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.info_circle),
-                    contentDescription = "Error",
-                    tint = Color.Red,
-                    modifier = Modifier.size(60.dp)
-                )
-                Spacer(modifier = Modifier.height(6.dp))
-                Text(text = "Error al autenticarse")
-            }
-        },
-        text = {
-            Text(
-                text = "Email o contrasena incorrecto. Por favor intente de nuevo.",
-                Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center,
-                fontSize = 16.sp
-            )
-        },
-        confirmButton = {
-            OutlinedButton(onClick = { }, modifier = Modifier.fillMaxWidth()) {
-                Text(text = "OK", color = Color.Black)
-            }
-        },
-    )
-}
 
 @Composable
 fun AlertError(
@@ -305,7 +271,7 @@ fun AlertVerificationDelete(
 @Composable
 fun AlertDifferentJob(
     showDialog: MutableState<Boolean>,
-    proposal:Proposal,
+    proposal: Proposal,
     user: User?,
     onDismiss: () -> Unit = { showDialog.value = false },
     onClick: () -> Unit
@@ -358,13 +324,13 @@ fun AlertDifferentJob(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center
                 ) {
-                    Box(modifier = Modifier.weight(1f)){
+                    Box(modifier = Modifier.weight(1f)) {
                         ButtonLine(text = "No") {
                             onDismiss()
                         }
                     }
                     Space(size = 5.dp)
-                    Box(modifier = Modifier.weight(1f)){
+                    Box(modifier = Modifier.weight(1f)) {
                         ButtonPrincipal(text = "Si", enabled = true) {
                             onClick()
                         }
@@ -375,7 +341,99 @@ fun AlertDifferentJob(
 }
 
 
+@Composable
+fun AlertFinishProposal(
+    showDialog: MutableState<Boolean>,
+    onDismiss: () -> Unit = { showDialog.value = false },
+    onClick: () -> Unit
+) {
+    if (showDialog.value) {
+        AlertDialog(
+            onDismissRequest = { showDialog.value = false },
+            icon = {
+                Icon(
+                    painter = painterResource(id = R.drawable.alertcircle),
+                    contentDescription = "",
+                    tint = GreenBusco,
+                    modifier = Modifier.size(90.dp)
+                )
+            },
+            title = {
+                Text(
+                    text = "Una vez concluida la propuesta, se considera terminado tanto el trabajo " +
+                            "como la relación del trabajador asignado con esta",
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Medium
+                )
+            },
+            confirmButton = {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 10.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Box(modifier = Modifier.weight(1f)) {
+                        ButtonLine(text = "Cancelar") {
+                            onDismiss()
+                        }
+                    }
+                    Space(size = 5.dp)
+                    Box(modifier = Modifier.weight(1f)) {
+                        ButtonPrincipal(text = "Finalizar", enabled = true, color = GreenBusco) {
+                            onClick()
+                        }
+                    }
+                }
+            })
+
+    }
+}
 
 
+@Composable
+fun AlertQualify(
+    showDialog: MutableState<Boolean>,
+    name: String,
+    rating: Float,
+    commentary: String,
+    changeCommentary: (String) -> Unit,
+    onStars: (Float) -> Unit,
+    onDismiss: () -> Unit = { showDialog.value = false },
+    onClick: () -> Unit
+) {
+    if (showDialog.value) {
+        AlertDialog(
+            title = {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Title(text = "Calificar a $name")
+                    Space(size = 5.dp)
+                    StarRatingBar(5, rating) {
+                        onStars(it)
+                    }
+                    Space(size = 5.dp)
 
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        Text(text = "Deja un comentario", fontSize = 14.sp)
+                        CommonFieldArea(commentary, "") {
+                            changeCommentary(it)
+                        }
+                    }
+                }
+            },
+            onDismissRequest = { onDismiss() },
+
+            confirmButton = {
+                ButtonPrincipal(text = "Calificar", enabled = true, color = GreenBusco) {
+                    onClick()
+                }
+            },
+            dismissButton = {
+                ButtonLine(text = "No, gracias") {
+                    onDismiss()
+                }
+            })
+    }
+}
 

@@ -24,7 +24,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -37,6 +39,7 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -44,6 +47,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import com.practica.buscov2.R
 import com.practica.buscov2.model.busco.Application
 import com.practica.buscov2.model.busco.Profession
@@ -60,18 +64,28 @@ import com.practica.buscov2.ui.theme.RedBusco
 import com.practica.buscov2.ui.theme.Rubik
 import com.practica.buscov2.ui.theme.YellowGold
 import com.practica.buscov2.ui.theme.YellowStar
+import com.practica.buscov2.util.AppUtils
 
 @Composable
-fun CardProposal(image: String, title: String, price: String, date: String, onClick: () -> Unit) {
+fun CardProposal(
+    image: String,
+    title: String,
+    price: String,
+    date: String,
+    modifier: Modifier? = null,
+    onClick: () -> Unit
+) {
+    val modifierDefault = Modifier
+        .padding(vertical = 8.dp)
+        .fillMaxWidth()
+        .height(150.dp)
+        .shadow(10.dp, RoundedCornerShape(10.dp))
+        .clip(RoundedCornerShape(10.dp))
+        .border(1.dp, Color.LightGray, RoundedCornerShape(10.dp))
+        .clickable { onClick() }
+
     Row(
-        modifier = Modifier
-            .padding(vertical = 8.dp)
-            .fillMaxWidth()
-            .height(150.dp)
-            .shadow(10.dp, RoundedCornerShape(10.dp))
-            .clip(RoundedCornerShape(10.dp))
-            .border(1.dp, Color.LightGray, RoundedCornerShape(10.dp))
-            .clickable { onClick() },
+        modifier = modifier ?: modifierDefault,
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -112,6 +126,89 @@ fun CardProposal(image: String, title: String, price: String, date: String, onCl
                 ) {
                     Text(text = price, fontSize = 18.sp, modifier = Modifier.weight(1f))
                     Text(text = date, fontSize = 18.sp, color = OrangePrincipal)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun CardJob(
+    proposal: Proposal,
+    user: User,
+    worker: Worker,
+    onClickProposal: () -> Unit,
+    onClickName: () -> Unit,
+    onClickChat: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .height(250.dp)
+            .border(1.dp, Color.LightGray, RoundedCornerShape(10.dp))
+            .shadow(10.dp, RoundedCornerShape(10.dp))
+            .clip(RoundedCornerShape(10.dp))
+            .background(Color.White)
+    ) {
+        CardProposal(
+            modifier = Modifier.height(125.dp).clickable { onClickProposal() },
+            image = proposal.image ?: "",
+            title = proposal.title ?: "",
+            price = "$${proposal.minBudget.toString()} a $${proposal.maxBudget.toString()}",
+            date = AppUtils.formatDateCard("${proposal.date}"),
+            onClick = onClickProposal
+        )
+        HorizontalDivider()
+        //InfoUser and chat
+        Row(
+            modifier = Modifier
+                .height(125.dp)
+                .fillMaxWidth()
+                .background(Color.White)
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .background(GrayPlaceholder)
+                    .width(110.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                InsertCircleProfileImage(
+                    image = user.image ?: "",
+                    modifier = Modifier.size(80.dp)
+                )
+            }
+
+            Column(
+                verticalArrangement = Arrangement.SpaceBetween,
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .padding(8.dp)
+                    .weight(1f)
+            ) {
+                Text(
+                    text = "${user.name} ${user.lastname}",
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 22.sp,
+                    modifier = Modifier.clickable {
+                        onClickName()
+                    }
+                )
+                Text(
+                    text = worker.workersProfessions?.firstOrNull()?.profession?.name ?: "",
+                    textAlign = TextAlign.Start,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+
+            Box(modifier = Modifier.width(100.dp).fillMaxHeight(), contentAlignment = Alignment.Center) {
+                IconButton(onClick = { onClickChat() }, modifier = Modifier.size(50.dp)) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.message_fill),
+                        contentDescription = "Enviar mensaje",
+                        tint = OrangePrincipal,
+                        modifier = Modifier.fillMaxSize()
+                    )
                 }
             }
         }

@@ -28,7 +28,8 @@ fun TabsComponent(
     tabs: List<TabItem>,
     pagerState: PagerState,
     modifier: Modifier = Modifier,
-    fontSize: TextUnit = 18.sp
+    fontSize: TextUnit = 18.sp,
+    onClick: (Int) -> Unit = {}
 ) {
     val selectedTab = pagerState.currentPage
     val scope = rememberCoroutineScope()
@@ -48,6 +49,7 @@ fun TabsComponent(
                     selected = selectedTab == index,
                     onClick = {
                         scope.launch { pagerState.animateScrollToPage(index) }
+                        onClick(index)
                     },
                     text = {
                         Text(

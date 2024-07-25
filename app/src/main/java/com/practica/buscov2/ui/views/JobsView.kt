@@ -4,51 +4,219 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.DrawerValue
-import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import androidx.paging.LoadState
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
+import com.practica.buscov2.model.busco.Proposal
+import com.practica.buscov2.model.busco.User
+import com.practica.buscov2.navigation.ItemTabJob
+import com.practica.buscov2.navigation.ItemTabProposal
 import com.practica.buscov2.navigation.RoutesBottom
 import com.practica.buscov2.ui.components.BottomNav
+import com.practica.buscov2.ui.components.CardJob
+import com.practica.buscov2.ui.components.CardProposal
+import com.practica.buscov2.ui.components.ItemsInLazy
+import com.practica.buscov2.ui.components.LateralMenu
+import com.practica.buscov2.ui.components.LoaderMaxSize
+import com.practica.buscov2.ui.components.MenuNavigation
+import com.practica.buscov2.ui.components.TabsComponent
+import com.practica.buscov2.ui.components.TopBar
+import com.practica.buscov2.ui.theme.GrayText
+import com.practica.buscov2.ui.viewModel.JobsViewModel
+import com.practica.buscov2.ui.viewModel.auth.GoogleLoginViewModel
+import com.practica.buscov2.ui.viewModel.auth.TokenViewModel
+import com.practica.buscov2.ui.viewModel.proposals.ProposalsViewModel
+import com.practica.buscov2.ui.viewModel.users.UserViewModel
+import com.practica.buscov2.ui.views.proposals.NoProposals
+import com.practica.buscov2.ui.views.proposals.activeLoaderMaxProposals
+import com.practica.buscov2.util.AppUtils
 
 @Composable
-fun JobsView(navController: NavHostController) {
-    Box(modifier = Modifier.fillMaxSize()) {
-        JobsV(Modifier.align(Alignment.Center), navController)
+fun JobsView(
+    vmUser: UserViewModel,
+    vmGoogle: GoogleLoginViewModel,
+    vmToken: TokenViewModel,
+    vmProposals: ProposalsViewModel,
+    vmJobs: JobsViewModel,
+    navController: NavHostController
+) {
+    val token by vmToken.token.collectAsState()
+    val user by vmUser.user.collectAsState()
+
+    //Ejecuto una unica vez
+    LaunchedEffect(Unit) {
+        token?.let { it ->
+            vmUser.getMyProfile(it.token, {
+                navController.navigate("Login")
+            }) { user ->
+                //Traer propuestas
+                user.id?.let { id ->
+                    vmProposals.changeUserId(id)
+                }
+            }
+
+
+            vmJobs.setToken(it.token)
+        }
+    }
+
+    if (user != null) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            JobsV(
+                Modifier.align(Alignment.Center),
+                vmUser,
+                vmGoogle,
+                vmProposals,
+                vmJobs,
+                user!!,
+                navController
+            )
+        }
     }
 }
 
 @Composable
-fun JobsV(modifier: Modifier, navController: NavHostController) {
-//Rutas de navegacion
-    val navigationRoutes = listOf(
-        RoutesBottom.Home,
-        RoutesBottom.New,
-        RoutesBottom.Chat
-    )
-
+fun JobsV(
+    modifier: Modifier,
+    vmUser: UserViewModel,
+    vmGoogle: GoogleLoginViewModel,
+    vmProposals: ProposalsViewModel,
+    vmJobs: JobsViewModel,
+    user: User,
+    navController: NavHostController
+) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val isLoading = vmJobs.isLoading.collectAsState()
 
-    ModalNavigationDrawer(
+    if(isLoading.value){
+        LoaderMaxSize()
+    }
+
+    LateralMenu(
         drawerState = drawerState,
-        drawerContent = {
-            //MenuNavigation(homeVm = homeVm, vmGoogle = vmGoogle, navController = navController)
-        }
-    ) {
-        //Screen content
+        drawerContent = { list -> MenuNavigation(vmUser, vmGoogle, user, navController, list) }
+    ) { scope ->
         Scaffold(modifier = Modifier
             .fillMaxSize(),
             bottomBar = {
-                BottomNav(navController, navigationRoutes)
+                BottomNav(navController, RoutesBottom.allRoutes)
+            },
+            topBar = {
+                TopBar(title = "Trabajos", scope = scope, drawerState = drawerState)
             }) {
-            Column(modifier = Modifier.padding(it)) {
-                Text(text = "Trabajos")
+            Column(
+                modifier = modifier
+                    .padding(it)
+                    .padding(15.dp)
+                    .fillMaxSize()
+            ) {
+                TabsPages(vmJobs, navController)
             }
         }
     }
+}
+
+
+@Composable
+fun Jobs(vmJobs: JobsViewModel, navController: NavController) {
+    val jobsPage = vmJobs.jobsPage.collectAsLazyPagingItems()
+    activeLoaderMaxJobs(jobsPage, vmJobs)
+
+    if (jobsPage.itemCount == 0) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text(text = "No hay trabajos que mostrar", color = GrayText)
+        }
+    } else {
+        ShowJobs(jobsPage, navController)
+    }
+}
+
+/*@Composable
+fun FinishedJobs(vmJobs: JobsViewModel, navController: NavController) {
+    val jobsPage = vmJobs.jobsPage.collectAsLazyPagingItems()
+    activeLoaderMaxJobs(jobsPage, vmJobs)
+
+    if (jobsPage.itemCount == 0) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text(text = "No hay trabajos que mostrar", color = GrayText)
+        }
+    } else {
+        ShowJobs(jobsPage, navController)
+    }
+}*/
+
+@Composable
+fun ShowJobs(jobsPage: LazyPagingItems<Proposal>, navController: NavController) {
+    ItemsInLazy(jobsPage) { proposal ->
+        val worker = proposal.applications?.firstOrNull()?.worker
+        val user = worker?.user
+        //CARD
+        if (worker != null && user != null) {
+            CardJob(proposal, user, worker,
+                onClickProposal = {
+                    navController.navigate("Proposal/${proposal.id}")
+                },
+                onClickName = {
+                    navController.navigate("Profile/${user.id}")
+                },
+                onClickChat = {
+                    //Ir al chat
+                })
+        }
+    }
+}
+
+@Composable
+private fun TabsPages(vm: JobsViewModel, navController: NavHostController) {
+    val tabs = ItemTabJob.pagesJobs
+    val pagerState = rememberPagerState(pageCount = { tabs.size })
+
+    Column {
+        TabsComponent(tabs, pagerState) { index ->
+            //Cambiar el status de la propuesta, status true trae las terminadas
+            vm.changeIsFinished(tabs[index].title != "En proceso")
+            vm.refreshProposals()
+        }
+        TabsContent(tabs, pagerState, vm, navController)
+    }
+}
+
+@Composable
+private fun TabsContent(
+    tabs: List<ItemTabJob>,
+    pagerState: PagerState,
+    vm: JobsViewModel,
+    navController: NavHostController
+) {
+    HorizontalPager(
+        state = pagerState
+    ) { page ->
+        tabs[page].screen(vm, navController)
+    }
+}
+
+fun activeLoaderMaxJobs(
+    proposalsPage: LazyPagingItems<Proposal>,
+    vmJobs: JobsViewModel
+) {
+    val loadState = proposalsPage.loadState
+    val isLoading = loadState.refresh is LoadState.Loading || loadState.prepend is LoadState.Loading
+    vmJobs.setLoading(isLoading)
 }

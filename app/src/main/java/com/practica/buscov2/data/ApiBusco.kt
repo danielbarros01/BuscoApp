@@ -15,6 +15,7 @@ import com.practica.buscov2.util.Constants.Companion.CONFIRM_PASSWORD_CODE
 import com.practica.buscov2.util.Constants.Companion.CONFIRM_REGISTER
 import com.practica.buscov2.util.Constants.Companion.ENDPOINT_APPLICATIONS
 import com.practica.buscov2.util.Constants.Companion.ENDPOINT_CATEGORIES
+import com.practica.buscov2.util.Constants.Companion.ENDPOINT_JOBS
 import com.practica.buscov2.util.Constants.Companion.ENDPOINT_LOGIN
 import com.practica.buscov2.util.Constants.Companion.ENDPOINT_MY_PROFILE
 import com.practica.buscov2.util.Constants.Companion.ENDPOINT_PHOTO
@@ -175,6 +176,12 @@ interface ApiBusco {
         @Path("id") id: Int
     ): Response<Proposal>
 
+    @PATCH("$ENDPOINT_PROPOSALS/{id}/finalize")
+    suspend fun finalizeProposal(
+        @Header("Authorization") token: String,
+        @Path("id") id: Int
+    ): Response<Unit>
+
     @DELETE("$ENDPOINT_PROPOSALS/{id}")
     suspend fun deleteProposal(
         @Header("Authorization") token: String,
@@ -228,4 +235,12 @@ interface ApiBusco {
         @Header("Authorization") token: String,
         @Path("proposalId") proposalId: Int,
     ):Response<Unit>
+
+    @GET(ENDPOINT_JOBS)
+    suspend fun getJobs(
+        @Header("Authorization") token: String,
+        @Query("page") page: Int?,
+        @Query("NumberRecordsPerPage") pageSize: Int?,
+        @Query("finished") finished: Boolean?,
+    ): Response<List<Proposal>>
 }

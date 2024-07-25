@@ -14,5 +14,6 @@ data class Proposal(
     val professionId:Int? = null,
 
     val user:User? = null,
-    val profession: Profession? = null
+    val profession: Profession? = null,
+    val applications: List<Application>? = null
 )

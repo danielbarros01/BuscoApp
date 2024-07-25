@@ -15,6 +15,7 @@ import com.practica.buscov2.ui.viewModel.confirmation.CheckEmailViewModel
 import com.practica.buscov2.ui.viewModel.users.CompleteDataViewModel
 import com.practica.buscov2.ui.viewModel.auth.GoogleLoginViewModel
 import com.practica.buscov2.ui.viewModel.HomeViewModel
+import com.practica.buscov2.ui.viewModel.JobsViewModel
 import com.practica.buscov2.ui.viewModel.NewPublicationViewModel
 import com.practica.buscov2.ui.viewModel.auth.LoginViewModel
 import com.practica.buscov2.ui.viewModel.auth.RecoverPasswordViewModel
@@ -57,7 +58,7 @@ fun NavManager() {
     val tokenViewModel: TokenViewModel = hiltViewModel()
     val loginGoogleViewModel: GoogleLoginViewModel = hiltViewModel()
 
-    NavHost(navController = navController, startDestination = "Start") {
+    NavHost(navController = navController, startDestination = "Jobs/me") {
         composable("Start") {
             val userViewModel: UserViewModel = hiltViewModel()
             StartView(tokenViewModel, userViewModel, navController)
@@ -279,7 +280,16 @@ fun NavManager() {
         }
 
         composable("Jobs/me") {
+            val userViewModel: UserViewModel = hiltViewModel()
+            val proposalsViewModel: ProposalsViewModel = hiltViewModel()
+            val jobsViewModel: JobsViewModel = hiltViewModel()
+
             JobsView(
+                userViewModel,
+                loginGoogleViewModel,
+                tokenViewModel,
+                proposalsViewModel,
+                jobsViewModel,
                 navController
             )
         }

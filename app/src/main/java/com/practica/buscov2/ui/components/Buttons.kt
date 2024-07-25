@@ -51,6 +51,7 @@ fun ButtonPrincipal(
     modifier: Modifier = Modifier,
     text: String,
     enabled: Boolean,
+    color: Color? = OrangePrincipal,
     onSelected: () -> Unit
 ) {
     Button(
@@ -59,7 +60,7 @@ fun ButtonPrincipal(
             .fillMaxWidth()
             .height(56.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = OrangePrincipal,
+            containerColor = color!!,
             contentColor = Color.White
         ),
         shape = RoundedCornerShape(12.dp),

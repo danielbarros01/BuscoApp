@@ -143,4 +143,18 @@ class ProposalsRepository @Inject constructor(private val api: ApiBusco) {
         val response = api.getRecommendedProposals("Bearer $token",page, pageSize)
         return response.body() ?: emptyList()
     }
+
+    suspend fun finalizeProposal(token:String, proposalId: Int): Any {
+        try {
+            val response = api.finalizeProposal("Bearer $token", proposalId)
+
+            return when (response.code()) {
+                in 200..300 -> true
+                in 400..599 -> ServerUtils.gsonError(response) //return ErrorBusco
+                else -> ErrorBusco(0, "Error", message = "Error desconocido, intentalo de nuevo")
+            }
+        }catch (e:Exception){
+            return ErrorBusco(0, "Error", message = "Error desconocido, intentalo de nuevo")
+        }
+    }
 }

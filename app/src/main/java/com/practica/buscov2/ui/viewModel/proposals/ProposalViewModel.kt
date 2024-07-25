@@ -105,6 +105,42 @@ class ProposalViewModel @Inject constructor(
         }
     }
 
+
+    fun finalizeProposal(id: Int, token: String, onError: () -> Unit, onSuccess: () -> Unit) {
+        viewModelScope.launch {
+            try {
+                _isLoading.value = true
+
+                val response = withContext(Dispatchers.IO) {
+                    repo.finalizeProposal(token, id)
+                }
+
+                when (response) {
+                    is Boolean -> {
+                        if (response) {
+                            onSuccess()
+                        }
+                    }
+
+                    is ErrorBusco -> {
+                        _error.value = response
+                        onError()
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("Error", e.message.toString())
+                _error.value = ErrorBusco(
+                    title = "Error",
+                    message = "Ha ocurrido un error inesperado, intentalo de nuevo más tarde"
+                )
+                onError()
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+
     fun editProposal(
         context: Context,
         proposal: Proposal,
@@ -161,6 +197,6 @@ class ProposalViewModel @Inject constructor(
     }
 
     fun setError(error: ErrorBusco) {
-     _error.value = error
+        _error.value = error
     }
 }

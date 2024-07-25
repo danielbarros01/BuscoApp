@@ -20,6 +20,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
@@ -33,6 +34,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -50,6 +52,8 @@ import com.practica.buscov2.navigation.ItemTabOnlyProposal
 import com.practica.buscov2.navigation.RoutesBottom
 import com.practica.buscov2.ui.components.AlertDifferentJob
 import com.practica.buscov2.ui.components.AlertError
+import com.practica.buscov2.ui.components.AlertFinishProposal
+import com.practica.buscov2.ui.components.AlertQualify
 import com.practica.buscov2.ui.components.AlertVerificationDelete
 import com.practica.buscov2.ui.components.ButtonSquareSmall
 import com.practica.buscov2.ui.components.BottomNav
@@ -141,6 +145,10 @@ fun ProposalV(
         mutableStateOf(false)
     }
 
+    val showFinalizeProposal = remember {
+        mutableStateOf(false)
+    }
+
     val proposal by vmProposal.proposal
     val userOwnerProposal by vmProposal.userOwner
 
@@ -153,6 +161,10 @@ fun ProposalV(
     val application by applicationsViewModel.applicant
 
     val showAlertDifferentJob = remember {
+        mutableStateOf(false)
+    }
+
+    val showQualify = remember {
         mutableStateOf(false)
     }
 
@@ -173,11 +185,9 @@ fun ProposalV(
             }
 
             if (it.status != null) {
-                if (!it.status) {
-                    //en proceso de trabajo
-                    //Traigo la aplicacion que contiene al trabajador
-                    applicationsViewModel.getAcceptedApplication(it.id!!)
-                }
+                //en proceso de trabajo
+                //Traigo la aplicacion que contiene al trabajador
+                applicationsViewModel.getAcceptedApplication(it.id!!)
             }
         }
     }
@@ -224,9 +234,33 @@ fun ProposalV(
             })
     }
 
+    AlertFinishProposal(showFinalizeProposal, onClick = {
+        //Finalizar propuesta
+        //Abrir alert de calificacion
+        token?.let { loginToken ->
+            proposal?.id?.let { proposalId ->
+                //Eliminar propuesta
+                vmProposal.finalizeProposal(proposalId, loginToken.token, onError = {
+                    showError.value = true
+                }) {
+                    //Exito
+                    //Poder calificar al trabajador
+                    showQualify.value = true
+                }
+            }
+        }
+    })
 
-
-
+    AlertQualify(
+        showDialog = showQualify,
+        name = "${application?.worker?.user?.name} ${application?.worker?.user?.lastname}",
+        rating = 1f,
+        commentary = "",
+        changeCommentary = {},
+        onStars = {},
+        onDismiss = {},
+        onClick = {}
+    )
 
     LateralMenu(
         drawerState = drawerState,
@@ -236,52 +270,71 @@ fun ProposalV(
             .fillMaxSize(),
             bottomBar = {
                 Column {
-                    Row(
-                        modifier = Modifier.padding(15.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        if (user.id == userOwnerProposal?.id) {
-                            ButtonSquareSmall(color = RedBusco, iconId = R.drawable.delete) {
-                                //Activar verificacion de eliminar
-                                showVerificationDelete.value = true
-                            }
-                            Space(size = 5.dp)
+                    if (proposal?.status != true) {
+                        //Buttons
+                        Row(
+                            modifier = Modifier.padding(15.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            if (user.id == userOwnerProposal?.id && proposal?.status != false) {
+                                ButtonSquareSmall(color = RedBusco, iconId = R.drawable.delete) {
+                                    //Activar verificacion de eliminar
+                                    showVerificationDelete.value = true
+                                }
+                                Space(size = 5.dp)
 
-                            //Boton para editar
-                            ButtonSquareSmall(color = OrangePrincipal, iconId = R.drawable.edit) {
-                                navController.navigate("EditProposal/${proposal?.id}")
-                            }
+                                //Boton para editar
+                                ButtonSquareSmall(
+                                    color = OrangePrincipal,
+                                    iconId = R.drawable.edit
+                                ) {
+                                    navController.navigate("EditProposal/${proposal?.id}")
+                                }
 
-                            Space(size = 5.dp)
-                        }
-                        if (userOwnerProposal != null) {
-                            ButtonPrincipal(
-                                text = if (user.id == userOwnerProposal?.id) "Ver postulantes" else "Aplicar",
-                                enabled = true
-                            ) {
-                                if (user.id == userOwnerProposal?.id) {
-                                    //Ver postulantes
-                                    navController.navigate("Applicants/${proposalId}")
-                                } else {
-                                    //Verificar el tipo de trabajador que buscan
-                                    if (user.worker?.workersProfessions?.firstOrNull()?.professionId?.equals(
-                                            proposal?.professionId
-                                        ) == false
+                                Space(size = 5.dp)
+                            }
+                            if (proposal?.status == false && user.id == userOwnerProposal?.id) {
+                                Box(modifier = Modifier.width(125.dp)) {
+                                    ButtonPrincipal(
+                                        text = "Finalizar",
+                                        enabled = true,
+                                        color = GreenBusco
                                     ) {
-                                        //Si es distinto mostrar un cuadro de aviso
-                                        showAlertDifferentJob.value = true
+                                        //Abrir Alert de finalizar
+                                        showFinalizeProposal.value = true
+                                    }
+                                }
+                                Space(size = 5.dp)
+                            }
+                            if (userOwnerProposal != null) {
+                                ButtonPrincipal(
+                                    text = if (user.id == userOwnerProposal?.id) "Ver postulantes" else "Aplicar",
+                                    enabled = !(proposal?.status == false && user.id != userOwnerProposal?.id) //verificar si esta en proceso y el usuario no es el dueño
+                                ) {
+                                    if (user.id == userOwnerProposal?.id) {
+                                        //Ver postulantes
+                                        navController.navigate("Applicants/${proposalId}")
                                     } else {
-                                        //Aplicar e ir a aplicaciones
-                                        applicationsViewModel.applyToProposal(
-                                            proposalId,
-                                            onError = {
-                                                vmProposal.setError(it)
-                                                showError.value = true
-                                            },
-                                            onSuccess = {
-                                                //Ir a mis trabajos
-                                                navController.navigate("Jobs/me")
-                                            })
+                                        //Verificar el tipo de trabajador que buscan
+                                        if (user.worker?.workersProfessions?.firstOrNull()?.professionId?.equals(
+                                                proposal?.professionId
+                                            ) == false
+                                        ) {
+                                            //Si es distinto mostrar un cuadro de aviso
+                                            showAlertDifferentJob.value = true
+                                        } else {
+                                            //Aplicar e ir a aplicaciones
+                                            applicationsViewModel.applyToProposal(
+                                                proposalId,
+                                                onError = {
+                                                    vmProposal.setError(it)
+                                                    showError.value = true
+                                                },
+                                                onSuccess = {
+                                                    //Ir a mis trabajos
+                                                    navController.navigate("Jobs/me")
+                                                })
+                                        }
                                     }
                                 }
                             }
@@ -322,6 +375,10 @@ fun ProposalV(
 
                             if (proposal.status == false) {
                                 Working()
+                            }
+
+                            if (proposal.status == true) {
+                                Finished()
                             }
 
                             TabsPages(proposal, application, userOwnerProposal, navController)
@@ -410,7 +467,7 @@ fun ProposalMoreInfo(
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
-        if (proposal.status == false && application != null) {
+        if (proposal.status != null && application != null) {
             application.worker?.let {
                 DataWorker(it, Qualification(5f, 20)) {
                     navController?.navigate("Profile/${it.user?.id}")
@@ -496,6 +553,24 @@ private fun Working() {
         InfiniteRotationIcon(modifier = Modifier.size(30.dp))
         Spacer(modifier = Modifier.width(5.dp))
         Text(text = "En proceso de trabajo", color = GreenBusco, fontWeight = FontWeight.Medium)
+    }
+}
+
+@Composable
+private fun Finished() {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Icon(
+            painter = painterResource(id = R.drawable.deal),
+            contentDescription = "",
+            tint = OrangePrincipal
+        )
+        Spacer(modifier = Modifier.width(5.dp))
+        Text(
+            text = "Propuesta finalizada",
+            color = OrangePrincipal,
+            fontWeight = FontWeight.Medium,
+            fontSize = 18.sp
+        )
     }
 }
 
