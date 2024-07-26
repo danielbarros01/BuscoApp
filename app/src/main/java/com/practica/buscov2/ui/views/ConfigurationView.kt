@@ -116,10 +116,16 @@ fun ConfigurationV(
                     .padding(it)
                     .padding(start = 15.dp, end = 15.dp, bottom = 15.dp, top = 5.dp)
             ) {
-                RoutesConfiguration.allRoutes.forEach { item ->
+                /*RoutesConfiguration.allRoutes.forEach { item ->
                     ItemConfiguration(item = item){
                         navController.navigate(item.route)
                     }
+                }*/
+
+
+                val profileRoute = RoutesConfiguration.Profile(user.id!!).route
+                ItemConfiguration(item = RoutesConfiguration.Profile(user.id)) {
+                    navController.navigate(profileRoute)
                 }
 
                 // Agregar ChangePassword como un caso especial

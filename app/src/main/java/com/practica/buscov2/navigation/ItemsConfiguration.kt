@@ -7,7 +7,13 @@ sealed class RoutesConfiguration(
     val title: String,
     val route: String
 ) {
-    object Profile : RoutesConfiguration(R.drawable.profile, "Ver Perfil", "Profile")
+    //object Profile : RoutesConfiguration(R.drawable.profile, "Ver Perfil", "Profile")
+
+    data class Profile(val userId: Int) : RoutesConfiguration(
+        R.drawable.profile,
+        "Ver Perfil",
+        "Profile/${userId}"
+    )
 
     data class ChangePassword(val userJson: String) : RoutesConfiguration(
         R.drawable.privacy,
@@ -17,7 +23,7 @@ sealed class RoutesConfiguration(
 
     companion object {
         val allRoutes: List<RoutesConfiguration> = listOf(
-            Profile,
+            //Profile,
             //ChangePassword,
         )
     }
