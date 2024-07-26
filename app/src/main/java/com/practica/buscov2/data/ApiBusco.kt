@@ -263,4 +263,11 @@ interface ApiBusco {
         @Query("stars") cantStars: Int?,
     ): Response<ListQualification>
 
+    @GET("$ENDPOINT_JOBS/{userId}/completed")
+    suspend fun getJobsCompleted(
+        @Path("userId") id: Int,
+        @Query("page") page: Int?,
+        @Query("NumberRecordsPerPage") pageSize: Int?
+    ): Response<List<Proposal>>
+
 }

@@ -20,4 +20,18 @@ class JobsRepository @Inject constructor(private val api: ApiBusco) {
             return emptyList()
         }
     }
+
+    suspend fun getJobsCompleted(
+        userId:Int,
+        page: Int? = null,
+        pageSize: Int? = null
+    ): List<Proposal> {
+        delay(2000) //para demostracion
+        try {
+            val response = api.getJobsCompleted(userId, page, pageSize)
+            return response.body() ?: emptyList()
+        } catch (e: Exception) {
+            return emptyList()
+        }
+    }
 }

@@ -571,24 +571,34 @@ fun CardWorker(
 
 
 @Composable
-fun CardQualificationOfUser(user:User, qualification: Qualification) {
-    Column(modifier = Modifier
-        .fillMaxWidth()
-        .padding(horizontal = 10.dp)) {
+fun CardQualificationOfUser(user: User, qualification: Qualification) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 10.dp)
+    ) {
         HorizontalDivider()
         Space(size = 4.dp)
         Row(verticalAlignment = Alignment.CenterVertically) {
-            InsertCircleProfileImage(image = user.image?:"", modifier = Modifier.size(40.dp))
+            InsertCircleProfileImage(image = user.image ?: "", modifier = Modifier.size(40.dp))
             Space(size = 8.dp)
-            Text(text = "${user.name} ${user.lastname}", fontSize = 20.sp, fontWeight = FontWeight.Medium)
+            Text(
+                text = "${user.name} ${user.lastname}",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Medium
+            )
         }
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(text = "Hace ${daysAgo(qualification.date ?: "")} dias", color = GrayText, fontSize = 16.sp)
-            Row (verticalAlignment = Alignment.CenterVertically){
+            Text(
+                text = "Hace ${daysAgo(qualification.date ?: "")} dias",
+                color = GrayText,
+                fontSize = 16.sp
+            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 StarRatingBar(5, qualification.score ?: 0f, sizeStar = 28.dp) {}
                 Space(size = 4.dp)
                 Text(text = "${qualification.score}/5", color = GrayText, fontSize = 16.sp)
@@ -596,5 +606,28 @@ fun CardQualificationOfUser(user:User, qualification: Qualification) {
         }
         Space(size = 2.dp)
         Text(text = qualification.commentary ?: "", fontSize = 18.sp, color = GrayText)
+    }
+}
+
+@Composable
+fun CardJobCompleted(proposal: Proposal, onClick: () -> Unit = {}) {
+    Column(modifier = Modifier.padding(vertical = 14.dp)) {
+        HorizontalDivider()
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.padding(horizontal = 8.dp)
+        ) {
+            Space(size = 4.dp)
+            Title(text = proposal.title ?: "", modifier = Modifier.clickable { onClick() })
+            InsertAsyncImage(
+                image = proposal.image ?: "",
+                defaultImg = R.drawable.camerapicnull,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp, horizontal = 40.dp)
+                    .clip(RoundedCornerShape(20.dp))
+            )
+            Text(text = proposal.description ?: "", fontSize = 16.sp, color = GrayText)
+        }
     }
 }

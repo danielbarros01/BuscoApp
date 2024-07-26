@@ -37,6 +37,9 @@ class JobsViewModel @Inject constructor(
     private val _isFinished = MutableStateFlow<Boolean?>(false)
     private val isFinished = _isFinished
 
+    private val _userId = MutableStateFlow<Int?>(null)
+    private val userId = _userId
+
     private val _refreshTrigger = MutableStateFlow(0)
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -46,6 +49,19 @@ class JobsViewModel @Inject constructor(
                 repo,
                 token.value,
                 isFinished.value
+            )
+        }.flow.cachedIn(viewModelScope)
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val jobsCompletedPage = _refreshTrigger.flatMapLatest {
+        Pager(PagingConfig(pageSize = 6)) {
+            JobsDataSource(
+                repo,
+                token.value,
+                isFinished.value,
+                true,
+                userId.value
             )
         }.flow.cachedIn(viewModelScope)
     }
@@ -64,5 +80,9 @@ class JobsViewModel @Inject constructor(
 
     fun changeIsFinished(isFinished: Boolean) {
         _isFinished.value = isFinished
+    }
+
+    fun setUserId(userId: Int) {
+        _userId.value = userId
     }
 }

@@ -9,10 +9,14 @@ import com.practica.buscov2.model.busco.Proposal
 class JobsDataSource(
     private val repo: JobsRepository,
     tokenP: String? = null,
-    finishedP: Boolean? = null
+    finishedP: Boolean? = null,
+    jobsCompletedOfUserP: Boolean? = null,
+    userIdP: Int? = null //Obligatorio si jobsCompletedOfUser es true
 ) : PagingSource<Int, Proposal>() {
     private val token = tokenP
     private val finished = finishedP
+    private val jobsCompletedOfUser = jobsCompletedOfUserP
+    private val userId = userIdP
 
     override fun getRefreshKey(state: PagingState<Int, Proposal>): Int? {
         // Obtiene la posición del ancla en el estado de paginación
@@ -30,12 +34,20 @@ class JobsDataSource(
             // Obtiene el número de la siguiente página o comienza con la página 1 si es nulo
             val nextPageNumber = params.key ?: 1
             // Hace una solicitud al repositorio para obtener las propuestas del usuario
-            val response = repo.getJobs(
-                token!!,
-                page = nextPageNumber,
-                pageSize = 6,
-                finished
-            )
+            val response = if (jobsCompletedOfUser == true) {
+                repo.getJobsCompleted(
+                    userId!!,
+                    page = nextPageNumber,
+                    pageSize = 6
+                )
+            } else {
+                repo.getJobs(
+                    token!!,
+                    page = nextPageNumber,
+                    pageSize = 6,
+                    finished
+                )
+            }
             // Devuelve los resultados cargados en una página
             PagingSource.LoadResult.Page(
                 data = response, // Datos de la respuesta

@@ -170,6 +170,7 @@ fun NavManager() {
             val proposalsViewModel: ProposalsViewModel = hiltViewModel()
 
             val qualificationsViewModel: QualificationsViewModel = hiltViewModel()
+            val vmJobs: JobsViewModel = hiltViewModel()
 
             ProfileView(
                 id,
@@ -178,6 +179,7 @@ fun NavManager() {
                 tokenViewModel,
                 proposalsViewModel,
                 qualificationsViewModel,
+                vmJobs,
                 navController
             )
         }

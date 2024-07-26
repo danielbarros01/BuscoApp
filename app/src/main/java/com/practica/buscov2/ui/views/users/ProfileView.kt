@@ -11,22 +11,18 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Tab
@@ -45,7 +41,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -55,7 +50,6 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
-import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.practica.buscov2.R
@@ -68,7 +62,7 @@ import com.practica.buscov2.ui.components.BottomNav
 import com.practica.buscov2.ui.components.ButtonBack
 import com.practica.buscov2.ui.components.ButtonClose
 import com.practica.buscov2.ui.components.ButtonWithIcon
-import com.practica.buscov2.ui.components.CardJob
+import com.practica.buscov2.ui.components.CardJobCompleted
 import com.practica.buscov2.ui.components.CardQualificationOfUser
 import com.practica.buscov2.ui.components.InsertCircleProfileImage
 import com.practica.buscov2.ui.components.ItemsInLazy
@@ -84,6 +78,7 @@ import com.practica.buscov2.ui.theme.GrayPlaceholder
 import com.practica.buscov2.ui.theme.GrayText
 import com.practica.buscov2.ui.theme.GreenBusco
 import com.practica.buscov2.ui.theme.OrangePrincipal
+import com.practica.buscov2.ui.viewModel.JobsViewModel
 import com.practica.buscov2.ui.viewModel.QualificationsViewModel
 import com.practica.buscov2.ui.viewModel.auth.GoogleLoginViewModel
 import com.practica.buscov2.ui.viewModel.auth.TokenViewModel
@@ -92,6 +87,7 @@ import com.practica.buscov2.ui.viewModel.users.UserViewModel
 import com.practica.buscov2.ui.views.proposals.NoProposals
 import com.practica.buscov2.ui.views.proposals.ShowProposals
 import com.practica.buscov2.ui.views.proposals.activeLoaderMaxProposals
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 @Composable
@@ -102,6 +98,7 @@ fun ProfileView(
     vmToken: TokenViewModel,
     vmProposals: ProposalsViewModel,
     vmQualifications: QualificationsViewModel,
+    vmJobs: JobsViewModel,
     navController: NavHostController
 ) {
     val token by vmToken.token.collectAsState()
@@ -135,6 +132,7 @@ fun ProfileView(
                 }
 
                 vmQualifications.setWorkerId(id)
+                vmJobs.setUserId(id)
             }
         }
     }
@@ -150,6 +148,7 @@ fun ProfileView(
                 userProfile!!,
                 vmProposals,
                 vmQualifications,
+                vmJobs,
                 navController
             )
         }
@@ -165,6 +164,7 @@ fun ProfileV(
     userProfile: User,
     vmProposals: ProposalsViewModel,
     vmQualifications: QualificationsViewModel,
+    vmJobs: JobsViewModel,
     navController: NavHostController
 ) {
     val isLoading by vmProposals.isLoading.collectAsState()
@@ -218,7 +218,7 @@ fun ProfileV(
 
                 Title(text = "${userProfile.name} ${userProfile.lastname}")
 
-                TabsPages(userProfile, vmProposals, vmQualifications, navController)
+                TabsPages(userProfile, vmProposals, vmQualifications, vmJobs, navController)
             }
         }
     }
@@ -229,6 +229,7 @@ private fun TabsPages(
     user: User,
     vmProposals: ProposalsViewModel,
     vmQualifications: QualificationsViewModel,
+    vmJobs: JobsViewModel,
     navController: NavController
 ) {
     val tabs = if (user.worker == null) ItemTabProfile.pagesUser else ItemTabProfile.pagesWorker
@@ -237,7 +238,7 @@ private fun TabsPages(
 
     Column(modifier = Modifier.fillMaxSize()) {
         Tabs(tabs, pagerState)
-        TabsContent(tabs, pagerState, user, vmProposals, vmQualifications, navController)
+        TabsContent(tabs, pagerState, user, vmProposals, vmQualifications, vmJobs, navController)
     }
 }
 
@@ -248,12 +249,13 @@ private fun TabsContent(
     user: User,
     vmProposals: ProposalsViewModel,
     vmQualifications: QualificationsViewModel,
+    vmJobs: JobsViewModel,
     navController: NavController
 ) {
     HorizontalPager(
         state = pagerState
     ) { page ->
-        tabs[page].screen(user, vmProposals, navController, vmQualifications)
+        tabs[page].screen(user, vmProposals, navController, vmQualifications, vmJobs)
     }
 }
 
@@ -296,13 +298,30 @@ private fun Tabs(tabs: List<ItemTabProfile>, pagerState: PagerState) {
 }
 
 @Composable
-fun WorksCompletedProfile(user: User) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(vertical = 15.dp)
-    ) {
+fun WorksCompletedProfile(
+    vmJobs: JobsViewModel,
+    vmProposals: ProposalsViewModel,
+    navController: NavController
+) {
+    val jobsPage = vmJobs.jobsCompletedPage.collectAsLazyPagingItems()
+    activeLoaderMaxProposals(jobsPage, vmProposals)
 
+    if (jobsPage.itemCount == 0) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text(text = "No hay trabajos realizados para mostrar", color = GrayText)
+        }
+    } else {
+        ShowJobs(jobsPage, navController)
+    }
+}
+
+@Composable
+fun ShowJobs(jobsPage: LazyPagingItems<Proposal>, navController: NavController) {
+    ItemsInLazy(itemsPage = jobsPage) {
+        //CARDS
+        CardJobCompleted(it) {
+            navController.navigate("Proposal/${it.id}")
+        }
     }
 }
 
