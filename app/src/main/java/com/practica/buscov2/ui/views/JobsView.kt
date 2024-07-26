@@ -163,7 +163,7 @@ fun FinishedJobs(vmJobs: JobsViewModel, navController: NavController) {
 }*/
 
 @Composable
-fun ShowJobs(jobsPage: LazyPagingItems<Proposal>, navController: NavController) {
+private fun ShowJobs(jobsPage: LazyPagingItems<Proposal>, navController: NavController) {
     ItemsInLazy(jobsPage) { proposal ->
         val worker = proposal.applications?.firstOrNull()?.worker
         val user = worker?.user

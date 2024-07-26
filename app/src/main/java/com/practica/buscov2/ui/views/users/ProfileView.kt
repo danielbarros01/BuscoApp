@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
@@ -200,7 +201,6 @@ fun ProfileV(
                 //.verticalScroll(rememberScrollState()),
                 , horizontalAlignment = Alignment.CenterHorizontally
             ) {
-
                 //Imagen de perfil
                 InsertCircleProfileImage(
                     image = userProfile.image ?: "",
@@ -216,9 +216,37 @@ fun ProfileV(
 
                 Space(size = 4.dp)
 
+                if (user.id != userProfile.id) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        ButtonWithIcon(
+                            iconId = R.drawable.send,
+                            text = "Enviar mensaje",
+                            fontSize = 12.sp,
+                            modifier = Modifier
+                                .width(140.dp)
+                                .height(34.dp)
+                        )
+                        Space(size = 8.dp)
+                        ButtonWithIcon(
+                            iconId = R.drawable.briefcase_works,
+                            text = "Proponer",
+                            fontSize = 12.sp,
+                            modifier = Modifier
+                                .width(140.dp)
+                                .height(34.dp)
+                        )
+                    }
+                }
+
                 Title(text = "${userProfile.name} ${userProfile.lastname}")
 
                 TabsPages(userProfile, vmProposals, vmQualifications, vmJobs, navController)
+
             }
         }
     }

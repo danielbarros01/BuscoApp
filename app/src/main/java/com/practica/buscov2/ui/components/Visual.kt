@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.CircleShape
@@ -234,7 +235,7 @@ fun <T : Any> ItemsInLazy(
     view: @Composable (T) -> Unit
 ) {
     LazyColumn {
-        item{
+        item {
             secondViewHeader()
         }
 
@@ -269,6 +270,50 @@ fun <T : Any> ItemsInLazy(
         }
     }
 }
+
+
+//EXPERIMENTAL
+@Composable
+fun <T : Any> LazyListScope.ItemsInLazyTwo(
+    itemsPage: LazyPagingItems<T>,
+    secondViewHeader: @Composable () -> Unit = {},
+    view: @Composable (T) -> Unit
+) {
+    item {
+        secondViewHeader()
+    }
+
+    items(itemsPage.itemCount) { index ->
+        val item = itemsPage[index]
+        if (item != null) {
+            view(item)
+        }
+    }
+    when (itemsPage.loadState.append) {
+        is LoadState.NotLoading -> Unit
+        LoadState.Loading -> {
+            item {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 10.dp), contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(
+                        strokeWidth = 6.dp,
+                        modifier = Modifier.size(40.dp)
+                    )
+                }
+            }
+        }
+
+        is LoadState.Error -> {
+            item {
+                Text(text = "Error al cargar")
+            }
+        }
+    }
+}
+
 
 @Composable
 fun InfiniteRotationIcon(modifier: Modifier = Modifier, iconId: Int = R.drawable.working) {

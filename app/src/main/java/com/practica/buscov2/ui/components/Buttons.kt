@@ -3,6 +3,7 @@ package com.practica.buscov2.ui.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -35,6 +36,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -239,6 +241,8 @@ fun ButtonWithIcon(
     modifier: Modifier = Modifier,
     iconId: Int,
     text: String,
+    fontSize: TextUnit = 18.sp,
+    iconSize: Dp = 22.dp,
     onClick: () -> Unit = {}
 ) {
     Button(
@@ -251,7 +255,8 @@ fun ButtonWithIcon(
         ),
         elevation = ButtonDefaults.elevatedButtonElevation(
             defaultElevation = 10.dp
-        )
+        ),
+        contentPadding = PaddingValues(0.dp)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -260,9 +265,11 @@ fun ButtonWithIcon(
             Icon(
                 painter = painterResource(id = iconId),
                 contentDescription = "",
-                tint = OrangePrincipal
+                tint = OrangePrincipal,
+                modifier = Modifier.size(iconSize)
             )
-            Text(text = text, color = OrangePrincipal)
+            Space(size = 1.dp)
+            Text(text = text, color = OrangePrincipal, fontSize = fontSize)
         }
     }
 }
