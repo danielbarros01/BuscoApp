@@ -30,6 +30,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -135,6 +136,7 @@ fun DateField(
 fun CommonFieldArea(
     text: String,
     placeholder: String,
+    textStyle: TextStyle? = null,
     onTextFieldChanged: (String) -> Unit
 ) {
     val scrollState = rememberScrollState()
@@ -152,7 +154,8 @@ fun CommonFieldArea(
             unfocusedTextColor = GrayText,
             focusedTextColor = Color.Black
         ),
-        shape = RoundedCornerShape(12.dp)
+        shape = RoundedCornerShape(12.dp),
+        textStyle = textStyle ?: TextStyle()
     )
 }
 
@@ -163,6 +166,7 @@ fun OptionsField(
     options: List<String>,
     text: String,
     enabled: Boolean = true,
+    modifier: Modifier? = Modifier,
     onChanged: (String) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -170,7 +174,7 @@ fun OptionsField(
     ExposedDropdownMenuBox(
         expanded = expanded,
         onExpandedChange = { expanded = it },
-        modifier = Modifier.padding()
+        modifier = modifier!!.padding()
     ) {
         TextField(
             // The `menuAnchor` modifier must be passed to the text field to handle

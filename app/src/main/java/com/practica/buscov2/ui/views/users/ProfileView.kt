@@ -2,14 +2,19 @@ package com.practica.buscov2.ui.views.users
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
@@ -20,6 +25,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Tab
@@ -38,16 +45,22 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import androidx.paging.LoadState
+import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.practica.buscov2.R
+import com.practica.buscov2.model.busco.Proposal
+import com.practica.buscov2.model.busco.Qualification
 import com.practica.buscov2.model.busco.User
 import com.practica.buscov2.navigation.ItemTabProfile
 import com.practica.buscov2.navigation.RoutesBottom
@@ -55,16 +68,23 @@ import com.practica.buscov2.ui.components.BottomNav
 import com.practica.buscov2.ui.components.ButtonBack
 import com.practica.buscov2.ui.components.ButtonClose
 import com.practica.buscov2.ui.components.ButtonWithIcon
+import com.practica.buscov2.ui.components.CardJob
+import com.practica.buscov2.ui.components.CardQualificationOfUser
 import com.practica.buscov2.ui.components.InsertCircleProfileImage
+import com.practica.buscov2.ui.components.ItemsInLazy
 import com.practica.buscov2.ui.components.LateralMenu
 import com.practica.buscov2.ui.components.LinkText
 import com.practica.buscov2.ui.components.LoaderMaxSize
 import com.practica.buscov2.ui.components.MenuNavigation
+import com.practica.buscov2.ui.components.OptionsField
 import com.practica.buscov2.ui.components.Space
+import com.practica.buscov2.ui.components.StarRatingBar
 import com.practica.buscov2.ui.components.Title
 import com.practica.buscov2.ui.theme.GrayPlaceholder
 import com.practica.buscov2.ui.theme.GrayText
+import com.practica.buscov2.ui.theme.GreenBusco
 import com.practica.buscov2.ui.theme.OrangePrincipal
+import com.practica.buscov2.ui.viewModel.QualificationsViewModel
 import com.practica.buscov2.ui.viewModel.auth.GoogleLoginViewModel
 import com.practica.buscov2.ui.viewModel.auth.TokenViewModel
 import com.practica.buscov2.ui.viewModel.proposals.ProposalsViewModel
@@ -81,6 +101,7 @@ fun ProfileView(
     vmGoogle: GoogleLoginViewModel,
     vmToken: TokenViewModel,
     vmProposals: ProposalsViewModel,
+    vmQualifications: QualificationsViewModel,
     navController: NavHostController
 ) {
     val token by vmToken.token.collectAsState()
@@ -112,6 +133,8 @@ fun ProfileView(
                         vmProposals.changeUserId(userId)
                     }
                 }
+
+                vmQualifications.setWorkerId(id)
             }
         }
     }
@@ -126,6 +149,7 @@ fun ProfileView(
                 user!!,
                 userProfile!!,
                 vmProposals,
+                vmQualifications,
                 navController
             )
         }
@@ -140,6 +164,7 @@ fun ProfileV(
     user: User,
     userProfile: User,
     vmProposals: ProposalsViewModel,
+    vmQualifications: QualificationsViewModel,
     navController: NavHostController
 ) {
     val isLoading by vmProposals.isLoading.collectAsState()
@@ -172,8 +197,8 @@ fun ProfileV(
                     .fillMaxSize()
                     .padding(it)
                     .padding(horizontal = 15.dp)
-                    //.verticalScroll(rememberScrollState()),
-                ,horizontalAlignment = Alignment.CenterHorizontally
+                //.verticalScroll(rememberScrollState()),
+                , horizontalAlignment = Alignment.CenterHorizontally
             ) {
 
                 //Imagen de perfil
@@ -193,21 +218,26 @@ fun ProfileV(
 
                 Title(text = "${userProfile.name} ${userProfile.lastname}")
 
-                TabsPages(userProfile, vmProposals, navController)
+                TabsPages(userProfile, vmProposals, vmQualifications, navController)
             }
         }
     }
 }
 
 @Composable
-private fun TabsPages(user: User, vmProposals: ProposalsViewModel, navController: NavController) {
+private fun TabsPages(
+    user: User,
+    vmProposals: ProposalsViewModel,
+    vmQualifications: QualificationsViewModel,
+    navController: NavController
+) {
     val tabs = if (user.worker == null) ItemTabProfile.pagesUser else ItemTabProfile.pagesWorker
 
     val pagerState = rememberPagerState(pageCount = { tabs.size })
 
     Column(modifier = Modifier.fillMaxSize()) {
         Tabs(tabs, pagerState)
-        TabsContent(tabs, pagerState, user, vmProposals, navController)
+        TabsContent(tabs, pagerState, user, vmProposals, vmQualifications, navController)
     }
 }
 
@@ -217,12 +247,13 @@ private fun TabsContent(
     pagerState: PagerState,
     user: User,
     vmProposals: ProposalsViewModel,
+    vmQualifications: QualificationsViewModel,
     navController: NavController
 ) {
     HorizontalPager(
         state = pagerState
     ) { page ->
-        tabs[page].screen(user, vmProposals, navController)
+        tabs[page].screen(user, vmProposals, navController, vmQualifications)
     }
 }
 
@@ -247,6 +278,8 @@ private fun Tabs(tabs: List<ItemTabProfile>, pagerState: PagerState) {
                 Tab(
                     selected = selectedTab == index,
                     onClick = {
+                        //vmProposals.changeStatus(if (tabs[index].title == "Activas") null else true)
+                        //vmProposals.refreshProposals()
                         scope.launch { pagerState.animateScrollToPage(index) }
                     },
                     text = {
@@ -274,13 +307,108 @@ fun WorksCompletedProfile(user: User) {
 }
 
 @Composable
-fun Qualifications(user: User) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(vertical = 15.dp)
-    ) {
+fun Qualifications(vmQualifications: QualificationsViewModel, vmProposals: ProposalsViewModel) {
+    val qualificationsPage = vmQualifications.qualificationsPage.collectAsLazyPagingItems()
+    activeLoaderMaxProposals(qualificationsPage, vmProposals)
 
+    ShowQualifications(qualificationsPage, vmQualifications)
+}
+
+@Composable
+fun ShowQualifications(
+    qualificationsPage: LazyPagingItems<Qualification>,
+    vm: QualificationsViewModel
+) {
+    val quantity by vm.quantity
+    val average by vm.rating
+    val stars by vm.filterStars
+
+    ItemsInLazy(qualificationsPage, secondViewHeader = {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 10.dp)
+        ) {
+            Text(text = "$quantity calificaciones", color = GrayPlaceholder)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 5.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                StarRatingBar(5, average, sizeStar = 44.dp, onRatingChanged = {})
+                Text(text = "$average/5")
+            }
+
+            Row(
+                modifier = Modifier.padding(vertical = 10.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(text = "Filtrar por:", color = GrayText, fontSize = 18.sp)
+                Space(size = 4.dp)
+                OptionsField(
+                    modifier = Modifier
+                        .width(120.dp)
+                        .height(54.dp),
+                    options = listOf("Todas", "1", "2", "3", "4", "5"),
+                    text = if (stars == null) "Todas" else stars.toString(),
+                    enabled = true,
+                    onChanged = {
+                        vm.setFilterStars(it)
+                        vm.refreshQualifications()
+                    })
+            }
+
+            FrequencyTable(vm.ratingFrequencies.value, quantity)
+            Space(size = 10.dp)
+        }
+
+
+    }) { qualification ->
+        //CARD
+        CardQualificationOfUser(qualification.user ?: User(), qualification)
+        Space(size = 10.dp)
+
+    }
+}
+
+@Composable
+fun FrequencyTable(ratingFrequencies: Map<Int, Int>, totalCount: Int) {
+    Column(modifier = Modifier.padding(horizontal = 18.dp)) {
+        Spacer(modifier = Modifier.height(8.dp))
+
+        ratingFrequencies.toSortedMap().forEach { (rating, count) ->
+            val progress = if (totalCount > 0) count.toFloat() / totalCount else 0f
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(text = "$rating", fontSize = 20.sp, fontWeight = FontWeight.Medium)
+                Space(size = 8.dp)
+
+                LinearProgressIndicator(
+                    progress = { progress },
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(18.dp),
+                    color = GreenBusco,
+                    gapSize = 0.dp
+                )
+                Space(size = 8.dp)
+
+                Box(
+                    modifier = Modifier
+                        .width(30.dp)
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(
+                            Color.LightGray.copy(alpha = 0.6f),
+                            shape = RoundedCornerShape(10.dp)
+                        ), contentAlignment = Alignment.Center
+                ) {
+                    Text(text = "$count", modifier = Modifier.padding(1.dp), fontSize = 12.sp)
+                }
+            }
+            Spacer(modifier = Modifier.height(2.dp))
+        }
     }
 }
 

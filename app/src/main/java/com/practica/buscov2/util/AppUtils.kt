@@ -8,7 +8,9 @@ import java.text.DecimalFormatSymbols
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 import java.util.Date
 import java.util.Locale
 
@@ -113,6 +115,17 @@ class AppUtils {
             val formatter = DateTimeFormatter.ofPattern("MMM dd")
 
             return localDate.format(formatter)
+        }
+
+        fun daysAgo(dateString: String): Long {
+            if (dateString.isEmpty()) {
+                return 0
+            }
+
+            val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
+            val givenDate = LocalDateTime.parse(dateString, formatter).toLocalDate()
+            val currentDate = LocalDateTime.now().toLocalDate()
+            return ChronoUnit.DAYS.between(givenDate, currentDate)
         }
     }
 }

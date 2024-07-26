@@ -8,11 +8,6 @@ sealed class RoutesConfiguration(
     val route: String
 ) {
     object Profile : RoutesConfiguration(R.drawable.profile, "Ver Perfil", "Profile")
-    /*object ChangePassword : RoutesConfiguration(
-        R.drawable.privacy,
-        "Cambiar contraseña",
-        "CheckEmailView/$userJson/recover-password"
-    )*/
 
     data class ChangePassword(val userJson: String) : RoutesConfiguration(
         R.drawable.privacy,

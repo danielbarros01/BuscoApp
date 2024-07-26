@@ -65,6 +65,7 @@ import com.practica.buscov2.ui.theme.Rubik
 import com.practica.buscov2.ui.theme.YellowGold
 import com.practica.buscov2.ui.theme.YellowStar
 import com.practica.buscov2.util.AppUtils
+import com.practica.buscov2.util.AppUtils.Companion.daysAgo
 
 @Composable
 fun CardProposal(
@@ -150,7 +151,9 @@ fun CardJob(
             .background(Color.White)
     ) {
         CardProposal(
-            modifier = Modifier.height(125.dp).clickable { onClickProposal() },
+            modifier = Modifier
+                .height(125.dp)
+                .clickable { onClickProposal() },
             image = proposal.image ?: "",
             title = proposal.title ?: "",
             price = "$${proposal.minBudget.toString()} a $${proposal.maxBudget.toString()}",
@@ -201,7 +204,12 @@ fun CardJob(
                 )
             }
 
-            Box(modifier = Modifier.width(100.dp).fillMaxHeight(), contentAlignment = Alignment.Center) {
+            Box(
+                modifier = Modifier
+                    .width(100.dp)
+                    .fillMaxHeight(),
+                contentAlignment = Alignment.Center
+            ) {
                 IconButton(onClick = { onClickChat() }, modifier = Modifier.size(50.dp)) {
                     Icon(
                         painter = painterResource(id = R.drawable.message_fill),
@@ -542,11 +550,11 @@ fun CardWorker(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        StarRatingBar(5, rating.rating) {
+                        StarRatingBar(5, rating.score ?: 0f) {
 
                         }
                         Text(
-                            text = "${rating.rating} (${rating.quantity})",
+                            text = "${rating.score} (${rating.quantity})",
                             fontSize = 12.sp,
                             color = GrayPlaceholder,
                             fontWeight = FontWeight.Medium
@@ -561,3 +569,32 @@ fun CardWorker(
     }
 }
 
+
+@Composable
+fun CardQualificationOfUser(user:User, qualification: Qualification) {
+    Column(modifier = Modifier
+        .fillMaxWidth()
+        .padding(horizontal = 10.dp)) {
+        HorizontalDivider()
+        Space(size = 4.dp)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            InsertCircleProfileImage(image = user.image?:"", modifier = Modifier.size(40.dp))
+            Space(size = 8.dp)
+            Text(text = "${user.name} ${user.lastname}", fontSize = 20.sp, fontWeight = FontWeight.Medium)
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(text = "Hace ${daysAgo(qualification.date ?: "")} dias", color = GrayText, fontSize = 16.sp)
+            Row (verticalAlignment = Alignment.CenterVertically){
+                StarRatingBar(5, qualification.score ?: 0f, sizeStar = 28.dp) {}
+                Space(size = 4.dp)
+                Text(text = "${qualification.score}/5", color = GrayText, fontSize = 16.sp)
+            }
+        }
+        Space(size = 2.dp)
+        Text(text = qualification.commentary ?: "", fontSize = 18.sp, color = GrayText)
+    }
+}

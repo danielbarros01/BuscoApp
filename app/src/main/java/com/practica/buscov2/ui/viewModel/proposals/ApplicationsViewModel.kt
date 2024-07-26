@@ -14,6 +14,7 @@ import com.practica.buscov2.data.repository.busco.ApplicationsRepository
 import com.practica.buscov2.data.repository.busco.ProposalsRepository
 import com.practica.buscov2.model.busco.Application
 import com.practica.buscov2.model.busco.Proposal
+import com.practica.buscov2.model.busco.Worker
 import com.practica.buscov2.model.busco.auth.ErrorBusco
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -106,7 +107,7 @@ class ApplicationsViewModel @Inject constructor(
         }
     }
 
-    fun getAcceptedApplication(proposalId: Int) {
+    fun getAcceptedApplication(proposalId: Int, onSuccess: (Worker?) -> Unit) {
         viewModelScope.launch {
             val response = withContext(Dispatchers.IO) {
                 repo.getApplicationAccepted(proposalId)
@@ -115,6 +116,7 @@ class ApplicationsViewModel @Inject constructor(
             when (response) {
                 is Application -> {
                     _applicant.value = response
+                    onSuccess(response.worker)
                 }
             }
         }

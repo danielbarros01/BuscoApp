@@ -27,6 +27,7 @@ class Constants {
         const val ENDPOINT_PROPOSALS = "proposals"
         const val ENDPOINT_APPLICATIONS = "applications"
         const val ENDPOINT_JOBS = "jobs"
+        const val ENDPOINT_QUALIFICATIONS = "qualifications"
 
         const val ENDPOINT_PRUEBA = "weatherforecast"
     }

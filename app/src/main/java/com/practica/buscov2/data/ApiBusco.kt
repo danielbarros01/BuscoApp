@@ -1,9 +1,11 @@
 package com.practica.buscov2.data
 
 import com.practica.buscov2.model.busco.Application
+import com.practica.buscov2.model.busco.ListQualification
 import com.practica.buscov2.model.busco.Profession
 import com.practica.buscov2.model.busco.ProfessionCategory
 import com.practica.buscov2.model.busco.Proposal
+import com.practica.buscov2.model.busco.Qualification
 import com.practica.buscov2.model.busco.ResponseCreatedId
 import com.practica.buscov2.model.busco.auth.LoginToken
 import com.practica.buscov2.model.busco.auth.LoginRequest
@@ -21,6 +23,7 @@ import com.practica.buscov2.util.Constants.Companion.ENDPOINT_MY_PROFILE
 import com.practica.buscov2.util.Constants.Companion.ENDPOINT_PHOTO
 import com.practica.buscov2.util.Constants.Companion.ENDPOINT_PROFESSIONS
 import com.practica.buscov2.util.Constants.Companion.ENDPOINT_PROPOSALS
+import com.practica.buscov2.util.Constants.Companion.ENDPOINT_QUALIFICATIONS
 import com.practica.buscov2.util.Constants.Companion.ENDPOINT_REGISTER
 import com.practica.buscov2.util.Constants.Companion.ENDPOINT_USERS
 import com.practica.buscov2.util.Constants.Companion.ENDPOINT_WORKERS
@@ -234,7 +237,7 @@ interface ApiBusco {
     suspend fun createApplication(
         @Header("Authorization") token: String,
         @Path("proposalId") proposalId: Int,
-    ):Response<Unit>
+    ): Response<Unit>
 
     @GET(ENDPOINT_JOBS)
     suspend fun getJobs(
@@ -243,4 +246,21 @@ interface ApiBusco {
         @Query("NumberRecordsPerPage") pageSize: Int?,
         @Query("finished") finished: Boolean?,
     ): Response<List<Proposal>>
+
+    @POST(ENDPOINT_QUALIFICATIONS)
+    suspend fun createQualification(
+        @Header("Authorization") token: String,
+        @Body qualification: Qualification
+    ): Response<Unit>
+
+
+
+    @GET("$ENDPOINT_QUALIFICATIONS/{workerId}")
+    suspend fun getQualifications(
+        @Path("workerId") id: Int,
+        @Query("page") page: Int?,
+        @Query("NumberRecordsPerPage") pageSize: Int?,
+        @Query("stars") cantStars: Int?,
+    ): Response<ListQualification>
+
 }

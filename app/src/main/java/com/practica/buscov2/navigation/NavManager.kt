@@ -17,6 +17,7 @@ import com.practica.buscov2.ui.viewModel.auth.GoogleLoginViewModel
 import com.practica.buscov2.ui.viewModel.HomeViewModel
 import com.practica.buscov2.ui.viewModel.JobsViewModel
 import com.practica.buscov2.ui.viewModel.NewPublicationViewModel
+import com.practica.buscov2.ui.viewModel.QualificationsViewModel
 import com.practica.buscov2.ui.viewModel.auth.LoginViewModel
 import com.practica.buscov2.ui.viewModel.auth.RecoverPasswordViewModel
 import com.practica.buscov2.ui.viewModel.auth.RegisterViewModel
@@ -58,7 +59,7 @@ fun NavManager() {
     val tokenViewModel: TokenViewModel = hiltViewModel()
     val loginGoogleViewModel: GoogleLoginViewModel = hiltViewModel()
 
-    NavHost(navController = navController, startDestination = "Jobs/me") {
+    NavHost(navController = navController, startDestination = "Start") {
         composable("Start") {
             val userViewModel: UserViewModel = hiltViewModel()
             StartView(tokenViewModel, userViewModel, navController)
@@ -168,15 +169,19 @@ fun NavManager() {
             val userViewModel: UserViewModel = hiltViewModel()
             val proposalsViewModel: ProposalsViewModel = hiltViewModel()
 
+            val qualificationsViewModel: QualificationsViewModel = hiltViewModel()
+
             ProfileView(
                 id,
                 userViewModel,
                 loginGoogleViewModel,
                 tokenViewModel,
                 proposalsViewModel,
+                qualificationsViewModel,
                 navController
             )
         }
+
 
         composable("EditProfile") {
             val userViewModel: UserViewModel = hiltViewModel()
@@ -249,6 +254,7 @@ fun NavManager() {
             val userViewModel: UserViewModel = hiltViewModel()
             val proposalViewModel: ProposalViewModel = hiltViewModel()
             val applicantsViewModel: ApplicationsViewModel = hiltViewModel()
+            val qualificationsViewModel: QualificationsViewModel = hiltViewModel()
 
             ProposalView(
                 id,
@@ -257,6 +263,7 @@ fun NavManager() {
                 tokenViewModel,
                 proposalViewModel,
                 applicantsViewModel,
+                qualificationsViewModel,
                 navController
             )
         }

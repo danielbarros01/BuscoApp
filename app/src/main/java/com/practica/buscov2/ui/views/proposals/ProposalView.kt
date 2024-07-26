@@ -74,6 +74,7 @@ import com.practica.buscov2.ui.theme.GrayText
 import com.practica.buscov2.ui.theme.GreenBusco
 import com.practica.buscov2.ui.theme.OrangePrincipal
 import com.practica.buscov2.ui.theme.RedBusco
+import com.practica.buscov2.ui.viewModel.QualificationsViewModel
 import com.practica.buscov2.ui.viewModel.auth.GoogleLoginViewModel
 import com.practica.buscov2.ui.viewModel.auth.TokenViewModel
 import com.practica.buscov2.ui.viewModel.proposals.ApplicationsViewModel
@@ -89,6 +90,7 @@ fun ProposalView(
     vmToken: TokenViewModel,
     vmProposal: ProposalViewModel,
     applicationsViewModel: ApplicationsViewModel,
+    qualificationsViewModel: QualificationsViewModel,
     navController: NavHostController
 ) {
     val token by vmToken.token.collectAsState()
@@ -116,6 +118,7 @@ fun ProposalView(
                 vmProposal,
                 token,
                 applicationsViewModel,
+                qualificationsViewModel,
                 navController
             )
         }
@@ -132,6 +135,7 @@ fun ProposalV(
     vmProposal: ProposalViewModel,
     token: LoginToken?,
     applicationsViewModel: ApplicationsViewModel,
+    qualificationsViewModel: QualificationsViewModel,
     navController: NavHostController
 ) {
     val error by vmProposal.error
@@ -168,6 +172,9 @@ fun ProposalV(
         mutableStateOf(false)
     }
 
+    val commentary by qualificationsViewModel.commentary
+    val rating by qualificationsViewModel.rating
+    val buttonEnabledQualify by qualificationsViewModel.buttonEnabled
 
     LaunchedEffect(Unit) {
         vmProposal.getProposal(proposalId, onError = {
@@ -187,7 +194,11 @@ fun ProposalV(
             if (it.status != null) {
                 //en proceso de trabajo
                 //Traigo la aplicacion que contiene al trabajador
-                applicationsViewModel.getAcceptedApplication(it.id!!)
+                applicationsViewModel.getAcceptedApplication(it.id!!) { worker ->
+                    worker?.userId?.let {
+                        qualificationsViewModel.setWorkerId(worker.userId)
+                    }
+                }
             }
         }
     }
@@ -254,12 +265,25 @@ fun ProposalV(
     AlertQualify(
         showDialog = showQualify,
         name = "${application?.worker?.user?.name} ${application?.worker?.user?.lastname}",
-        rating = 1f,
-        commentary = "",
-        changeCommentary = {},
-        onStars = {},
-        onDismiss = {},
-        onClick = {}
+        rating = rating,
+        commentary = commentary,
+        buttonEnabled = buttonEnabledQualify,
+        changeCommentary = { qualificationsViewModel.setCommentary(it) },
+        onStars = { qualificationsViewModel.setRating(it) },
+        onDismiss = {
+            navController.navigate("Proposal/${proposal?.id}")
+        },
+        onClick = {
+            //Realizar creacion de calificacion
+            token?.let {
+                qualificationsViewModel.createQualification(it.token, onError = {
+                    navController.navigate("Proposal/${proposal?.id}")
+                }, onSuccess = {
+                    navController.navigate("Proposal/${proposal?.id}")
+                })
+            }
+
+        }
     )
 
     LateralMenu(
@@ -469,6 +493,7 @@ fun ProposalMoreInfo(
     ) {
         if (proposal.status != null && application != null) {
             application.worker?.let {
+                //ACA
                 DataWorker(it, Qualification(5f, 20)) {
                     navController?.navigate("Profile/${it.user?.id}")
                 }

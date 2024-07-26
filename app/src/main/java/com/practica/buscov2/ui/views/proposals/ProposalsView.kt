@@ -165,8 +165,8 @@ fun ActiveProposals(vmProposals: ProposalsViewModel, navController: NavHostContr
 }
 
 //Para activar el loader completo la primera vez que traigo datos
-fun activeLoaderMaxProposals(
-    proposalsPage: LazyPagingItems<Proposal>,
+inline fun <reified T:Any> activeLoaderMaxProposals(
+    proposalsPage: LazyPagingItems<T>,
     vmProposals: ProposalsViewModel
 ) {
     val loadState = proposalsPage.loadState

@@ -228,8 +228,16 @@ fun TriangleShape(modifier: Modifier, color: Color) {
 }
 
 @Composable
-fun <T : Any> ItemsInLazy(itemsPage: LazyPagingItems<T>, view: @Composable (T) -> Unit) {
+fun <T : Any> ItemsInLazy(
+    itemsPage: LazyPagingItems<T>,
+    secondViewHeader: @Composable () -> Unit = {},
+    view: @Composable (T) -> Unit
+) {
     LazyColumn {
+        item{
+            secondViewHeader()
+        }
+
         items(itemsPage.itemCount) { index ->
             val item = itemsPage[index]
             if (item != null) {
@@ -263,7 +271,7 @@ fun <T : Any> ItemsInLazy(itemsPage: LazyPagingItems<T>, view: @Composable (T) -
 }
 
 @Composable
-fun InfiniteRotationIcon(modifier: Modifier = Modifier, iconId:Int = R.drawable.working){
+fun InfiniteRotationIcon(modifier: Modifier = Modifier, iconId: Int = R.drawable.working) {
     val rotation = remember {
         Animatable(0f)
     }
@@ -289,6 +297,7 @@ fun InfiniteRotationIcon(modifier: Modifier = Modifier, iconId:Int = R.drawable.
 fun StarRatingBar(
     maxStars: Int = 5,
     rating: Float,
+    sizeStar: Dp = 36.dp,
     onRatingChanged: (Float) -> Unit
 ) {
     Row(
@@ -304,7 +313,7 @@ fun StarRatingBar(
                 contentDescription = null,
                 tint = iconTintColor,
                 modifier = Modifier
-                    .size(36.dp)
+                    .size(sizeStar)
                     .selectable(
                         selected = isSelected,
                         onClick = {

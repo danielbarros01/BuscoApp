@@ -398,6 +398,7 @@ fun AlertQualify(
     name: String,
     rating: Float,
     commentary: String,
+    buttonEnabled: Boolean = true,
     changeCommentary: (String) -> Unit,
     onStars: (Float) -> Unit,
     onDismiss: () -> Unit = { showDialog.value = false },
@@ -415,17 +416,16 @@ fun AlertQualify(
                     Space(size = 5.dp)
 
                     Column(modifier = Modifier.fillMaxWidth()) {
-                        Text(text = "Deja un comentario", fontSize = 14.sp)
-                        CommonFieldArea(commentary, "") {
+                        Text(text = "Deja un comentario", fontSize = 16.sp)
+                        CommonFieldArea(commentary, "", textStyle = TextStyle(fontSize = 14.sp)) {
                             changeCommentary(it)
                         }
                     }
                 }
             },
-            onDismissRequest = { onDismiss() },
-
+            onDismissRequest = { },
             confirmButton = {
-                ButtonPrincipal(text = "Calificar", enabled = true, color = GreenBusco) {
+                ButtonPrincipal(text = "Calificar", enabled = buttonEnabled, color = GreenBusco) {
                     onClick()
                 }
             },
