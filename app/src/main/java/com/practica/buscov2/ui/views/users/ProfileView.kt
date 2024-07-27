@@ -239,7 +239,9 @@ fun ProfileV(
                             modifier = Modifier
                                 .width(140.dp)
                                 .height(34.dp)
-                        )
+                        ){
+                            navController.navigate("Proposals/me/active/${userProfile.id}")
+                        }
                     }
                 }
 

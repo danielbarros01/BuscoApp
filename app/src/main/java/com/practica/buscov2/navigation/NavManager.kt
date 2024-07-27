@@ -45,6 +45,8 @@ import com.practica.buscov2.ui.views.auth.RecoverPassword
 import com.practica.buscov2.ui.views.auth.RegisterView
 import com.practica.buscov2.ui.views.auth.ResetPassword
 import com.practica.buscov2.ui.views.StartView
+import com.practica.buscov2.ui.views.proposals.ActiveProposals
+import com.practica.buscov2.ui.views.proposals.ActiveProposalsView
 import com.practica.buscov2.ui.views.proposals.ApplicantsView
 import com.practica.buscov2.ui.views.proposals.EditProposalView
 import com.practica.buscov2.ui.views.proposals.ProposalView
@@ -299,6 +301,23 @@ fun NavManager() {
                 tokenViewModel,
                 proposalsViewModel,
                 jobsViewModel,
+                navController
+            )
+        }
+
+        composable(
+            "Proposals/me/active/{toWorkerId}",
+            arguments = listOf(navArgument("toWorkerId") { type = NavType.IntType })
+        ) {
+            val toWorkerId = it.arguments?.getInt("toWorkerId") ?: 0
+            val userViewModel: UserViewModel = hiltViewModel()
+            val proposalsViewModel: ProposalsViewModel = hiltViewModel()
+
+            ActiveProposalsView(
+                toWorkerId,
+                userViewModel,
+                tokenViewModel,
+                proposalsViewModel,
                 navController
             )
         }

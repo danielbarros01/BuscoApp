@@ -29,6 +29,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -129,6 +133,42 @@ fun CardProposal(
                     Text(text = date, fontSize = 18.sp, color = OrangePrincipal)
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun CardProposalWithButton(
+    proposal: Proposal,
+    onClickProposal: () -> Unit,
+    onSend: (MutableState<String>, MutableState<Boolean>) -> Unit
+) {
+    val textButton = remember { mutableStateOf("Enviar") }
+    val enabledButton = remember { mutableStateOf(true) }
+
+    Column(
+        modifier = Modifier
+            .border(1.dp, Color.LightGray, RoundedCornerShape(10.dp))
+            .shadow(10.dp, RoundedCornerShape(10.dp))
+            .clip(RoundedCornerShape(10.dp))
+            .background(Color.White)
+    ) {
+        CardProposal(
+            image = proposal.image ?: "",
+            title = proposal.title ?: "",
+            price = "$${proposal.minBudget.toString()} a $${proposal.maxBudget.toString()}",
+            date = AppUtils.formatDateCard("${proposal.date}"),
+            onClick = onClickProposal,
+            modifier = Modifier
+                .height(125.dp)
+                .clickable { onClickProposal() }
+        )
+        ButtonPrincipal(
+            text = textButton.value,
+            enabled = enabledButton.value,
+            shape = RectangleShape
+        ) {
+            onSend(textButton, enabledButton)
         }
     }
 }

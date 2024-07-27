@@ -30,6 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -54,6 +55,7 @@ fun ButtonPrincipal(
     text: String,
     enabled: Boolean,
     color: Color? = OrangePrincipal,
+    shape: Shape = RoundedCornerShape(12.dp),
     onSelected: () -> Unit
 ) {
     Button(
@@ -65,8 +67,8 @@ fun ButtonPrincipal(
             containerColor = color!!,
             contentColor = Color.White
         ),
-        shape = RoundedCornerShape(12.dp),
-        enabled = enabled
+        shape = shape,
+        enabled = enabled,
     )
     {
         Text(text = text)
