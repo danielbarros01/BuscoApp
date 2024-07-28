@@ -29,6 +29,7 @@ import com.practica.buscov2.ui.viewModel.proposals.ProposalViewModel
 import com.practica.buscov2.ui.viewModel.users.UserViewModel
 import com.practica.buscov2.ui.viewModel.workers.RegisterWorkerViewModel
 import com.practica.buscov2.ui.viewModel.proposals.ProposalsViewModel
+import com.practica.buscov2.ui.views.ApplicationsView
 import com.practica.buscov2.ui.views.workers.BeWorkerView
 import com.practica.buscov2.ui.views.ChatView
 import com.practica.buscov2.ui.views.ConfigurationView
@@ -319,6 +320,19 @@ fun NavManager() {
                 tokenViewModel,
                 proposalsViewModel,
                 navController
+            )
+        }
+
+        composable("Applications/me"){
+            val userViewModel: UserViewModel = hiltViewModel()
+            val vmApplications: ApplicationsViewModel = hiltViewModel()
+
+            ApplicationsView(
+                vmUser = userViewModel,
+                vmGoogle = loginGoogleViewModel,
+                vmToken = tokenViewModel,
+                vmApplications = vmApplications,
+                navController = navController
             )
         }
     }

@@ -44,16 +44,17 @@ class ApplicationsRepository @Inject constructor(private val api: ApiBusco) {
         proposalId: Int,
         applicationId: Int,
         status: Boolean
-    ):Any {
+    ): Any {
         try {
-            val response = api.acceptOrDeclineApplication("Bearer $token", proposalId, applicationId, status)
+            val response =
+                api.acceptOrDeclineApplication("Bearer $token", proposalId, applicationId, status)
 
             return when (response.code()) {
                 in 200..299 -> true
                 in 400..599 -> ServerUtils.gsonError(response) //return ErrorBusco
                 else -> ErrorBusco(0, "Error", message = "Error desconocido, intentalo de nuevo")
             }
-        }catch (e: Exception){
+        } catch (e: Exception) {
             Log.d("Error", e.toString())
             return ErrorBusco(0, "Error", message = "Error desconocido, intentalo de nuevo")
         }
@@ -62,7 +63,7 @@ class ApplicationsRepository @Inject constructor(private val api: ApiBusco) {
     suspend fun createApplication(
         token: String,
         proposalId: Int
-    ):Any {
+    ): Any {
         try {
             val response = api.createApplication("Bearer $token", proposalId)
 
@@ -71,9 +72,26 @@ class ApplicationsRepository @Inject constructor(private val api: ApiBusco) {
                 in 400..599 -> ServerUtils.gsonError(response) //return ErrorBusco
                 else -> ErrorBusco(0, "Error", message = "Error desconocido, intentalo de nuevo")
             }
-        }catch (e: Exception){
+        } catch (e: Exception) {
             Log.d("Error", e.toString())
             return ErrorBusco(0, "Error", message = "Error desconocido, intentalo de nuevo")
+        }
+    }
+
+    suspend fun getApplicationsOfUser(
+        token: String,
+        status: Boolean? = null,
+        page: Int? = null,
+        pageSize: Int? = null,
+    ): List<Application> {
+        try {
+            delay(1000)
+            val response =
+                api.getApplicationsOfUser("Bearer $token", status, page, pageSize)
+            return response.body() ?: emptyList()
+        } catch (e: Exception) {
+            Log.d("ERROR", e.toString())
+            return emptyList()
         }
     }
 }

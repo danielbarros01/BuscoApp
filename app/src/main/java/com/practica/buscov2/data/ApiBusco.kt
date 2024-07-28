@@ -270,4 +270,12 @@ interface ApiBusco {
         @Query("NumberRecordsPerPage") pageSize: Int?
     ): Response<List<Proposal>>
 
+
+    @GET("$ENDPOINT_APPLICATIONS/me")
+    suspend fun getApplicationsOfUser(
+        @Header("Authorization") token: String,
+        @Query("status") status: Boolean?,
+        @Query("page") page: Int?,
+        @Query("NumberRecordsPerPage") pageSize: Int?
+    ): Response<List<Application>>
 }

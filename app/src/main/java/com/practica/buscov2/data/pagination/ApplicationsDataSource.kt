@@ -8,11 +8,15 @@ import com.practica.buscov2.model.busco.User
 
 class ApplicationsDataSource(
     private val repo: ApplicationsRepository,
-    proposalId: Int,
-    tokenP: String
+    proposalId: Int? = null,
+    tokenP: String,
+    myApplicationsP: Boolean? = null,
+    statusP: Boolean? = null
 ) : PagingSource<Int, Application>() {
     val token = tokenP
     val id = proposalId
+    val myApplications = myApplicationsP
+    val status = statusP
 
     override fun getRefreshKey(state: PagingState<Int, Application>): Int? {
         return state.anchorPosition?.let { anchorPosition ->
@@ -24,12 +28,17 @@ class ApplicationsDataSource(
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Application> {
         return try {
             val nextPageNumber = params.key ?: 1
-            val response = repo.getApplications(
-                token,
-                proposalId = id,
-                page = nextPageNumber,
-                pageSize = 6
-            )
+            val response =
+                if (myApplications == true) {
+                    repo.getApplicationsOfUser(token, status, page = nextPageNumber, pageSize = 6)
+                } else {
+                    repo.getApplications(
+                        token,
+                        proposalId = id!!,
+                        page = nextPageNumber,
+                        pageSize = 6
+                    )
+                }
             LoadResult.Page(
                 data = response,
                 prevKey = null,

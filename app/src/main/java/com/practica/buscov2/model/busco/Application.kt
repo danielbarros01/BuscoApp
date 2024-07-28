@@ -6,5 +6,6 @@ data class Application(
     val proposalId: Int? = null,
     val date: String? = null,
     val status: Boolean? = null,
-    val worker: Worker? = null
+    val worker: Worker? = null,
+    val proposal:Proposal? = null
 )

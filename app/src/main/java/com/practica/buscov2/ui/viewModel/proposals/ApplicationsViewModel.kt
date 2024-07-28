@@ -50,6 +50,9 @@ class ApplicationsViewModel @Inject constructor(
     private val _applicant = mutableStateOf<Application?>(null)
     val applicant: State<Application?> = _applicant
 
+    private val _status = mutableStateOf<Boolean?>(true)
+    val status: State<Boolean?> = _status
+
     private val _refreshTrigger = MutableStateFlow(0)
 
     //Traer postulantes
@@ -58,6 +61,19 @@ class ApplicationsViewModel @Inject constructor(
         _refreshTrigger.flatMapLatest {
             Pager(PagingConfig(pageSize = 4)) {
                 ApplicationsDataSource(repo, proposalId.value!!, tokenP = token.value!!)
+            }.flow.cachedIn(viewModelScope)
+        }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val applicationsPage =
+        _refreshTrigger.flatMapLatest {
+            Pager(PagingConfig(pageSize = 4)) {
+                ApplicationsDataSource(
+                    repo,
+                    tokenP = token.value!!,
+                    myApplicationsP = true,
+                    statusP = status.value
+                )
             }.flow.cachedIn(viewModelScope)
         }
 
@@ -169,5 +185,9 @@ class ApplicationsViewModel @Inject constructor(
 
     fun setProposalId(id: Int) {
         _proposalId.value = id
+    }
+
+    fun changeStatus(status: Boolean?) {
+        _status.value = status
     }
 }
