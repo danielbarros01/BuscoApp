@@ -10,12 +10,23 @@ class ProposalsDataSource(
     userId: Int = 0,
     status: Boolean?,
     tokenP: String? = null,
-    function: String? = null
+    function: String? = null,
+    queryP: String? = null,
+    cityP: String? = null,
+    departmentP: String? = null,
+    provinceP: String? = null,
+    categoryIdP: Int? = null,
 ) : PagingSource<Int, Proposal>() {
     private val userId2 = userId
     private val status2 = status
     private val functionCall = function
     private val token = tokenP
+
+    private val query = queryP
+    private val city = cityP
+    private val department = departmentP
+    private val province = provinceP
+    private val categoryId = categoryIdP
 
     //controla el estado de paginacion
     override fun getRefreshKey(state: PagingState<Int, Proposal>): Int? {
@@ -34,16 +45,32 @@ class ProposalsDataSource(
             // Obtiene el número de la siguiente página o comienza con la página 1 si es nulo
             val nextPageNumber = params.key ?: 1
             // Hace una solicitud al repositorio para obtener las propuestas del usuario
-            val response = if(functionCall != "getRecommendedProposals") repo.getProposalsOfUser(
-                userId2,
-                page = nextPageNumber,
-                pageSize = 6,
-                status = status2
-            ) else repo.getRecommendedProposals(
-                token!!,
-                page = nextPageNumber,
-                pageSize = 6
-            )
+            val response =
+                if (functionCall == "search") {
+                    repo.searchProposals(
+                        token = token!!,
+                        query = query!!,
+                        city,
+                        department,
+                        province,
+                        categoryId,
+                        page = nextPageNumber,
+                        pageSize = 6
+                    )
+                } else if (functionCall != "getRecommendedProposals") {
+                    repo.getProposalsOfUser(
+                        userId2,
+                        page = nextPageNumber,
+                        pageSize = 6,
+                        status = status2
+                    )
+                } else {
+                    repo.getRecommendedProposals(
+                        token!!,
+                        page = nextPageNumber,
+                        pageSize = 6
+                    )
+                }
             // Devuelve los resultados cargados en una página
             LoadResult.Page(
                 data = response, // Datos de la respuesta

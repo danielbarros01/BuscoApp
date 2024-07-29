@@ -291,4 +291,16 @@ interface ApiBusco {
         @Query("page") page: Int?,
         @Query("NumberRecordsPerPage") pageSize: Int?
     ): Response<List<Worker>>
+
+    @GET("$ENDPOINT_PROPOSALS/search")
+    suspend fun searchProposals(
+        @Header("Authorization") token: String,
+        @Query("query") query: String?,
+        @Query("city") city: String?,
+        @Query("department") department: String?,
+        @Query("province") province: String?,
+        @Query("filterCategoryId") categoryId: Int?,
+        @Query("page") page: Int?,
+        @Query("NumberRecordsPerPage") pageSize: Int?
+    ): Response<List<Proposal>>
 }

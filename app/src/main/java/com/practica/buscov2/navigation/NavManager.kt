@@ -346,11 +346,15 @@ fun NavManager() {
             )
         }
 
-        composable("Search") {
+        composable("Search/{typeSearch}",
+            arguments = listOf(navArgument("typeSearch") { type = NavType.StringType })
+            ) {
+            val typeSearch = it.arguments?.getString("typeSearch") ?: "workers"
             val userViewModel: UserViewModel = hiltViewModel()
             val completeDataViewModel: CompleteDataViewModel = hiltViewModel()
 
             SearchView(
+                typeSearch = typeSearch,
                 vmUser = userViewModel,
                 vmGoogle = loginGoogleViewModel,
                 vmToken = tokenViewModel,

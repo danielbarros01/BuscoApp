@@ -9,8 +9,10 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
 import com.practica.buscov2.data.pagination.JobsDataSource
+import com.practica.buscov2.data.pagination.ProposalsDataSource
 import com.practica.buscov2.data.pagination.SearchDataSource
 import com.practica.buscov2.data.repository.busco.ProfessionsRepository
+import com.practica.buscov2.data.repository.busco.ProposalsRepository
 import com.practica.buscov2.data.repository.busco.WorkersRepository
 import com.practica.buscov2.model.busco.ProfessionCategory
 import com.practica.buscov2.model.busco.SimpleUbication
@@ -28,7 +30,8 @@ import javax.inject.Inject
 @HiltViewModel
 class SearchViewModel @Inject constructor(
     private val repoWorkers: WorkersRepository,
-    private val repoProfessions: ProfessionsRepository
+    private val repoProfessions: ProfessionsRepository,
+    private val repoProposals: ProposalsRepository,
 ) :
     ViewModel() {
     private val _isLoading = mutableStateOf(false)
@@ -70,6 +73,23 @@ class SearchViewModel @Inject constructor(
         }.flow.cachedIn(viewModelScope)
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val proposalsPage = _refreshTrigger.flatMapLatest {
+        Pager(PagingConfig(pageSize = 6)) {
+            ProposalsDataSource(
+                function = "search",
+                repo = repoProposals,
+                tokenP = token.value!!,
+                queryP = query.value,
+                cityP = ubication.value.city,
+                departmentP = ubication.value.department,
+                provinceP = ubication.value.province,
+                categoryIdP = category.value?.id,
+                status = null
+            )
+        }.flow.cachedIn(viewModelScope)
+    }
+
     fun refreshWorkers() {
         _refreshTrigger.value++
     }
@@ -96,6 +116,11 @@ class SearchViewModel @Inject constructor(
 
     init {
         fetchCategories()
+    }
+
+    fun resetValues(){
+        _stars.value = null
+        _category.value = null
     }
 
     private fun fetchCategories() {

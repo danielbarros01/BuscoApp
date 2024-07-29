@@ -507,11 +507,13 @@ fun AlertChangeUbication(
 fun AlertFilters(
     showDialog: MutableState<Boolean>,
     categories: List<ProfessionCategory>,
+    filterQualificationView: Boolean?,
     onFilter: (Int?, ProfessionCategory?) -> Unit
 ) {
     // Crear una lista mutable a partir de categories y agregar el elemento "Todas"
     val listCategories = remember {
-        categories.toMutableList().apply { add(0, ProfessionCategory(name = "Todas")) } }
+        categories.toMutableList().apply { add(0, ProfessionCategory(name = "Todas")) }
+    }
 
     var stars by remember { mutableStateOf<Int?>(null) }
     var categorySelected by remember { mutableStateOf<ProfessionCategory?>(null) }
@@ -523,22 +525,24 @@ fun AlertFilters(
             },
             title = {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Row(
-                        modifier = Modifier.padding(vertical = 10.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(text = "Calificación:", color = GrayText, fontSize = 18.sp)
-                        Space(size = 4.dp)
-                        OptionsField(
-                            modifier = Modifier
-                                .height(58.dp)
-                                .weight(1f),
-                            options = listOf("Todas", "1", "2", "3", "4", "5"),
-                            text = if (stars == null) "Todas" else stars.toString(),
-                            enabled = true,
-                            onChanged = {
-                                stars = it.toIntOrNull()
-                            })
+                    if (filterQualificationView == true) {
+                        Row(
+                            modifier = Modifier.padding(vertical = 10.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(text = "Calificación:", color = GrayText, fontSize = 18.sp)
+                            Space(size = 4.dp)
+                            OptionsField(
+                                modifier = Modifier
+                                    .height(58.dp)
+                                    .weight(1f),
+                                options = listOf("Todas", "1", "2", "3", "4", "5"),
+                                text = if (stars == null) "Todas" else stars.toString(),
+                                enabled = true,
+                                onChanged = {
+                                    stars = it.toIntOrNull()
+                                })
+                        }
                     }
 
                     Row(

@@ -32,6 +32,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.practica.buscov2.R
@@ -44,6 +45,7 @@ import com.practica.buscov2.ui.components.AlertFilters
 import com.practica.buscov2.ui.components.BottomNav
 import com.practica.buscov2.ui.components.ButtonUbication
 import com.practica.buscov2.ui.components.CardJob
+import com.practica.buscov2.ui.components.CardProposal
 import com.practica.buscov2.ui.components.CardWorker
 import com.practica.buscov2.ui.components.ItemsInLazy
 import com.practica.buscov2.ui.components.LateralMenu
@@ -60,9 +62,11 @@ import com.practica.buscov2.ui.viewModel.proposals.ApplicationsViewModel
 import com.practica.buscov2.ui.viewModel.users.CompleteDataViewModel
 import com.practica.buscov2.ui.viewModel.users.UserViewModel
 import com.practica.buscov2.ui.views.proposals.NewPublication
+import com.practica.buscov2.util.AppUtils
 
 @Composable
 fun SearchView(
+    typeSearch: String, // workers or proposals
     vmUser: UserViewModel,
     vmGoogle: GoogleLoginViewModel,
     vmToken: TokenViewModel,
@@ -81,6 +85,7 @@ fun SearchView(
             }) {}
 
             vmSearch.setToken(it.token)
+            vmSearch.resetValues()
         }
     }
 
@@ -88,6 +93,7 @@ fun SearchView(
         Box(modifier = Modifier.fillMaxSize()) {
             SearchV(
                 Modifier.align(Alignment.Center),
+                typeSearch,
                 vmUser,
                 vmGoogle,
                 user!!,
@@ -102,6 +108,7 @@ fun SearchView(
 @Composable
 fun SearchV(
     modifier: Modifier,
+    search: String,
     vmUser: UserViewModel,
     vmGoogle: GoogleLoginViewModel,
     user: User,
@@ -128,7 +135,11 @@ fun SearchV(
         LoaderMaxSize()
     }
 
-    AlertFilters(showDialog = showAlertFilters, categories = categories) { stars, category ->
+    AlertFilters(
+        showDialog = showAlertFilters,
+        categories = categories,
+        filterQualificationView = search == "workers" //si busco trabajadores puedo filtrar por calificacion
+    ) { stars, category ->
         //Poner estos valores en el viewModel
         vmSearch.setStars(stars)
         vmSearch.setCategory(category)
@@ -205,21 +216,46 @@ fun SearchV(
                     .padding(start = 15.dp, end = 15.dp, top = 0.dp, bottom = 0.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                val workersPage = vmSearch.workersPage.collectAsLazyPagingItems()
-
-                ItemsInLazy(workersPage, secondViewHeader = {}) { worker ->
-                    CardWorker(
-                        modifier = Modifier
-                            .height(150.dp)
-                            .padding(vertical = 10.dp),
-                        worker = worker,
-                        rating = Qualification(worker.averageQualification),
-                        onClick = {
-                            navController.navigate("Profile/${worker.userId}")
-                        }
-                    )
+                if (search == "workers") {
+                    SearchWorkers(vmSearch, navController)
+                } else {
+                    SearchProposals(vmSearch, navController)
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun SearchWorkers(vmSearch: SearchViewModel, navController: NavController) {
+    val workersPage = vmSearch.workersPage.collectAsLazyPagingItems()
+
+    ItemsInLazy(workersPage, secondViewHeader = {}) { worker ->
+        CardWorker(
+            modifier = Modifier
+                .height(150.dp)
+                .padding(vertical = 10.dp),
+            worker = worker,
+            rating = Qualification(worker.averageQualification),
+            onClick = {
+                navController.navigate("Profile/${worker.userId}")
+            }
+        )
+    }
+}
+
+@Composable
+fun SearchProposals(vmSearch: SearchViewModel, navController: NavController) {
+    val workersPage = vmSearch.proposalsPage.collectAsLazyPagingItems()
+
+    ItemsInLazy(workersPage, secondViewHeader = {}) {
+        CardProposal(
+            image = it.image ?: "",
+            title = it.title ?: "",
+            price = "$${it.minBudget.toString()} a $${it.maxBudget.toString()}",
+            date = AppUtils.formatDateCard("${it.date}"),
+        ) {
+           navController.navigate("Proposal/${it.id}")
         }
     }
 }

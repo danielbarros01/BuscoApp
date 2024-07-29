@@ -178,6 +178,10 @@ fun Home(
     navController: NavHostController,
     user: User
 ) {
+    var typeSearch by remember {
+        mutableStateOf("workers") // workers or proposals
+    }
+
     val navigationRoutes = RoutesBottom.allRoutes
 
     val isLoading by homeVm.isLoading.collectAsState()
@@ -262,12 +266,14 @@ fun Home(
                     ButtonsChangeType(onClickWorker = {
                         if (user.worker != null) {
                             isSearchWork = true
+                            typeSearch = "proposals"
 
                         } else {
                             navController.navigate("BeWorker")
                         }
                     }, onClickClient = {
                         isSearchWork = false
+                        typeSearch = "workers"
                     })
                 }
 
@@ -287,12 +293,19 @@ fun Home(
                     if (isSearchWork) {
                         val proposalsPage = homeVm.proposalsPage.collectAsLazyPagingItems()
                         activeLoaderMax(proposalsPage, homeVm)
-                        ButtonPrincipal(
+                        /*ButtonPrincipal(
                             text = "Buscar",
                             enabled = true,
                             modifier = Modifier.padding(bottom = 15.dp)
                         ) {
-                        }
+                        }*/
+
+                        SearchSection(vmProfessions, onQueryChange = { query ->
+                            vmSearch.onQueryChange(query)
+                        }, onSearch = {
+                            //pasar en la ruta el query
+                            navController.navigate("Search/${typeSearch}")
+                        })
 
                         ShowProposals(proposalsPage, navController)
                     } else {
@@ -304,7 +317,7 @@ fun Home(
                             vmSearch.onQueryChange(query)
                         }, onSearch = {
                             //pasar en la ruta el query
-                            navController.navigate("Search")
+                            navController.navigate("Search/${typeSearch}")
                         })
 
                         Space(size = 10.dp)

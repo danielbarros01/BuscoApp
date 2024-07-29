@@ -4,6 +4,7 @@ import android.util.Log
 import com.practica.buscov2.data.ApiBusco
 import com.practica.buscov2.model.busco.Proposal
 import com.practica.buscov2.model.busco.User
+import com.practica.buscov2.model.busco.Worker
 import com.practica.buscov2.model.busco.auth.ErrorBusco
 import com.practica.buscov2.util.ServerUtils
 import kotlinx.coroutines.delay
@@ -155,6 +156,36 @@ class ProposalsRepository @Inject constructor(private val api: ApiBusco) {
             }
         }catch (e:Exception){
             return ErrorBusco(0, "Error", message = "Error desconocido, intentalo de nuevo")
+        }
+    }
+
+    suspend fun searchProposals(
+        token: String,
+        query: String,
+        city: String? = null,
+        department: String? = null,
+        province: String? = null,
+        categoryId: Int? = null,
+        page: Int? = null,
+        pageSize: Int? = null
+    ): List<Proposal> {
+        try {
+            delay(1000)
+
+            val response = api.searchProposals(
+                token = "Bearer $token",
+                query = query,
+                city = city,
+                department = department,
+                province = province,
+                categoryId = categoryId,
+                page = page,
+                pageSize = pageSize
+            )
+
+            return response.body() ?: emptyList()
+        } catch (e: Exception) {
+            return emptyList()
         }
     }
 }
