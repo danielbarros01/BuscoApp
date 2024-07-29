@@ -3,6 +3,7 @@ package com.practica.buscov2.data.repository.busco
 import android.util.Log
 import com.google.gson.Gson
 import com.practica.buscov2.data.ApiBusco
+import com.practica.buscov2.model.busco.Profession
 import com.practica.buscov2.model.busco.Proposal
 import com.practica.buscov2.model.busco.User
 import com.practica.buscov2.model.busco.Worker
@@ -27,7 +28,7 @@ class WorkersRepository @Inject constructor(private val api: ApiBusco) {
         }
     }
 
-    suspend fun updateWorker(token: String, worker: Worker):Any{
+    suspend fun updateWorker(token: String, worker: Worker): Any {
         try {
             val response = api.updateWorker("Bearer $token", worker)
 
@@ -43,12 +44,45 @@ class WorkersRepository @Inject constructor(private val api: ApiBusco) {
     }
 
     suspend fun getRecommendedWorkers(
-        token:String,
+        token: String,
         page: Int? = null,
         pageSize: Int? = null,
     ): List<User> {
         delay(2000) //para demostracion
-        val response = api.getRecommendedWorkers("Bearer $token",page, pageSize)
+        val response = api.getRecommendedWorkers("Bearer $token", page, pageSize)
         return response.body() ?: emptyList()
     }
+
+    suspend fun searchWorkers(
+        token: String,
+        query: String,
+        city: String? = null,
+        department: String? = null,
+        province: String? = null,
+        categoryId: Int? = null,
+        qualificationStars: Int? = null,
+        page: Int? = null,
+        pageSize: Int? = null
+    ): List<Worker> {
+        try {
+            delay(1000)
+
+            val response = api.searchWorkers(
+                token = "Bearer $token",
+                query = query,
+                city = city,
+                department = department,
+                province = province,
+                categoryId = categoryId,
+                qualificationStars = qualificationStars,
+                page = page,
+                pageSize = pageSize
+            )
+
+            return response.body() ?: emptyList()
+        } catch (e: Exception) {
+            return emptyList()
+        }
+    }
+
 }

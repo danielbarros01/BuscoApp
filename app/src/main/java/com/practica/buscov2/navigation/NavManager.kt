@@ -18,6 +18,7 @@ import com.practica.buscov2.ui.viewModel.HomeViewModel
 import com.practica.buscov2.ui.viewModel.JobsViewModel
 import com.practica.buscov2.ui.viewModel.NewPublicationViewModel
 import com.practica.buscov2.ui.viewModel.QualificationsViewModel
+import com.practica.buscov2.ui.viewModel.SearchViewModel
 import com.practica.buscov2.ui.viewModel.auth.LoginViewModel
 import com.practica.buscov2.ui.viewModel.auth.RecoverPasswordViewModel
 import com.practica.buscov2.ui.viewModel.auth.RegisterViewModel
@@ -38,6 +39,7 @@ import com.practica.buscov2.ui.views.confirmation.CheckEmailView
 import com.practica.buscov2.ui.views.users.CompleteDataView
 import com.practica.buscov2.ui.views.HomeView
 import com.practica.buscov2.ui.views.JobsView
+import com.practica.buscov2.ui.views.SearchView
 import com.practica.buscov2.ui.views.proposals.NewPublicationView
 import com.practica.buscov2.ui.views.users.ProfileView
 import com.practica.buscov2.ui.views.auth.LoginView
@@ -61,6 +63,7 @@ fun NavManager() {
     val navController = rememberNavController()
     val tokenViewModel: TokenViewModel = hiltViewModel()
     val loginGoogleViewModel: GoogleLoginViewModel = hiltViewModel()
+    val searchViewModel: SearchViewModel = hiltViewModel()
 
     NavHost(navController = navController, startDestination = "Start") {
         composable("Start") {
@@ -117,11 +120,18 @@ fun NavManager() {
         composable("Home") {
             val homeViewModel: HomeViewModel = hiltViewModel()
             val userViewModel: UserViewModel = hiltViewModel()
+            val vmCompleteData: CompleteDataViewModel = hiltViewModel()
+            val professionsViewModel: ProfessionsViewModel = hiltViewModel()
+
+
             HomeView(
                 homeViewModel,
                 userViewModel,
                 tokenViewModel,
                 loginGoogleViewModel,
+                vmCompleteData,
+                professionsViewModel,
+                searchViewModel,
                 navController
             )
         }
@@ -323,7 +333,7 @@ fun NavManager() {
             )
         }
 
-        composable("Applications/me"){
+        composable("Applications/me") {
             val userViewModel: UserViewModel = hiltViewModel()
             val vmApplications: ApplicationsViewModel = hiltViewModel()
 
@@ -332,6 +342,20 @@ fun NavManager() {
                 vmGoogle = loginGoogleViewModel,
                 vmToken = tokenViewModel,
                 vmApplications = vmApplications,
+                navController = navController
+            )
+        }
+
+        composable("Search") {
+            val userViewModel: UserViewModel = hiltViewModel()
+            val completeDataViewModel: CompleteDataViewModel = hiltViewModel()
+
+            SearchView(
+                vmUser = userViewModel,
+                vmGoogle = loginGoogleViewModel,
+                vmToken = tokenViewModel,
+                vmSearch = searchViewModel,
+                completeDataViewModel,
                 navController = navController
             )
         }

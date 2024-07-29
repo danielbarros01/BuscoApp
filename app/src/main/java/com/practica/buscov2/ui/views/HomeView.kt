@@ -6,6 +6,7 @@ import android.widget.Toast
 import androidx.camera.view.LifecycleCameraController
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -13,7 +14,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.FlowRowOverflow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -22,8 +26,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
@@ -32,8 +38,10 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBar
@@ -42,6 +50,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -78,6 +87,7 @@ import com.practica.buscov2.model.busco.SimpleUbication
 import com.practica.buscov2.model.busco.User
 import com.practica.buscov2.navigation.RoutesBottom
 import com.practica.buscov2.navigation.RoutesDrawer
+import com.practica.buscov2.ui.components.AlertChangeUbication
 import com.practica.buscov2.ui.components.BottomNav
 import com.practica.buscov2.ui.components.ButtonMenu
 import com.practica.buscov2.ui.components.ButtonPrincipal
@@ -99,8 +109,11 @@ import com.practica.buscov2.ui.theme.Rubik
 import com.practica.buscov2.ui.theme.ShadowColor
 import com.practica.buscov2.ui.viewModel.auth.GoogleLoginViewModel
 import com.practica.buscov2.ui.viewModel.HomeViewModel
+import com.practica.buscov2.ui.viewModel.SearchViewModel
 import com.practica.buscov2.ui.viewModel.auth.TokenViewModel
+import com.practica.buscov2.ui.viewModel.professions.ProfessionsViewModel
 import com.practica.buscov2.ui.viewModel.proposals.ProposalsViewModel
+import com.practica.buscov2.ui.viewModel.users.CompleteDataViewModel
 import com.practica.buscov2.ui.viewModel.users.UserViewModel
 import com.practica.buscov2.util.AppUtils
 import kotlinx.coroutines.launch
@@ -112,6 +125,9 @@ fun HomeView(
     vmUser: UserViewModel,
     vmToken: TokenViewModel,
     vmGoogle: GoogleLoginViewModel,
+    vmCompleteData: CompleteDataViewModel,
+    vmProfessions: ProfessionsViewModel,
+    vmSearch: SearchViewModel,
     navController: NavHostController
 ) {
     val token by vmToken.token.collectAsState()
@@ -122,7 +138,10 @@ fun HomeView(
         token?.let {
             vmUser.getMyProfile(it.token, {
                 navController.navigate("Login")
-            }) {}
+            }) { user ->
+                vmCompleteData.onDateChangedInitializedData(user)
+                vmSearch.onUbicationChange(SimpleUbication(user.country, user.province, user.department, user.city))
+            }
             homeVm.setToken(it.token)
             homeVm.refreshWorkers()
         }
@@ -131,7 +150,17 @@ fun HomeView(
 
     if (user != null) {
         Box(modifier = Modifier.fillMaxSize()) {
-            Home(Modifier.align(Alignment.Center), homeVm, vmUser, vmGoogle, navController, user!!)
+            Home(
+                Modifier.align(Alignment.Center),
+                homeVm,
+                vmUser,
+                vmGoogle,
+                vmCompleteData,
+                vmProfessions,
+                vmSearch,
+                navController,
+                user!!
+            )
         }
     }
 }
@@ -143,10 +172,12 @@ fun Home(
     homeVm: HomeViewModel,
     vmUser: UserViewModel,
     vmGoogle: GoogleLoginViewModel,
+    vmCompleteData: CompleteDataViewModel,
+    vmProfessions: ProfessionsViewModel,
+    vmSearch: SearchViewModel,
     navController: NavHostController,
     user: User
 ) {
-    //Rutas de navegacion bottom
     val navigationRoutes = RoutesBottom.allRoutes
 
     val isLoading by homeVm.isLoading.collectAsState()
@@ -157,8 +188,19 @@ fun Home(
         mutableStateOf(false)
     }
 
+    val changeUbication = remember {
+        mutableStateOf(false)
+    }
+
     if (isLoading) {
         LoaderMaxSize()
+    }
+
+    AlertChangeUbication(
+        changeUbication,
+        vmCompleteData
+    ) { pais, provincia, departamento, localidad ->
+        vmSearch.onUbicationChange(SimpleUbication(pais, provincia, departamento, localidad))
     }
 
     ModalNavigationDrawer(
@@ -233,12 +275,14 @@ fun Home(
                 Column {
                     ButtonUbication(
                         ubication = SimpleUbication(
-                            country = user.country,
-                            province = user.province,
-                            department = user.department,
-                            city = user.city
+                            country = vmCompleteData.pais.value,
+                            province = vmCompleteData.provincia.value,
+                            department = vmCompleteData.departamento.value,
+                            city = vmCompleteData.localidad.value
                         ), modifier = Modifier.offset(x = -(15.dp))
-                    )
+                    ) {
+                        changeUbication.value = true
+                    }
 
                     if (isSearchWork) {
                         val proposalsPage = homeVm.proposalsPage.collectAsLazyPagingItems()
@@ -255,7 +299,14 @@ fun Home(
                         val workersPage = homeVm.workersPage.collectAsLazyPagingItems()
                         activeLoaderMax(workersPage, homeVm)
 
-                        SearchField() {}
+
+                        SearchSection(vmProfessions, onQueryChange = { query ->
+                            vmSearch.onQueryChange(query)
+                        }, onSearch = {
+                            //pasar en la ruta el query
+                            navController.navigate("Search")
+                        })
+
                         Space(size = 10.dp)
                         ShowWorkers(workersPage, navController)
                     }
@@ -264,6 +315,58 @@ fun Home(
         }
 
     }
+}
+
+@Composable
+fun SearchSection(
+    vmProfessions: ProfessionsViewModel,
+    onQueryChange: (String) -> Unit,
+    onSearch: () -> Unit
+) {
+    val professions by vmProfessions.professions
+
+    SearchField(
+        onQueryChange = {
+            vmProfessions.getProfessions(it)
+            onQueryChange(it)
+        },
+        onSearch = { onSearch() },
+        content = {
+            //Mostrar lista de profesiones
+            Column(
+                modifier = Modifier
+                    .padding(bottom = 15.dp)
+                    .verticalScroll(rememberScrollState()),
+            ) {
+                Column(
+                    modifier = Modifier
+                        .padding(top = 5.dp)
+                        .fillMaxWidth()
+                ) {
+                    professions.forEach { profession ->
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .defaultMinSize(minHeight = 50.dp)
+                                .clickable {
+                                    onQueryChange(profession.name)
+                                    onSearch()
+                                }, contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = profession.name,
+                                fontSize = 18.sp,
+                                modifier = Modifier
+                                    .padding(8.dp)
+                                    .fillMaxSize()
+                            )
+                        }
+                        HorizontalDivider()
+                    }
+                }
+            }
+        }
+    )
 }
 
 @Composable
@@ -403,7 +506,7 @@ fun OutlinedTitle(text: String) {
     }
 }
 
-fun <T:Any>activeLoaderMax(
+fun <T : Any> activeLoaderMax(
     itemsPage: LazyPagingItems<T>,
     vmHomeViewModel: HomeViewModel
 ) {

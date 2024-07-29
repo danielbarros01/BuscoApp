@@ -9,5 +9,6 @@ data class Worker(
     val professionsId: List<Int?>? = null,
     val workersProfessions: List<WorkersProfessions>? = null,
 
-    val user:User? = null
+    val user:User? = null,
+    val averageQualification: Float? = null
 )

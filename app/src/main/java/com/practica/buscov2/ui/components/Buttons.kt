@@ -292,7 +292,7 @@ fun ButtonUbication(
     onClick: () -> Unit = {}
 ) {
     Button(
-        onClick = { /*TODO*/ }, colors = ButtonDefaults.buttonColors(
+        onClick = { onClick()}, colors = ButtonDefaults.buttonColors(
             containerColor = Color.Transparent,
             contentColor = Color.Transparent,
         ),

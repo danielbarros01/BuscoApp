@@ -573,6 +573,7 @@ fun CardWorker(
                     Text(
                         text = nameComplete,
                         fontSize = 26.sp,
+                        maxLines = 1,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.clickable {
                             onClickName()
@@ -594,7 +595,7 @@ fun CardWorker(
 
                         }
                         Text(
-                            text = "${rating.score} (${rating.quantity})",
+                            text = "${rating.score} (${rating.quantity ?: ""})",
                             fontSize = 12.sp,
                             color = GrayPlaceholder,
                             fontWeight = FontWeight.Medium

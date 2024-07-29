@@ -33,7 +33,8 @@ fun TopBar(
             Text(
                 text = title,
                 fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
+                maxLines = 2
             )
         },
         navigationIcon = {

@@ -39,7 +39,7 @@ import com.practica.buscov2.ui.theme.GrayPlaceholder
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchField(onQueryChange: (String) -> Unit = {}, content: @Composable () -> Unit) {
+fun SearchField(onQueryChange: (String) -> Unit = {}, onSearch:() -> Unit = {}, content: @Composable () -> Unit) {
     val colors1 = SearchBarDefaults.colors()
 
     var query by remember {
@@ -62,15 +62,15 @@ fun SearchField(onQueryChange: (String) -> Unit = {}, content: @Composable () ->
                     onQueryChange(it)
                 },
                 onSearch = {
-                    active = false
+                    onSearch()
                 },
                 expanded = active, //active
                 onExpandedChange = {}, //onactivechange
                 colors = colors1.inputFieldColors,
                 leadingIcon = {
                     IconButton(onClick = {
-                        active = false
                         //Lo mismo que en OnSearch
+                        onSearch()
                     }) {
                         Icon(
                             painter = painterResource(id = R.drawable.search),

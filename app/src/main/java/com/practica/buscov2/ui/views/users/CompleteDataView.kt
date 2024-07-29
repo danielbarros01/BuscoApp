@@ -305,7 +305,10 @@ fun PageOne(
 }
 
 @Composable
-fun PageTwo(vm: CompleteDataViewModel) {
+fun PageTwo(
+    vm: CompleteDataViewModel,
+    onData: (String, String, String, String?) -> Unit = { a, b, c, d -> }
+) {
     val provincias by vm.provincias.collectAsState()
     val departamentos by vm.departamentos.collectAsState()
     val localidades by vm.localidades.collectAsState()
@@ -325,10 +328,12 @@ fun PageTwo(vm: CompleteDataViewModel) {
         ) {
             DropDownMenu() {
                 vm.onDateChangedUbication(it, provincia, departamento, localidad)
+                onData(it, provincia, departamento, localidad)
             }
             Spacer(modifier = Modifier.width(10.dp))
             SelectProvince(provincias, provincia) {
                 vm.onDateChangedUbication(pais, it, departamento, localidad)
+                onData(it, provincia, departamento, localidad)
                 vm.fetchDepartamentos()
             }
         }
@@ -336,11 +341,13 @@ fun PageTwo(vm: CompleteDataViewModel) {
         Space(5.dp)
         SelectDepartment(departamentos, departamento) {
             vm.onDateChangedUbication(pais, provincia, it, localidad)
+            onData(it, provincia, departamento, localidad)
             vm.fetchLocalidades()
         }
         Space(10.dp)
         SelectCity(localidades, localidad ?: "", enabledField) {
             vm.onDateChangedUbication(pais, provincia, departamento, it)
+            onData(it, provincia, departamento, localidad)
         }
     }
 }

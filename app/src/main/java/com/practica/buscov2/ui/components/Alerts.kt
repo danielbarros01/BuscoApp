@@ -24,6 +24,10 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -40,11 +44,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.practica.buscov2.R
 import com.practica.buscov2.model.busco.Application
+import com.practica.buscov2.model.busco.ProfessionCategory
 import com.practica.buscov2.model.busco.Proposal
+import com.practica.buscov2.model.busco.SimpleUbication
 import com.practica.buscov2.model.busco.User
+import com.practica.buscov2.ui.theme.GrayText
 import com.practica.buscov2.ui.theme.GreenBusco
 import com.practica.buscov2.ui.theme.OrangePrincipal
 import com.practica.buscov2.ui.theme.RedBusco
+import com.practica.buscov2.ui.viewModel.users.CompleteDataViewModel
+import com.practica.buscov2.ui.views.users.PageTwo
+import java.util.Locale.Category
 
 @Composable
 fun AlertError(
@@ -437,3 +447,128 @@ fun AlertQualify(
     }
 }
 
+@Composable
+fun AlertChangeUbication(
+    showDialog: MutableState<Boolean>,
+    vm: CompleteDataViewModel,
+    onDismiss: () -> Unit = { showDialog.value = false },
+    onChange: (String, String, String, String) -> Unit
+) {
+    var country by remember { mutableStateOf("") }
+    var province by remember { mutableStateOf("") }
+    var department by remember { mutableStateOf("") }
+    var city by remember { mutableStateOf("") }
+
+    if (showDialog.value) {
+        AlertDialog(
+            title = {
+                PageTwo(vm) { pais, provincia, departamento, localidad ->
+                    country = pais
+                    province = provincia
+                    department = departamento
+                    city = localidad ?: ""
+                }
+            },
+            icon = {
+                Icon(
+                    painter = painterResource(id = R.drawable.location),
+                    contentDescription = "",
+                    tint = GreenBusco,
+                    modifier = Modifier.size(110.dp)
+                )
+            },
+            onDismissRequest = { onDismiss() },
+            confirmButton = {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 10.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Box(modifier = Modifier.weight(1f)) {
+                        ButtonLine(text = "Cancelar") {
+                            onDismiss()
+                        }
+                    }
+                    Space(size = 5.dp)
+                    Box(modifier = Modifier.weight(1f)) {
+                        ButtonPrincipal(text = "Cambiar", enabled = true, color = GreenBusco) {
+                            onChange(country, province, department, city)
+                            showDialog.value = false
+                        }
+                    }
+                }
+            })
+    }
+}
+
+@Composable
+fun AlertFilters(
+    showDialog: MutableState<Boolean>,
+    categories: List<ProfessionCategory>,
+    onFilter: (Int?, ProfessionCategory?) -> Unit
+) {
+    // Crear una lista mutable a partir de categories y agregar el elemento "Todas"
+    val listCategories = remember {
+        categories.toMutableList().apply { add(0, ProfessionCategory(name = "Todas")) } }
+
+    var stars by remember { mutableStateOf<Int?>(null) }
+    var categorySelected by remember { mutableStateOf<ProfessionCategory?>(null) }
+
+    if (showDialog.value) {
+        AlertDialog(
+            icon = {
+                Title(text = "Filtrar por")
+            },
+            title = {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Row(
+                        modifier = Modifier.padding(vertical = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(text = "Calificación:", color = GrayText, fontSize = 18.sp)
+                        Space(size = 4.dp)
+                        OptionsField(
+                            modifier = Modifier
+                                .height(58.dp)
+                                .weight(1f),
+                            options = listOf("Todas", "1", "2", "3", "4", "5"),
+                            text = if (stars == null) "Todas" else stars.toString(),
+                            enabled = true,
+                            onChanged = {
+                                stars = it.toIntOrNull()
+                            })
+                    }
+
+                    Row(
+                        modifier = Modifier.padding(vertical = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(text = "Categoria:", color = GrayText, fontSize = 18.sp)
+                        Space(size = 4.dp)
+                        OptionsField(
+                            modifier = Modifier
+                                .height(58.dp)
+                                .weight(1f),
+                            options = listCategories.map { it.name!! },
+                            text = categorySelected?.name ?: "Todas",
+                            enabled = true,
+                            onChanged = {
+                                categorySelected = categories.firstOrNull { category ->
+                                    category.name == it
+                                }
+                            })
+                    }
+                }
+
+            },
+            onDismissRequest = { showDialog.value = false },
+            confirmButton = {
+                ButtonPrincipal(text = "Filtrar", enabled = true) {
+                    onFilter(stars, categorySelected)
+                }
+            }
+        )
+    }
+}
