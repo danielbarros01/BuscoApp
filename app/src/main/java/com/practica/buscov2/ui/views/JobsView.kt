@@ -178,6 +178,7 @@ private fun ShowJobs(jobsPage: LazyPagingItems<Proposal>, navController: NavCont
                 },
                 onClickChat = {
                     //Ir al chat
+                    navController.navigate("Chat/${user.id}")
                 })
         }
     }

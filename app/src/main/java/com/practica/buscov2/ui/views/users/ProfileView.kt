@@ -230,7 +230,11 @@ fun ProfileV(
                             modifier = Modifier
                                 .width(140.dp)
                                 .height(34.dp)
-                        )
+                        ){
+                            //Send message
+                            //Abrir el chat con esa persona
+                            navController.navigate("Chat/${userProfile.id}")
+                        }
                         Space(size = 8.dp)
                         ButtonWithIcon(
                             iconId = R.drawable.briefcase_works,

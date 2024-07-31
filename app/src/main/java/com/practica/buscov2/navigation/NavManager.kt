@@ -24,6 +24,7 @@ import com.practica.buscov2.ui.viewModel.auth.RecoverPasswordViewModel
 import com.practica.buscov2.ui.viewModel.auth.RegisterViewModel
 import com.practica.buscov2.ui.viewModel.auth.ResetPasswordViewModel
 import com.practica.buscov2.ui.viewModel.auth.TokenViewModel
+import com.practica.buscov2.ui.viewModel.chat.ChatViewModel
 import com.practica.buscov2.ui.viewModel.professions.ProfessionsViewModel
 import com.practica.buscov2.ui.viewModel.proposals.ApplicationsViewModel
 import com.practica.buscov2.ui.viewModel.proposals.ProposalViewModel
@@ -48,6 +49,8 @@ import com.practica.buscov2.ui.views.auth.RecoverPassword
 import com.practica.buscov2.ui.views.auth.RegisterView
 import com.practica.buscov2.ui.views.auth.ResetPassword
 import com.practica.buscov2.ui.views.StartView
+import com.practica.buscov2.ui.views.chat.ChatPrivateScreen
+import com.practica.buscov2.ui.views.chat.ChatScreen
 import com.practica.buscov2.ui.views.proposals.ActiveProposals
 import com.practica.buscov2.ui.views.proposals.ActiveProposalsView
 import com.practica.buscov2.ui.views.proposals.ApplicantsView
@@ -160,10 +163,6 @@ fun NavManager() {
         composable("RegisterWorker") {
             val registerWorkerViewModel: RegisterWorkerViewModel = hiltViewModel()
             RegisterWorkerView(registerWorkerViewModel, tokenViewModel, navController)
-        }
-
-        composable("Chat") {
-            ChatView(navController)
         }
 
         composable("Configuration")
@@ -346,9 +345,10 @@ fun NavManager() {
             )
         }
 
-        composable("Search/{typeSearch}",
+        composable(
+            "Search/{typeSearch}",
             arguments = listOf(navArgument("typeSearch") { type = NavType.StringType })
-            ) {
+        ) {
             val typeSearch = it.arguments?.getString("typeSearch") ?: "workers"
             val userViewModel: UserViewModel = hiltViewModel()
             val completeDataViewModel: CompleteDataViewModel = hiltViewModel()
@@ -363,5 +363,23 @@ fun NavManager() {
                 navController = navController
             )
         }
+
+        composable("Chat") {
+            val chatVm: ChatViewModel = hiltViewModel()
+            val userViewModel: UserViewModel = hiltViewModel()
+            ChatScreen(chatVm, userViewModel, loginGoogleViewModel, tokenViewModel, navController)
+        }
+
+        composable(
+            "Chat/{toUserId}",
+            arguments = listOf(navArgument("toUserId") { type = NavType.IntType })
+        ) {
+            val toUserId = it.arguments?.getInt("toUserId") ?: 0
+            val chatVm: ChatViewModel = hiltViewModel()
+            val userViewModel: UserViewModel = hiltViewModel()
+
+            ChatPrivateScreen(toUserId, chatVm, userViewModel, navController)
+        }
+
     }
 }

@@ -10,6 +10,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeParseException
 import java.time.temporal.ChronoUnit
 import java.util.Date
 import java.util.Locale
@@ -126,6 +127,28 @@ class AppUtils {
             val givenDate = LocalDateTime.parse(dateString, formatter).toLocalDate()
             val currentDate = LocalDateTime.now().toLocalDate()
             return ChronoUnit.DAYS.between(givenDate, currentDate)
+        }
+
+        fun formatHours(dateString: String): String {
+            return try {
+                val dateWithoutMillis = dateString.substringBeforeLast(".")
+                val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
+                val givenDateTime = LocalDateTime.parse(dateWithoutMillis, formatter)
+                val givenDate = givenDateTime.toLocalDate()
+                val currentDate = LocalDateTime.now().toLocalDate()
+
+                when (val cantDays = ChronoUnit.DAYS.between(givenDate, currentDate)) {
+                    0L -> {
+                        val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
+                        givenDateTime.format(timeFormatter)
+                    }
+                    1L -> "Ayer"
+                    2L -> "Anteayer"
+                    else -> "Hace $cantDays días"
+                }
+            } catch (e: DateTimeParseException) {
+                "Fecha inválida"
+            }
         }
     }
 }
