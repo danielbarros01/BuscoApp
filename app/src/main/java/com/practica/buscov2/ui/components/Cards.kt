@@ -52,8 +52,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import androidx.core.app.NotificationCompat
 import com.practica.buscov2.R
 import com.practica.buscov2.model.busco.Application
+import com.practica.buscov2.model.busco.Chat
+import com.practica.buscov2.model.busco.Notification
 import com.practica.buscov2.model.busco.Profession
 import com.practica.buscov2.model.busco.Proposal
 import com.practica.buscov2.model.busco.Qualification
@@ -669,6 +672,124 @@ fun CardJobCompleted(proposal: Proposal, onClick: () -> Unit = {}) {
                     .clip(RoundedCornerShape(20.dp))
             )
             Text(text = proposal.description ?: "", fontSize = 16.sp, color = GrayText)
+        }
+    }
+}
+
+
+@Composable
+fun CardChatUser(chat: Chat, onClick: (Chat) -> Unit) {
+    Box(
+        modifier = Modifier
+            .padding(bottom = 10.dp)
+            .fillMaxWidth()
+            .height(100.dp)
+            .border(1.dp, Color.LightGray, RoundedCornerShape(20.dp))
+            .shadow(
+                elevation = 8.dp,
+                spotColor = Color.Black,
+                shape = RoundedCornerShape(20.dp)
+            )
+            .clip(RoundedCornerShape(20.dp))
+            .background(Color.White)
+            .clickable { onClick(chat) }
+            .padding(vertical = 15.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 15.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(modifier = Modifier) {
+                InsertCircleProfileImage(
+                    image = chat.user?.image ?: "",
+                    modifier = Modifier.size(70.dp)
+                )
+            }
+
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+                    .padding(start = 10.dp, top = 8.dp, bottom = 8.dp),
+                verticalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "${chat.user?.name} ${chat.user?.lastname}",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+                Text(
+                    text = chat.lastMessage?.text ?: "",
+                    color = GrayText,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+
+            Box(modifier = Modifier.fillMaxHeight(), contentAlignment = Alignment.TopCenter) {
+                Text(
+                    text = AppUtils.formatHours(chat.lastMessage?.dateAndTime.toString()),
+                    color = GrayText
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun CardNotification(notification: Notification, onClick: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(100.dp)
+            .clickable { onClick()},
+        horizontalAlignment =Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Row(
+            modifier = Modifier.padding(vertical = 15.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(modifier = Modifier) {
+                InsertCircleProfileImage(
+                    image = notification.userSender?.image ?: "",
+                    modifier = Modifier.size(70.dp)
+                )
+            }
+
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+                    .padding(start = 10.dp, top = 8.dp, bottom = 8.dp),
+                verticalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = "Notificación",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+
+                    Text(
+                        text = AppUtils.formatHours(notification.dateAndTime.toString()),
+                        color = GrayText
+                    )
+                }
+
+                Text(
+                    text = notification.text ?: "",
+                    color = GrayText,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+
+
         }
     }
 }

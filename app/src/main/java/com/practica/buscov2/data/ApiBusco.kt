@@ -2,6 +2,7 @@ package com.practica.buscov2.data
 
 import com.practica.buscov2.model.busco.Application
 import com.practica.buscov2.model.busco.ListQualification
+import com.practica.buscov2.model.busco.Notification
 import com.practica.buscov2.model.busco.Profession
 import com.practica.buscov2.model.busco.ProfessionCategory
 import com.practica.buscov2.model.busco.Proposal
@@ -20,6 +21,7 @@ import com.practica.buscov2.util.Constants.Companion.ENDPOINT_CATEGORIES
 import com.practica.buscov2.util.Constants.Companion.ENDPOINT_JOBS
 import com.practica.buscov2.util.Constants.Companion.ENDPOINT_LOGIN
 import com.practica.buscov2.util.Constants.Companion.ENDPOINT_MY_PROFILE
+import com.practica.buscov2.util.Constants.Companion.ENDPOINT_NOTIFICATIONS
 import com.practica.buscov2.util.Constants.Companion.ENDPOINT_PHOTO
 import com.practica.buscov2.util.Constants.Companion.ENDPOINT_PROFESSIONS
 import com.practica.buscov2.util.Constants.Companion.ENDPOINT_PROPOSALS
@@ -303,4 +305,12 @@ interface ApiBusco {
         @Query("page") page: Int?,
         @Query("NumberRecordsPerPage") pageSize: Int?
     ): Response<List<Proposal>>
+
+
+    @GET(ENDPOINT_NOTIFICATIONS)
+    suspend fun getNotifications(
+        @Header("Authorization") token:String,
+        @Query("page") page: Int?,
+        @Query("NumberRecordsPerPage") pageSize: Int?
+    ):Response<List<Notification>>
 }

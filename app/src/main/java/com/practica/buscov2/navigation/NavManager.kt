@@ -3,6 +3,7 @@ package com.practica.buscov2.navigation
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -10,6 +11,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.google.gson.Gson
+import com.practica.buscov2.model.busco.Notification
 import com.practica.buscov2.model.busco.User
 import com.practica.buscov2.ui.viewModel.confirmation.CheckEmailViewModel
 import com.practica.buscov2.ui.viewModel.users.CompleteDataViewModel
@@ -17,6 +19,7 @@ import com.practica.buscov2.ui.viewModel.auth.GoogleLoginViewModel
 import com.practica.buscov2.ui.viewModel.HomeViewModel
 import com.practica.buscov2.ui.viewModel.JobsViewModel
 import com.practica.buscov2.ui.viewModel.NewPublicationViewModel
+import com.practica.buscov2.ui.viewModel.NotificationsViewModel
 import com.practica.buscov2.ui.viewModel.QualificationsViewModel
 import com.practica.buscov2.ui.viewModel.SearchViewModel
 import com.practica.buscov2.ui.viewModel.auth.LoginViewModel
@@ -40,6 +43,7 @@ import com.practica.buscov2.ui.views.confirmation.CheckEmailView
 import com.practica.buscov2.ui.views.users.CompleteDataView
 import com.practica.buscov2.ui.views.HomeView
 import com.practica.buscov2.ui.views.JobsView
+import com.practica.buscov2.ui.views.NotificationsView
 import com.practica.buscov2.ui.views.SearchView
 import com.practica.buscov2.ui.views.proposals.NewPublicationView
 import com.practica.buscov2.ui.views.users.ProfileView
@@ -63,10 +67,14 @@ import com.practica.buscov2.ui.views.workers.RegisterWorkerView
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun NavManager() {
+    val context = LocalContext.current
+
     val navController = rememberNavController()
     val tokenViewModel: TokenViewModel = hiltViewModel()
     val loginGoogleViewModel: GoogleLoginViewModel = hiltViewModel()
     val searchViewModel: SearchViewModel = hiltViewModel()
+    val notificationsViewModel: NotificationsViewModel = hiltViewModel()
+    notificationsViewModel.apllyContext(context)
 
     NavHost(navController = navController, startDestination = "Start") {
         composable("Start") {
@@ -328,6 +336,7 @@ fun NavManager() {
                 userViewModel,
                 tokenViewModel,
                 proposalsViewModel,
+                notificationsViewModel,
                 navController
             )
         }
@@ -381,5 +390,17 @@ fun NavManager() {
             ChatPrivateScreen(toUserId, chatVm, userViewModel, navController)
         }
 
+
+        composable("Notifications") {
+            val vmNotifications: NotificationsViewModel = hiltViewModel()
+            val userViewModel: UserViewModel = hiltViewModel()
+
+            NotificationsView(
+                vmNotifications = vmNotifications,
+                vmUser = userViewModel,
+                vmGoogle = loginGoogleViewModel,
+                navController = navController
+            )
+        }
     }
 }

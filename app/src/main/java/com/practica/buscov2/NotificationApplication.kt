@@ -5,15 +5,15 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.os.Build
 import androidx.annotation.RequiresApi
-import dagger.hilt.android.HiltAndroidApp
 
-@HiltAndroidApp
-class BuscoApplication : Application() {
+
+class NotificationApplication: Application() {
+
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate() {
         super.onCreate()
         val notificationChannel = NotificationChannel(
-            "notification_one",
+            "123",
             "notificaciones",
             NotificationManager.IMPORTANCE_HIGH
         )
@@ -21,4 +21,5 @@ class BuscoApplication : Application() {
         val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.createNotificationChannel(notificationChannel)
     }
+
 }

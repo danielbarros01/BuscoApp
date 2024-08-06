@@ -50,6 +50,7 @@ import com.practica.buscov2.model.busco.Message
 import com.practica.buscov2.model.busco.User
 import com.practica.buscov2.navigation.RoutesBottom
 import com.practica.buscov2.ui.components.BottomNav
+import com.practica.buscov2.ui.components.CardChatUser
 import com.practica.buscov2.ui.components.InsertCircleProfileImage
 import com.practica.buscov2.ui.components.LateralMenu
 import com.practica.buscov2.ui.components.MenuNavigation
@@ -130,7 +131,7 @@ fun ChatPrincipal(
             ) {
                 items(chats.size) { index ->
                     val chat = chats[index]
-                    ChatUser(chat){
+                    CardChatUser(chat){
                         //Ir al chat con el otro usuario
                         navController.navigate("Chat/${chat.user?.id}")
                     }
@@ -141,60 +142,4 @@ fun ChatPrincipal(
 }
 
 
-@Composable
-fun ChatUser(chat: Chat, onClick: (Chat) -> Unit) {
-    Box(
-        modifier = Modifier
-            .padding(bottom = 10.dp)
-            .fillMaxWidth()
-            .height(100.dp)
-            .border(1.dp, Color.LightGray, RoundedCornerShape(20.dp))
-            .shadow(
-                elevation = 8.dp,
-                spotColor = Color.Black,
-                shape = RoundedCornerShape(20.dp)
-            )
-            .clip(RoundedCornerShape(20.dp))
-            .background(Color.White)
-            .clickable { onClick(chat) }
-            .padding(vertical = 15.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 15.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(modifier = Modifier) {
-                InsertCircleProfileImage(
-                    image = chat.user?.image ?: "",
-                    modifier = Modifier.size(70.dp)
-                )
-            }
-
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-                    .padding(start = 10.dp, top = 8.dp, bottom = 8.dp),
-                verticalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = "${chat.user?.name} ${chat.user?.lastname}",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
-                Text(
-                    text = chat.lastMessage?.text ?: "",
-                    color = GrayText,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-
-            Box(modifier = Modifier.fillMaxHeight(), contentAlignment = Alignment.TopCenter) {
-                Text(text = formatHours(chat.lastMessage?.dateAndTime.toString()), color = GrayText)
-            }
-        }
-    }
-}
 

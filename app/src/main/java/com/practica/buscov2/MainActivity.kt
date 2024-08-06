@@ -11,6 +11,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import com.practica.buscov2.navigation.NavManager
 import com.practica.buscov2.ui.theme.BuscoV2Theme
+import com.practica.buscov2.util.permissions.PermissionNotifications
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -25,6 +26,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background,
                 ) {
+                    PermissionNotifications(context = this)
                     NavManager()
                 }
             }

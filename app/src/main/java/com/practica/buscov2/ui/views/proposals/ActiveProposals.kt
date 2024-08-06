@@ -12,19 +12,23 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.paging.compose.collectAsLazyPagingItems
+import com.practica.buscov2.model.busco.Notification
 import com.practica.buscov2.model.busco.User
 import com.practica.buscov2.navigation.RoutesBottom
+import com.practica.buscov2.notifications.NotificationService
+import com.practica.buscov2.notifications.NotificationWorker
 import com.practica.buscov2.ui.components.BottomNav
-import com.practica.buscov2.ui.components.CardJobCompleted
 import com.practica.buscov2.ui.components.CardProposalWithButton
 import com.practica.buscov2.ui.components.ItemsInLazy
 import com.practica.buscov2.ui.components.LoaderMaxSize
 import com.practica.buscov2.ui.components.Space
 import com.practica.buscov2.ui.components.TopBarWithBack
 import com.practica.buscov2.ui.theme.GrayText
+import com.practica.buscov2.ui.viewModel.NotificationsViewModel
 import com.practica.buscov2.ui.viewModel.auth.TokenViewModel
 import com.practica.buscov2.ui.viewModel.proposals.ProposalsViewModel
 import com.practica.buscov2.ui.viewModel.users.UserViewModel
@@ -35,10 +39,12 @@ fun ActiveProposalsView(
     vmUser: UserViewModel,
     vmToken: TokenViewModel,
     vmProposals: ProposalsViewModel,
+    vmNotifications: NotificationsViewModel,
     navController: NavHostController
 ) {
     val token by vmToken.token.collectAsState()
     val user by vmUser.user.collectAsState()
+    val context = LocalContext.current
 
     //Ejecuto una unica vez
     LaunchedEffect(Unit) {
@@ -48,6 +54,7 @@ fun ActiveProposalsView(
                 navController.navigate("Login")
             }) {
                 vmProposals.changeUserId(it.id!!)
+
             }
         }
     }
@@ -59,6 +66,8 @@ fun ActiveProposalsView(
                 vmUser,
                 vmProposals,
                 user!!,
+                vmNotifications,
+                userIdToSend,
                 navController
             )
         }
@@ -71,10 +80,13 @@ fun ActiveProposalsV(
     vmUser: UserViewModel,
     vmProposals: ProposalsViewModel,
     user: User,
+    vmNotifications: NotificationsViewModel,
+    userIdToSend: Int,
     navController: NavHostController
 ) {
     val isLoading by vmProposals.isLoading.collectAsState()
-
+    val context = LocalContext.current
+    val notificationService = NotificationService(context)
     if (isLoading) {
         LoaderMaxSize()
     }
@@ -107,6 +119,14 @@ fun ActiveProposalsV(
                     }, onSend = { text, enabledButton ->
                         //Enviar propuesta
                         //En notificacion
+                        vmNotifications.sendNotification(
+                            Notification(
+                                userSenderId = user.id,
+                                userReceiveId = userIdToSend,
+                                text = "${user.username} te ha enviado una propuesta",
+                                proposalId = proposal.id
+                            )
+                        )
                         //En mensaje
 
                         //Exito
