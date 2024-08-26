@@ -34,9 +34,6 @@ class SearchViewModel @Inject constructor(
     private val repoProposals: ProposalsRepository,
 ) :
     ViewModel() {
-    private val _isLoading = mutableStateOf(false)
-    val isLoading: State<Boolean> = _isLoading
-
     private val _query = mutableStateOf("")
     val query = _query
 
@@ -126,8 +123,6 @@ class SearchViewModel @Inject constructor(
     private fun fetchCategories() {
         viewModelScope.launch {
             try {
-                _isLoading.value = true
-
                 val response = withContext(Dispatchers.IO) {
                     repoProfessions.getCategories()
                 }
@@ -135,8 +130,6 @@ class SearchViewModel @Inject constructor(
                 _categories.value = response ?: emptyList()
             } catch (e: Exception) {
                 Log.e("Error", e.toString())
-            } finally {
-                _isLoading.value = false
             }
         }
     }

@@ -40,11 +40,12 @@ import com.practica.buscov2.ui.components.Space
 import com.practica.buscov2.ui.components.TopBarWithBack
 import com.practica.buscov2.ui.theme.GrayText
 import com.practica.buscov2.ui.viewModel.HomeViewModel
+import com.practica.buscov2.ui.viewModel.LoadingViewModel
 import com.practica.buscov2.ui.viewModel.auth.GoogleLoginViewModel
 import com.practica.buscov2.ui.viewModel.auth.TokenViewModel
 import com.practica.buscov2.ui.viewModel.proposals.ApplicationsViewModel
 import com.practica.buscov2.ui.viewModel.users.UserViewModel
-import com.practica.buscov2.ui.views.activeLoaderMax
+import com.practica.buscov2.ui.views.util.ActiveLoader.Companion.activeLoaderMax
 
 @Composable
 fun ApplicantsView(
@@ -53,6 +54,7 @@ fun ApplicantsView(
     vmGoogle: GoogleLoginViewModel,
     vmToken: TokenViewModel,
     applicantsViewModel: ApplicationsViewModel,
+    vmLoading: LoadingViewModel,
     navController: NavHostController
 ) {
     applicantsViewModel.setProposalId(proposalId)
@@ -80,6 +82,7 @@ fun ApplicantsView(
                 vmGoogle,
                 user!!,
                 applicantsViewModel,
+                vmLoading,
                 navController
             )
         }
@@ -93,10 +96,11 @@ fun ApplicantsV(
     vmGoogle: GoogleLoginViewModel,
     user: User,
     applicantsViewModel: ApplicationsViewModel,
+    vmLoading: LoadingViewModel,
     navController: NavHostController
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-    val isLoading by applicantsViewModel.isLoading.collectAsState()
+    val isLoading by vmLoading.isLoading
     val error by applicantsViewModel.error
     val showError = remember {
         mutableStateOf(false)
@@ -128,8 +132,8 @@ fun ApplicantsV(
                 val applicantsPage = applicantsViewModel.applicantsPage?.collectAsLazyPagingItems()
 
                 if (applicantsPage != null) {
-                    activeLoaderMax(applicantsPage, applicantsViewModel)
-                    ShowApplicants(applicantsPage, applicantsViewModel, navController,
+                    activeLoaderMax(applicantsPage, vmLoading)
+                    ShowApplicants(applicantsPage, applicantsViewModel, vmLoading, navController,
                         onErrorDecline = {
                             showError.value = true
                         },
@@ -141,8 +145,11 @@ fun ApplicantsV(
                         }
                     )
 
-                    if(applicantsPage.itemCount == 0){
-                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
+                    if (applicantsPage.itemCount == 0) {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
                             Text(text = "No hay postulantes", color = GrayText)
                         }
                     }
@@ -156,6 +163,7 @@ fun ApplicantsV(
 fun ShowApplicants(
     applicantsPage: LazyPagingItems<Application>,
     vmApplications: ApplicationsViewModel,
+    vmLoading: LoadingViewModel,
     navController: NavController,
     onErrorDecline: () -> Unit = {},
     onSuccessDecline: () -> Unit = {},
@@ -173,44 +181,39 @@ fun ShowApplicants(
                 navController.navigate("Profile/${idUser}")
             },
             onDecline = {
-                vmApplications.acceptOrDeclineApplication(
-                    item.proposalId!!,
-                    item.id!!,
-                    false,
-                    onError = {
-                        //Mostrar error
-                        onErrorDecline()
-                    },
-                    onSuccess = {
-                        //Actualizar la lista
-                        onSuccessDecline()
-                    })
+                vmLoading.withLoading {
+                    vmApplications.acceptOrDeclineApplication(
+                        item.proposalId!!,
+                        item.id!!,
+                        false,
+                        onError = {
+                            //Mostrar error
+                            onErrorDecline()
+                        },
+                        onSuccess = {
+                            //Actualizar la lista
+                            onSuccessDecline()
+                        })
+                }
             },
             onChoose = {
-                vmApplications.acceptOrDeclineApplication(
-                    item.proposalId!!,
-                    item.id!!,
-                    true,
-                    onError = {
-                        //Mostrar error
-                        onErrorAccept()
-                    },
-                    onSuccess = {
-                        //Ir a propuesta
-                        navController.navigate("Proposal/${item.proposalId}")
-                    })
+                vmLoading.withLoading {
+                    vmApplications.acceptOrDeclineApplication(
+                        item.proposalId!!,
+                        item.id!!,
+                        true,
+                        onError = {
+                            //Mostrar error
+                            onErrorAccept()
+                        },
+                        onSuccess = {
+                            //Ir a propuesta
+                            navController.navigate("Proposal/${item.proposalId}")
+                        })
+                }
             }
         )
 
         Space(size = 8.dp)
     }
-}
-
-fun <T : Any> activeLoaderMax(
-    itemsPage: LazyPagingItems<T>,
-    vm: ApplicationsViewModel
-) {
-    val loadState = itemsPage.loadState
-    val isLoading = loadState.refresh is LoadState.Loading || loadState.prepend is LoadState.Loading
-    vm.setLoading(isLoading)
 }

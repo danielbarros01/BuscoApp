@@ -55,6 +55,7 @@ import com.practica.buscov2.ui.components.Space
 import com.practica.buscov2.ui.components.TopBar
 import com.practica.buscov2.ui.theme.GrayText
 import com.practica.buscov2.ui.theme.OrangePrincipal
+import com.practica.buscov2.ui.viewModel.LoadingViewModel
 import com.practica.buscov2.ui.viewModel.SearchViewModel
 import com.practica.buscov2.ui.viewModel.auth.GoogleLoginViewModel
 import com.practica.buscov2.ui.viewModel.auth.TokenViewModel
@@ -72,6 +73,7 @@ fun SearchView(
     vmToken: TokenViewModel,
     vmSearch: SearchViewModel,
     vmCompleteData: CompleteDataViewModel,
+    vmLoading: LoadingViewModel,
     navController: NavHostController
 ) {
     val token by vmToken.token.collectAsState()
@@ -99,6 +101,7 @@ fun SearchView(
                 user!!,
                 vmSearch,
                 vmCompleteData,
+                vmLoading,
                 navController
             )
         }
@@ -114,9 +117,10 @@ fun SearchV(
     user: User,
     vmSearch: SearchViewModel,
     vmCompleteData: CompleteDataViewModel,
+    vmLoading:LoadingViewModel,
     navController: NavHostController
 ) {
-    val isLoading by vmSearch.isLoading
+    val isLoading by vmLoading.isLoading
     val query by vmSearch.query
     val changeUbication = remember {
         mutableStateOf(false)

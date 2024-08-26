@@ -27,16 +27,9 @@ import javax.inject.Inject
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val repo: UsersRepository,
     private val repoWorkers: WorkersRepository,
     private val repoProposals: ProposalsRepository,
-    private val storeToken: StoreToken
 ) : ViewModel() {
-    /*UI*/
-    private val _isLoading = MutableStateFlow(false)
-    val isLoading: StateFlow<Boolean> get() = _isLoading
-    /*UI*/
-
     private val _token = MutableStateFlow<String?>(null)
     private val token = _token
 
@@ -76,11 +69,6 @@ class HomeViewModel @Inject constructor(
     fun setToken(token: String) {
         _token.value = token
     }
-
-    fun setLoading(isLoading: Boolean) {
-        _isLoading.value = isLoading
-    }
-
 
     //UBICACION
 

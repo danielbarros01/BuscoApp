@@ -42,6 +42,7 @@ import com.practica.buscov2.ui.components.PasswordField
 import com.practica.buscov2.ui.components.SeparatoryLine
 import com.practica.buscov2.ui.components.Space
 import com.practica.buscov2.ui.components.Title
+import com.practica.buscov2.ui.viewModel.LoadingViewModel
 import com.practica.buscov2.ui.viewModel.auth.GoogleLoginViewModel
 import com.practica.buscov2.ui.viewModel.auth.LoginViewModel
 import com.practica.buscov2.ui.viewModel.users.UserViewModel
@@ -51,13 +52,21 @@ fun LoginView(
     viewModel: LoginViewModel,
     vmUser: UserViewModel,
     vmGoogle: GoogleLoginViewModel,
+    vmLoading: LoadingViewModel,
     navController: NavController
 ) {
     Box(
         modifier = Modifier
             .fillMaxSize()
     ) {
-        Login(Modifier.align(Alignment.Center), viewModel, vmUser, vmGoogle, navController)
+        Login(
+            Modifier.align(Alignment.Center),
+            viewModel,
+            vmUser,
+            vmGoogle,
+            vmLoading,
+            navController
+        )
     }
 }
 
@@ -116,6 +125,7 @@ fun Login(
     viewModel: LoginViewModel,
     vmUser: UserViewModel,
     vmGoogle: GoogleLoginViewModel,
+    vmLoading: LoadingViewModel,
     navController: NavController
 ) {
     val email: String by viewModel.email
@@ -123,7 +133,7 @@ fun Login(
     val loginEnable: Boolean by viewModel.loginEnabled
     val showError = remember { mutableStateOf(false) }
     val error = viewModel.error
-    val isLoading: Boolean by viewModel.isLoading
+    val isLoading: Boolean by vmLoading.isLoading
 
     //val user by vmUser.user.collectAsState()
     if (showError.value) {
@@ -154,28 +164,30 @@ fun Login(
         Space(8.dp)
         PasswordField(password) { viewModel.onLoginChanged(email, it) }
         Space(4.dp)
-        ForgotPassword(){
+        ForgotPassword() {
             navController.navigate("RecoverPassword")
         }
         Space(16.dp)
 
         ButtonPrincipal(text = "Iniciar Sesión", enabled = loginEnable) {
-            viewModel.login(onError = { showError.value = true }) { token ->
-                vmUser.getMyProfile(token, {}) {
-                    //En caso de obtener el usuario
-                    //Si esta confirmado
-                    if (it.confirmed == true) {
-                        //Si los datos estan completados, ir a Home, si no, a completar los datos
-                        if (it.name != null && it.lastname != null) {
-                            navController.navigate("Home")
-                        } else {
-                            navController.navigate("CompleteData/${it.username}")
+            vmLoading.withLoading {
+                viewModel.login(onError = { showError.value = true }) { token ->
+                    vmUser.getMyProfile(token, {}) {
+                        //En caso de obtener el usuario
+                        //Si esta confirmado
+                        if (it.confirmed == true) {
+                            //Si los datos estan completados, ir a Home, si no, a completar los datos
+                            if (it.name != null && it.lastname != null) {
+                                navController.navigate("Home")
+                            } else {
+                                navController.navigate("CompleteData/${it.username}")
+                            }
                         }
-                    }
-                    //Si no esta confirmado
-                    else {
-                        val userJson = Gson().toJson(it)
-                        navController.navigate("CheckEmailView/$userJson/check-email")
+                        //Si no esta confirmado
+                        else {
+                            val userJson = Gson().toJson(it)
+                            navController.navigate("CheckEmailView/$userJson/check-email")
+                        }
                     }
                 }
             }
@@ -188,7 +200,7 @@ fun Login(
         Space(4.dp)
         SeparatoryLine()
         Space(4.dp)
-        GoogleLogin(vmGoogle, viewModel, vmUser, navController) {
+        GoogleLogin(vmGoogle, viewModel, vmUser, vmLoading, navController) {
             //En caso de error
             showError.value = true
         }
@@ -200,6 +212,7 @@ fun GoogleLogin(
     vmGoogle: GoogleLoginViewModel,
     vmLogin: LoginViewModel,
     vmUser: UserViewModel,
+    vmLoading: LoadingViewModel,
     navController: NavController,
     onError: () -> Unit
 ) {
@@ -214,16 +227,18 @@ fun GoogleLogin(
                         GoogleSignIn.getSignedInAccountFromIntent(intent)
 
                     //Iniciar sesion
-                    vmLogin.loginWithGoogle(task, onError = { onError() }) { token ->
-                        //Obtener el usuario
-                        vmUser.getMyProfile(token, {}) {
-                            //Si los datos estan completados, ir a Home
-                            if (it.name != null && it.lastname != null) {
-                                navController.navigate("Home")
-                            }
-                            //Si no estan completados los datos, ir a CompleteData
-                            else {
-                                navController.navigate("CompleteData/${it.username}")
+                    vmLoading.withLoading {
+                        vmLogin.loginWithGoogle(task, onError = { onError() }) { token ->
+                            //Obtener el usuario
+                            vmUser.getMyProfile(token, {}) {
+                                //Si los datos estan completados, ir a Home
+                                if (it.name != null && it.lastname != null) {
+                                    navController.navigate("Home")
+                                }
+                                //Si no estan completados los datos, ir a CompleteData
+                                else {
+                                    navController.navigate("CompleteData/${it.username}")
+                                }
                             }
                         }
                     }

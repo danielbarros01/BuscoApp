@@ -41,6 +41,7 @@ import com.practica.buscov2.ui.components.MenuNavigation
 import com.practica.buscov2.ui.components.Space
 import com.practica.buscov2.ui.components.TopBar
 import com.practica.buscov2.ui.theme.OrangePrincipal
+import com.practica.buscov2.ui.viewModel.LoadingViewModel
 import com.practica.buscov2.ui.viewModel.NewPublicationViewModel
 import com.practica.buscov2.ui.viewModel.auth.GoogleLoginViewModel
 import com.practica.buscov2.ui.viewModel.auth.TokenViewModel
@@ -58,6 +59,7 @@ fun EditProposalView(
     vmProfession: ProfessionsViewModel,
     vmNewPublication: NewPublicationViewModel,
     vmProposal: ProposalViewModel,
+    vmLoading: LoadingViewModel,
     navController: NavHostController
 ) {
     val token by vmToken.token.collectAsState()
@@ -70,27 +72,30 @@ fun EditProposalView(
             vmUser.getMyProfile(it.token, {
                 navController.navigate("Login")
             }) {
-                //Traigo la propuesta
-                vmProposal.getProposal(proposalId, {}) { p ->
-                    //Cambio los valores del vm
-                    vmProposal.changeProposal(p)
-                    vmNewPublication.setId(p.id!!)
-                    vmNewPublication.setData(
-                        title = p.title ?: "",
-                        description = p.description ?: "",
-                        requirements = p.requirements ?: ""
-                    )
-                    vmNewPublication.setBudget(
-                        p.minBudget.toString(),
-                        p.maxBudget.toString()
-                    )
+                vmLoading.withLoading {
 
-                    //Debo traer la profesion
-                    vmProfession.getProfession(p.professionId!!, {}) { profession ->
-                        vmNewPublication.setProfession(profession)
+                    //Traigo la propuesta
+                    vmProposal.getProposal(proposalId, {}) { p ->
+                        //Cambio los valores del vm
+                        vmProposal.changeProposal(p)
+                        vmNewPublication.setId(p.id!!)
+                        vmNewPublication.setData(
+                            title = p.title ?: "",
+                            description = p.description ?: "",
+                            requirements = p.requirements ?: ""
+                        )
+                        vmNewPublication.setBudget(
+                            p.minBudget.toString(),
+                            p.maxBudget.toString()
+                        )
+
+                        //Debo traer la profesion
+                        vmProfession.getProfession(p.professionId!!, {}) { profession ->
+                            vmNewPublication.setProfession(profession)
+                        }
+
+                        vmNewPublication.setImage(Uri.parse(p.image))
                     }
-
-                    vmNewPublication.setImage(Uri.parse(p.image))
                 }
             }
         }
@@ -107,6 +112,7 @@ fun EditProposalView(
                 vmProfession,
                 vmNewPublication,
                 vmProposal,
+                vmLoading,
                 navController
             )
         }
@@ -123,12 +129,13 @@ fun EditPublication(
     vmProfession: ProfessionsViewModel,
     vmNewPublication: NewPublicationViewModel,
     vmProposal: ProposalViewModel,
+    vmLoading: LoadingViewModel,
     navController: NavHostController
 ) {
     val context = LocalContext.current
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
 
-    val isLoading by vmNewPublication.isLoading
+    val isLoading by vmLoading.isLoading
     val error = vmNewPublication.error
     val showError = remember { mutableStateOf(false) }
 
@@ -164,10 +171,7 @@ fun EditPublication(
 
     if (openCamera.value) {
         UseCamera(onBack = { openCamera.value = false }) { uri ->
-            //La logica cuando tengo la foto
-            //salgo de la camara
             openCamera.value = false
-            //vmNewPublication.setImage(uri)
             newUriPicture.value = uri
         }
     }
@@ -182,7 +186,6 @@ fun EditPublication(
                 openGallery.value = false
             }) { uri ->
                 newUriPicture.value = uri
-                //vmNewPublication.setImage(uri)
                 openGallery.value = false
             }
         }
@@ -239,16 +242,18 @@ fun EditPublication(
                         token?.let { loginToken ->
                             //Si propuesta no es null
                             //Editamos
-                            vmNewPublication.editProposal(
-                                context,
-                                newUriPicture.value,
-                                token = loginToken.token,
-                                {
-                                    //MOSTRAR ERROR
-                                    showError.value = true
-                                }) {
-                                //Volver a propuesta ya editada
-                                navController.popBackStack()
+                            vmLoading.withLoading {
+                                vmProposal.editProposal(
+                                    context,
+                                    newUriPicture.value,
+                                    token = loginToken.token,
+                                    {
+                                        //MOSTRAR ERROR
+                                        showError.value = true
+                                    }) {
+                                    //Volver a propuesta ya editada
+                                    navController.popBackStack()
+                                }
                             }
                         }
                     }

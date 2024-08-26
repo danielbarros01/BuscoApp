@@ -24,9 +24,6 @@ class JobsViewModel @Inject constructor(
     private val repo: JobsRepository
 ) : ViewModel(){
     /*UI*/
-    private val _isLoading = MutableStateFlow(false)
-    val isLoading: StateFlow<Boolean> get() = _isLoading
-
     private var _error = mutableStateOf(ErrorBusco())
     var error: State<ErrorBusco> = _error
     /*UI*/
@@ -68,10 +65,6 @@ class JobsViewModel @Inject constructor(
 
     fun refreshProposals() {
         _refreshTrigger.value++
-    }
-
-    fun setLoading(isLoading: Boolean) {
-        _isLoading.value = isLoading
     }
 
     fun setToken(token: String) {

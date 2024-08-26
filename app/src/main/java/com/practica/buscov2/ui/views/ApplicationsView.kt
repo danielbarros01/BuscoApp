@@ -41,10 +41,12 @@ import com.practica.buscov2.ui.components.TabsComponent
 import com.practica.buscov2.ui.components.TopBar
 import com.practica.buscov2.ui.theme.GrayText
 import com.practica.buscov2.ui.viewModel.JobsViewModel
+import com.practica.buscov2.ui.viewModel.LoadingViewModel
 import com.practica.buscov2.ui.viewModel.auth.GoogleLoginViewModel
 import com.practica.buscov2.ui.viewModel.auth.TokenViewModel
 import com.practica.buscov2.ui.viewModel.proposals.ApplicationsViewModel
 import com.practica.buscov2.ui.viewModel.users.UserViewModel
+import com.practica.buscov2.ui.views.util.ActiveLoader.Companion.activeLoaderMax
 import com.practica.buscov2.util.AppUtils
 
 @Composable
@@ -53,6 +55,7 @@ fun ApplicationsView(
     vmGoogle: GoogleLoginViewModel,
     vmToken: TokenViewModel,
     vmApplications: ApplicationsViewModel,
+    vmLoading: LoadingViewModel,
     navController: NavHostController
 ) {
     val token by vmToken.token.collectAsState()
@@ -79,6 +82,7 @@ fun ApplicationsView(
                 vmUser,
                 vmGoogle,
                 vmApplications,
+                vmLoading,
                 user!!,
                 navController
             )
@@ -92,11 +96,12 @@ fun ApplicationsV(
     vmUser: UserViewModel,
     vmGoogle: GoogleLoginViewModel,
     vmApplications: ApplicationsViewModel,
+    vmLoading: LoadingViewModel,
     user: User,
     navController: NavHostController
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-    val isLoading = vmApplications.isLoading.collectAsState()
+    val isLoading = vmLoading.isLoading
 
     if (isLoading.value) {
         LoaderMaxSize()
@@ -120,16 +125,20 @@ fun ApplicationsV(
                     .padding(15.dp)
                     .fillMaxSize()
             ) {
-                TabsPages(vmApplications, navController)
+                TabsPages(vmApplications, vmLoading, navController)
             }
         }
     }
 }
 
 @Composable
-fun ListApplicationsView(vm: ApplicationsViewModel, navController: NavController) {
+fun ListApplicationsView(
+    vm: ApplicationsViewModel,
+    vmLoading: LoadingViewModel,
+    navController: NavController
+) {
     val applicationsPage = vm.applicationsPage.collectAsLazyPagingItems()
-    activeLoaderMaxApplications(applicationsPage, vm)
+    activeLoaderMax(applicationsPage, vmLoading)
 
     if (applicationsPage.itemCount == 0) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -155,19 +164,12 @@ fun ShowApplications(applicationsPage: LazyPagingItems<Application>, navControll
     }
 }
 
-
-fun activeLoaderMaxApplications(
-    applicationsPage: LazyPagingItems<Application>,
-    vm: ApplicationsViewModel
-) {
-    val loadState = applicationsPage.loadState
-    val isLoading = loadState.refresh is LoadState.Loading || loadState.prepend is LoadState.Loading
-    vm.setLoading(isLoading)
-}
-
-
 @Composable
-private fun TabsPages(vm: ApplicationsViewModel, navController: NavHostController) {
+private fun TabsPages(
+    vm: ApplicationsViewModel,
+    vmLoading: LoadingViewModel,
+    navController: NavHostController
+) {
     val tabs = ItemTabApplication.pagesApplications
     val pagerState = rememberPagerState(pageCount = { tabs.size })
 
@@ -183,7 +185,7 @@ private fun TabsPages(vm: ApplicationsViewModel, navController: NavHostControlle
             vm.refreshProposals()
         }
 
-        TabsContent(tabs, pagerState, vm, navController)
+        TabsContent(tabs, pagerState, vm, vmLoading, navController)
     }
 }
 
@@ -192,12 +194,13 @@ private fun TabsContent(
     tabs: List<ItemTabApplication>,
     pagerState: PagerState,
     vm: ApplicationsViewModel,
+    vmLoading: LoadingViewModel,
     navController: NavHostController
 ) {
     HorizontalPager(
         state = pagerState
     ) { page ->
-        tabs[page].screen(vm, navController)
+        tabs[page].screen(vm, vmLoading, navController)
     }
 }
 

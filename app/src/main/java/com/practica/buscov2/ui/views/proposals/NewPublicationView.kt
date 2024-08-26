@@ -72,6 +72,7 @@ import com.practica.buscov2.ui.components.TopBar
 import com.practica.buscov2.ui.theme.GrayField
 import com.practica.buscov2.ui.theme.GrayText
 import com.practica.buscov2.ui.theme.OrangePrincipal
+import com.practica.buscov2.ui.viewModel.LoadingViewModel
 import com.practica.buscov2.ui.viewModel.NewPublicationViewModel
 import com.practica.buscov2.ui.viewModel.auth.GoogleLoginViewModel
 import com.practica.buscov2.ui.viewModel.auth.TokenViewModel
@@ -87,6 +88,7 @@ fun NewPublicationView(
     vmToken: TokenViewModel,
     vmProfession: ProfessionsViewModel,
     vmNewPublication: NewPublicationViewModel,
+    vmLoading: LoadingViewModel,
     navController: NavHostController
 ) {
     val token by vmToken.token.collectAsState()
@@ -112,6 +114,7 @@ fun NewPublicationView(
                 token,
                 vmProfession,
                 vmNewPublication,
+                vmLoading,
                 navController
             )
         }
@@ -127,12 +130,13 @@ fun NewPublication(
     token: LoginToken?,
     vmProfession: ProfessionsViewModel,
     vmNewPublication: NewPublicationViewModel,
+    vmLoading: LoadingViewModel,
     navController: NavHostController
 ) {
     val context = LocalContext.current
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
 
-    val isLoading by vmNewPublication.isLoading
+    val isLoading by vmLoading.isLoading
     val error = vmNewPublication.error
     val showError = remember { mutableStateOf(false) }
 
@@ -237,16 +241,18 @@ fun NewPublication(
                 ) {
                     ButtonPrincipal(text = "Publicar", enabled = buttonEnabled) {
                         token?.let { loginToken ->
-                            vmNewPublication.createProposal(
-                                context,
-                                newUriPicture.value,
-                                token = loginToken.token,
-                                {
-                                    //MOSTRAR ERROR
-                                    showError.value = true
-                                }) { id ->
-                                //IR A LA NUEVA PROPUESTA
-                                navController.navigate("Proposal/${id}")
+                            vmLoading.withLoading {
+                                vmNewPublication.createProposal(
+                                    context,
+                                    newUriPicture.value,
+                                    token = loginToken.token,
+                                    {
+                                        //MOSTRAR ERROR
+                                        showError.value = true
+                                    }) { id ->
+                                    //IR A LA NUEVA PROPUESTA
+                                    navController.navigate("Proposal/${id}")
+                                }
                             }
                         }
                     }

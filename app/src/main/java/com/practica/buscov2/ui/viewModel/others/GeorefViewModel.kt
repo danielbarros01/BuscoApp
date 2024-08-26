@@ -19,7 +19,6 @@ class GeorefViewModel @Inject constructor(
     private val _provincias = MutableStateFlow<List<Provincia>>(emptyList())
     val provincias = _provincias.asStateFlow()
 
-
     init{
         fetchProvincias()
     }

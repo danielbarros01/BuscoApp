@@ -51,10 +51,12 @@ import com.practica.buscov2.ui.components.TopBar
 import com.practica.buscov2.ui.theme.GrayText
 import com.practica.buscov2.ui.theme.GreenBusco
 import com.practica.buscov2.ui.theme.RedBusco
+import com.practica.buscov2.ui.viewModel.LoadingViewModel
 import com.practica.buscov2.ui.viewModel.auth.GoogleLoginViewModel
 import com.practica.buscov2.ui.viewModel.auth.TokenViewModel
 import com.practica.buscov2.ui.viewModel.users.UserViewModel
 import com.practica.buscov2.ui.viewModel.proposals.ProposalsViewModel
+import com.practica.buscov2.ui.views.util.ActiveLoader.Companion.activeLoaderMax
 import com.practica.buscov2.util.AppUtils.Companion.formatDateCard
 import com.practica.buscov2.util.AppUtils.Companion.formatNumber
 import kotlinx.coroutines.launch
@@ -65,6 +67,7 @@ fun ProposalsView(
     vmGoogle: GoogleLoginViewModel,
     vmToken: TokenViewModel,
     vmProposals: ProposalsViewModel,
+    vmLoading: LoadingViewModel,
     navController: NavHostController
 ) {
     val token by vmToken.token.collectAsState()
@@ -92,6 +95,7 @@ fun ProposalsView(
                 vmGoogle,
                 user!!,
                 vmProposals,
+                vmLoading,
                 navController
             )
         }
@@ -105,12 +109,10 @@ fun ProposalsV(
     vmGoogle: GoogleLoginViewModel,
     user: User,
     vmProposals: ProposalsViewModel,
+    vmLoading: LoadingViewModel,
     navController: NavHostController
 ) {
-    //val proposals by vmProposals.proposals
-    //val activeProposals by vmProposals.activeProposals
-    // val finishedProposals by vmProposals.finishedProposals
-    val isLoading by vmProposals.isLoading.collectAsState()
+    val isLoading by vmLoading.isLoading
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
 
     if (isLoading) {
@@ -134,16 +136,20 @@ fun ProposalsV(
                     .padding(it)
                     .padding(15.dp)
             ) {
-                TabsPages(vmProposals, navController)
+                TabsPages(vmProposals, vmLoading, navController)
             }
         }
     }
 }
 
 @Composable
-fun ExpiredProposals(vmProposals: ProposalsViewModel, navController: NavHostController) {
+fun ExpiredProposals(
+    vmProposals: ProposalsViewModel,
+    vmLoading: LoadingViewModel,
+    navController: NavHostController
+) {
     val proposalsPage = vmProposals.proposalsPage.collectAsLazyPagingItems()
-    activeLoaderMaxProposals(proposalsPage, vmProposals)
+    activeLoaderMax(proposalsPage, vmLoading)
 
     if (proposalsPage.itemCount == 0) {
         NoProposals()
@@ -153,9 +159,13 @@ fun ExpiredProposals(vmProposals: ProposalsViewModel, navController: NavHostCont
 }
 
 @Composable
-fun ActiveProposals(vmProposals: ProposalsViewModel, navController: NavHostController) {
+fun ActiveProposals(
+    vmProposals: ProposalsViewModel,
+    vmLoading: LoadingViewModel,
+    navController: NavHostController
+) {
     val proposalsPage = vmProposals.proposalsPage.collectAsLazyPagingItems()
-    activeLoaderMaxProposals(proposalsPage, vmProposals)
+    activeLoaderMax(proposalsPage, vmLoading)
 
     if (proposalsPage.itemCount == 0) {
         NoProposals()
@@ -164,15 +174,6 @@ fun ActiveProposals(vmProposals: ProposalsViewModel, navController: NavHostContr
     }
 }
 
-//Para activar el loader completo la primera vez que traigo datos
-inline fun <reified T:Any> activeLoaderMaxProposals(
-    proposalsPage: LazyPagingItems<T>,
-    vmProposals: ProposalsViewModel
-) {
-    val loadState = proposalsPage.loadState
-    val isLoading = loadState.refresh is LoadState.Loading || loadState.prepend is LoadState.Loading
-    vmProposals.setLoading(isLoading)
-}
 
 @Composable
 fun ShowProposals(proposalsPage: LazyPagingItems<Proposal>, navController: NavController) {
@@ -197,13 +198,17 @@ fun NoProposals() {
 }
 
 @Composable
-private fun TabsPages(vmProposals: ProposalsViewModel, navController: NavHostController) {
+private fun TabsPages(
+    vmProposals: ProposalsViewModel,
+    vmLoading: LoadingViewModel,
+    navController: NavHostController
+) {
     val tabs = ItemTabProposal.pagesProposals
     val pagerState = rememberPagerState(pageCount = { tabs.size })
 
     Column {
         Tabs(tabs, pagerState, vmProposals)
-        TabsContent(tabs, pagerState, vmProposals, navController)
+        TabsContent(tabs, pagerState, vmProposals, vmLoading, navController)
     }
 }
 
@@ -262,12 +267,13 @@ private fun TabsContent(
     tabs: List<ItemTabProposal>,
     pagerState: PagerState,
     vm: ProposalsViewModel,
+    vmLoading: LoadingViewModel,
     navController: NavHostController
 ) {
     HorizontalPager(
         state = pagerState
     ) { page ->
-        tabs[page].screen(vm, navController)
+        tabs[page].screen(vm, vmLoading, navController)
     }
 }
 

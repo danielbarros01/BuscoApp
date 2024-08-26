@@ -45,6 +45,7 @@ import com.practica.buscov2.ui.components.ButtonPrincipal
 import com.practica.buscov2.ui.components.InsertCirlceProfileEditImage
 import com.practica.buscov2.ui.components.LoaderMaxSize
 import com.practica.buscov2.ui.components.Space
+import com.practica.buscov2.ui.viewModel.LoadingViewModel
 import com.practica.buscov2.ui.viewModel.auth.TokenViewModel
 import com.practica.buscov2.ui.viewModel.users.CompleteDataViewModel
 import com.practica.buscov2.ui.viewModel.users.UserViewModel
@@ -62,6 +63,7 @@ fun EditUserView(
     vmToken: TokenViewModel,
     vmWorker: RegisterWorkerViewModel,
     vmCompleteData: CompleteDataViewModel,
+    vmLoading: LoadingViewModel,
     navController: NavHostController
 ) {
     val token by vmToken.token.collectAsState()
@@ -86,7 +88,7 @@ fun EditUserView(
 
         // Initialize user and worker data once
         LaunchedEffect(Unit) {
-            initializeUserData(vmCompleteData, vmWorker, it)
+            initializeUserData(vmCompleteData, vmWorker, vmLoading, it)
         }
 
         // Render EditUser screen
@@ -98,6 +100,7 @@ fun EditUserView(
                 vmWorker,
                 vmCompleteData,
                 token,
+                vmLoading,
                 navController,
                 stateDataPicker
             )
@@ -109,6 +112,7 @@ fun EditUserView(
 private fun initializeUserData(
     vmCompleteData: CompleteDataViewModel,
     vmWorker: RegisterWorkerViewModel,
+    vmLoading: LoadingViewModel,
     user: User
 ) {
     vmCompleteData.onDateChanged(
@@ -123,11 +127,15 @@ private fun initializeUserData(
         vmWorker.onCategoryChangeForId(
             it.workersProfessions?.first()?.profession?.categoryId ?: 1
         )
-        vmWorker.fetchProfessions {
-            vmWorker.onProfessionChange(
-                it.workersProfessions?.first()?.profession?.name ?: ""
-            )
+
+        vmLoading.withLoading {
+            vmWorker.fetchProfessions {
+                vmWorker.onProfessionChange(
+                    it.workersProfessions?.first()?.profession?.name ?: ""
+                )
+            }
         }
+
         vmWorker.onTitleChange(it.title ?: "")
         vmWorker.onYearsChange(it.yearsExperience?.toString() ?: "")
         vmWorker.onDescriptionChange(it.description ?: "")
@@ -145,12 +153,13 @@ fun EditUser(
     vmWorker: RegisterWorkerViewModel,
     vmCompleteData: CompleteDataViewModel,
     token: LoginToken?,
+    vmLoading: LoadingViewModel,
     navController: NavHostController,
     stateDataPicker: DatePickerState
 ) {
     val context = LocalContext.current
     // State variables
-    val isLoading by vmWorker.isLoading
+    val isLoading by vmLoading.isLoading
     val buttonEnabled by vmWorker.buttonEnabled
     val error = vmWorker.error
     val errorData = vmCompleteData.error
@@ -236,8 +245,12 @@ fun EditUser(
         }
     }
 
-    if(openGallery.value){
-        Column (modifier = Modifier.fillMaxSize().zIndex(100f)){
+    if (openGallery.value) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .zIndex(100f)
+        ) {
             SelectImageFromGallery(onGalleryClosed = {
                 openGallery.value = false
             }) { uri ->
@@ -299,6 +312,7 @@ fun EditUser(
                     SaveButton(
                         token,
                         vmWorker = vmWorker,
+                        vmLoading = vmLoading,
                         showDialog = showDialog,
                         showError = showError
                     )
@@ -313,6 +327,7 @@ fun EditUser(
                     SaveButton(
                         token,
                         vmCompleteData = vmCompleteData,
+                        vmLoading = vmLoading,
                         showDialog = showDialog,
                         showError = showError
                     )
@@ -327,6 +342,7 @@ fun SaveButton(
     token: LoginToken?,
     vmWorker: RegisterWorkerViewModel? = null,
     vmCompleteData: CompleteDataViewModel? = null,
+    vmLoading: LoadingViewModel,
     showDialog: MutableState<Boolean>,
     showError: MutableState<Boolean>
 ) {
@@ -347,15 +363,19 @@ fun SaveButton(
 
             when {
                 vmWorker != null -> {
-                    vmWorker.updateWorker(token.token, handleError, handleSuccess)
+                    vmLoading.withLoading {
+                        vmWorker.updateWorker(token.token, handleError, handleSuccess)
+                    }
                 }
 
                 vmCompleteData != null -> {
-                    vmCompleteData.saveCompleteData(
-                        token = token.token,
-                        onError = handleError,
-                        onSuccess = handleSuccess
-                    )
+                    vmLoading.withLoading {
+                        vmCompleteData.saveCompleteData(
+                            token = token.token,
+                            onError = handleError,
+                            onSuccess = handleSuccess
+                        )
+                    }
                 }
             }
         }

@@ -65,6 +65,7 @@ import com.practica.buscov2.ui.components.Space
 import com.practica.buscov2.ui.components.Title
 import com.practica.buscov2.ui.theme.GrayText
 import com.practica.buscov2.ui.theme.OrangePrincipal
+import com.practica.buscov2.ui.viewModel.LoadingViewModel
 import com.practica.buscov2.ui.viewModel.users.CompleteDataViewModel
 import com.practica.buscov2.ui.viewModel.others.GeorefViewModel
 import com.practica.buscov2.ui.viewModel.auth.TokenViewModel
@@ -80,6 +81,7 @@ fun CompleteDataView(
     viewModel: CompleteDataViewModel,
     navController: NavController,
     vmToken: TokenViewModel,
+    vmLoading: LoadingViewModel,
     username: String
 ) {
     Box(
@@ -90,6 +92,7 @@ fun CompleteDataView(
             Modifier.align(Alignment.Center),
             viewModel,
             vmToken,
+            vmLoading,
             navController,
             username
         )
@@ -103,6 +106,7 @@ fun CompleteData(
     modifier: Modifier,
     viewModel: CompleteDataViewModel,
     vmToken: TokenViewModel,
+    vmLoading: LoadingViewModel,
     navController: NavController,
     username: String
 ) {
@@ -111,7 +115,7 @@ fun CompleteData(
     val currentPage = remember { mutableIntStateOf(0) }
     val showError = remember { mutableStateOf(false) }
     val error = viewModel.error
-    val isLoading by viewModel.isLoading
+    val isLoading by vmLoading.isLoading
 
     //Mostrar botones en el datePicker si la fecha es correcta o no hay nada
     val enabledButtonDate = remember { mutableStateOf(true) }
@@ -142,7 +146,15 @@ fun CompleteData(
     Scaffold(
         // Barra inferior
         bottomBar = {
-            BottomBarPart(currentPage, viewModel, user, vmToken, showError, navController)
+            BottomBarPart(
+                currentPage,
+                viewModel,
+                user,
+                vmToken,
+                vmLoading,
+                showError,
+                navController
+            )
         },
 
         // Contenido principal
@@ -514,6 +526,7 @@ private fun BottomBarPart(
     viewModel: CompleteDataViewModel,
     user: User,
     vmToken: TokenViewModel,
+    vmLoading: LoadingViewModel,
     showError: MutableState<Boolean>,
     navController: NavController
 ) {
@@ -540,12 +553,14 @@ private fun BottomBarPart(
         ) {
             //Guardar los datos
             token?.let {
-                viewModel.saveCompleteData(it.token, user, {
-                    //En caso de error
-                    showError.value = true
-                }) {
-                    //En caso de exito navegar al home
-                    navController.navigate("BeWorker")
+                vmLoading.withLoading {
+                    viewModel.saveCompleteData(it.token, user, {
+                        //En caso de error
+                        showError.value = true
+                    }) {
+                        //En caso de exito navegar al home
+                        navController.navigate("BeWorker")
+                    }
                 }
             }
         }

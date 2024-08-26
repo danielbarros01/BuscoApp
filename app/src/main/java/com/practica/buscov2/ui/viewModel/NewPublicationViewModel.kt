@@ -27,13 +27,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class NewPublicationViewModel @Inject constructor(
-    private val professionsRepo: ProfessionsRepository,
     private val proposalsRepository: ProposalsRepository,
 ) : ViewModel() {
     //UI
-    private val _isLoading = mutableStateOf(false)
-    val isLoading: State<Boolean> = _isLoading
-
     private val _buttonEnabled = mutableStateOf(false)
     val buttonEnabled: State<Boolean> = _buttonEnabled
 
@@ -139,8 +135,6 @@ class NewPublicationViewModel @Inject constructor(
     ) {
         viewModelScope.launch {
             try {
-                _isLoading.value = true
-                //imagen
                 val filePart = if (!uri.scheme.isNullOrEmpty() && !uri.path.isNullOrEmpty()) {
                     FilesUtils.getFilePart(context, uri, "image")
                 } else {
@@ -166,65 +160,9 @@ class NewPublicationViewModel @Inject constructor(
             } catch (e: Exception) {
                 _error.value = ErrorBusco(message = "Ha ocurrido un error inesperado")
                 Log.e("Error", e.toString())
-            } finally {
-                _isLoading.value = false
             }
         }
     }
 
-    fun editProposal(
-        context: Context,
-        uri: Uri,
-        token: String,
-        onError: () -> Unit,
-        onSuccess: () -> Unit
-    ) {
-        viewModelScope.launch {
-            try {
-                _isLoading.value = true
 
-                var uriModified: Uri? = uri
-
-                /**Esto es porque si tiene http, la imagen no se modifico
-                 * Es la que ya venia del servidor, por eso no hay que volver a enviarla y
-                 * el valor es nulo*/
-                if (uri.toString().contains("http")) {
-                    uriModified = null
-                }
-
-                val filePart =
-                    if (!uriModified?.scheme.isNullOrEmpty() && !uriModified?.path.isNullOrEmpty()) {
-                        FilesUtils.getFilePart(context, uri, "image")
-                    } else {
-                        null
-                    }
-
-                val response = withContext(Dispatchers.IO) {
-                    proposalsRepository.editProposal(proposal, filePart, token)
-                }
-
-                when (response) {
-                    is Boolean -> {
-                        if (response) {
-                            onSuccess()
-                        }
-                    }
-
-                    is ErrorBusco -> {
-                        _error.value = response
-                        onError()
-                    }
-                }
-            } catch (e: Exception) {
-                Log.e("Error", e.message.toString())
-                _error.value = ErrorBusco(
-                    title = "Error",
-                    message = "Ha ocurrido un error inesperado, intentalo de nuevo más tarde"
-                )
-                onError()
-            } finally {
-                _isLoading.value = false
-            }
-        }
-    }
 }

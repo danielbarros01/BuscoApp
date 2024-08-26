@@ -36,9 +36,6 @@ class ProposalsViewModel @Inject constructor(
     private val repo: ProposalsRepository
 ) : ViewModel() {
     /*UI*/
-    private val _isLoading = MutableStateFlow(false)
-    val isLoading: StateFlow<Boolean> get() = _isLoading
-
     private var _error = mutableStateOf(ErrorBusco())
     var error: State<ErrorBusco> = _error
 
@@ -51,12 +48,6 @@ class ProposalsViewModel @Inject constructor(
 
     private val _proposals = mutableStateOf<List<Proposal>>(emptyList())
     val proposals: State<List<Proposal>> = _proposals
-
-    private val _activeProposals = mutableStateOf<List<Proposal>>(emptyList())
-    val activeProposals: State<List<Proposal>> = _activeProposals
-
-    private val _finishedProposals = mutableStateOf<List<Proposal>>(emptyList())
-    val finishedProposals: State<List<Proposal>> = _finishedProposals
 
     private val _refreshTrigger = MutableStateFlow(0)
 
@@ -72,37 +63,7 @@ class ProposalsViewModel @Inject constructor(
     }
 
     fun refreshProposals() {
-        //_isLoading.value = true
         _refreshTrigger.value++
-    }
-
-    fun getProposalsForUserId(userId: Int, onError: () -> Unit = {}) {
-        viewModelScope.launch {
-            try {
-                _isLoading.value = true
-
-                val response = withContext(Dispatchers.IO) {
-                    repo.getProposalsOfUser(userId)
-                }
-
-                _proposals.value = response ?: emptyList()
-                separateProposals(response ?: emptyList())
-            } catch (e: Exception) {
-                Log.e("Error", e.toString())
-                _error.value = ErrorBusco(
-                    title = "Ha ocurrido un error",
-                    message = "Intentelo de nuevo más tarde"
-                )
-                onError()
-            } finally {
-                _isLoading.value = false
-            }
-        }
-    }
-
-    private fun separateProposals(proposals: List<Proposal>) {
-        _activeProposals.value = proposals.filter { p -> p.status == true }
-        _finishedProposals.value = proposals.filter { p -> p.status == false }
     }
 
     fun changeStatus(status: Boolean? = null) {
@@ -111,9 +72,5 @@ class ProposalsViewModel @Inject constructor(
 
     fun changeUserId(userId: Int) {
         _userId.intValue = userId
-    }
-
-    fun setLoading(isLoading: Boolean) {
-        _isLoading.value = isLoading
     }
 }

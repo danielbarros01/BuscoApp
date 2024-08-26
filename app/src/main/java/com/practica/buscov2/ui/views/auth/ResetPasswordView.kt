@@ -30,6 +30,7 @@ import com.practica.buscov2.ui.components.LoaderMaxSize
 import com.practica.buscov2.ui.components.PasswordField
 import com.practica.buscov2.ui.components.Space
 import com.practica.buscov2.ui.components.Title
+import com.practica.buscov2.ui.viewModel.LoadingViewModel
 import com.practica.buscov2.ui.viewModel.auth.ResetPasswordViewModel
 import com.practica.buscov2.ui.viewModel.auth.TokenViewModel
 
@@ -37,13 +38,14 @@ import com.practica.buscov2.ui.viewModel.auth.TokenViewModel
 fun ResetPassword(
     vmReset: ResetPasswordViewModel,
     vmToken: TokenViewModel,
+    vmLoading: LoadingViewModel,
     navController: NavController
 ) {
     Box(
         modifier = Modifier
             .fillMaxSize()
     ) {
-        Reset(Modifier.align(Alignment.Center), vmReset, vmToken, navController)
+        Reset(Modifier.align(Alignment.Center), vmReset, vmToken, vmLoading, navController)
     }
 }
 
@@ -52,6 +54,7 @@ fun Reset(
     modifier: Modifier,
     vmReset: ResetPasswordViewModel,
     vmToken: TokenViewModel,
+    vmLoading: LoadingViewModel,
     navController: NavController
 ) {
     val token by vmToken.token.collectAsState()
@@ -59,7 +62,7 @@ fun Reset(
     val password by vmReset.password
     val repeatPassword by vmReset.repeatPassword
     val buttonEnabled by vmReset.buttonEnabled
-    val isLoading by vmReset.isLoading
+    val isLoading by vmLoading.isLoading
     val error = vmReset.error
     val showError = remember {
         mutableStateOf(false)
@@ -112,11 +115,13 @@ fun Reset(
 
         Space(size = 20.dp)
         ButtonPrincipal(text = "Cambiar contraseña", enabled = buttonEnabled) {
-            token?.let{
-                vmReset.changePassword(it.token, {
-                    showError.value = true
-                }) {
-                    navController.navigate("OkResetPassword")
+            token?.let {
+                vmLoading.withLoading {
+                    vmReset.changePassword(it.token, {
+                        showError.value = true
+                    }) {
+                        navController.navigate("OkResetPassword")
+                    }
                 }
             }
         }

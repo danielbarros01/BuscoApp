@@ -35,9 +35,6 @@ class QualificationsViewModel @Inject constructor(
     /*UI*/
     private val _buttonEnabled = mutableStateOf(false)
     val buttonEnabled: State<Boolean> = _buttonEnabled
-
-    private val _isLoading = MutableStateFlow(false)
-    val isLoading: StateFlow<Boolean> get() = _isLoading
     /*UI*/
 
     var qualification by mutableStateOf(Qualification())

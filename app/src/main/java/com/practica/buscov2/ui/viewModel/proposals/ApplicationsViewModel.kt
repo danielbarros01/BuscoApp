@@ -31,13 +31,10 @@ class ApplicationsViewModel @Inject constructor(
     private val repo: ApplicationsRepository
 ) : ViewModel() {
     /*UI*/
-    private val _isLoading = MutableStateFlow(false)
-    val isLoading: StateFlow<Boolean> get() = _isLoading
-
     private var _error = mutableStateOf(ErrorBusco())
     var error: State<ErrorBusco> = _error
-
     /*UI*/
+
     private val _proposalId: MutableState<Int?> = mutableStateOf(null)
     private val proposalId = _proposalId
 
@@ -87,8 +84,6 @@ class ApplicationsViewModel @Inject constructor(
     ) {
         viewModelScope.launch {
             try {
-                _isLoading.value = true
-
                 val response = withContext(Dispatchers.IO) {
                     repo.acceptOrDeclineApplication(
                         token.value!!,
@@ -116,10 +111,7 @@ class ApplicationsViewModel @Inject constructor(
                     message = "Ha ocurrido un error inesperado, intentalo de nuevo más tarde"
                 )
                 onError()
-            } finally {
-                _isLoading.value = false
             }
-
         }
     }
 
@@ -141,8 +133,6 @@ class ApplicationsViewModel @Inject constructor(
     fun applyToProposal(proposalId: Int, onError: (ErrorBusco) -> Unit, onSuccess: () -> Unit) {
         viewModelScope.launch {
             try {
-                _isLoading.value = true
-
                 val response = withContext(Dispatchers.IO) {
                     repo.createApplication(token.value!!, proposalId)
                 }
@@ -165,8 +155,6 @@ class ApplicationsViewModel @Inject constructor(
                     message = "Ha ocurrido un error inesperado, intentalo de nuevo más tarde"
                 )
                 onError(error.value)
-            } finally {
-                _isLoading.value = false
             }
         }
     }
@@ -177,10 +165,6 @@ class ApplicationsViewModel @Inject constructor(
 
     fun setToken(token: String) {
         _token.value = token
-    }
-
-    fun setLoading(isLoading: Boolean) {
-        _isLoading.value = isLoading
     }
 
     fun setProposalId(id: Int) {

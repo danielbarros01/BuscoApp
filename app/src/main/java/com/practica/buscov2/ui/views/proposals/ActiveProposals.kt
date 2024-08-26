@@ -28,10 +28,12 @@ import com.practica.buscov2.ui.components.LoaderMaxSize
 import com.practica.buscov2.ui.components.Space
 import com.practica.buscov2.ui.components.TopBarWithBack
 import com.practica.buscov2.ui.theme.GrayText
+import com.practica.buscov2.ui.viewModel.LoadingViewModel
 import com.practica.buscov2.ui.viewModel.NotificationsViewModel
 import com.practica.buscov2.ui.viewModel.auth.TokenViewModel
 import com.practica.buscov2.ui.viewModel.proposals.ProposalsViewModel
 import com.practica.buscov2.ui.viewModel.users.UserViewModel
+import com.practica.buscov2.ui.views.util.ActiveLoader.Companion.activeLoaderMax
 
 @Composable
 fun ActiveProposalsView(
@@ -40,6 +42,7 @@ fun ActiveProposalsView(
     vmToken: TokenViewModel,
     vmProposals: ProposalsViewModel,
     vmNotifications: NotificationsViewModel,
+    vmLoading: LoadingViewModel,
     navController: NavHostController
 ) {
     val token by vmToken.token.collectAsState()
@@ -68,6 +71,7 @@ fun ActiveProposalsView(
                 user!!,
                 vmNotifications,
                 userIdToSend,
+                vmLoading,
                 navController
             )
         }
@@ -82,9 +86,10 @@ fun ActiveProposalsV(
     user: User,
     vmNotifications: NotificationsViewModel,
     userIdToSend: Int,
+    vmLoading: LoadingViewModel,
     navController: NavHostController
 ) {
-    val isLoading by vmProposals.isLoading.collectAsState()
+    val isLoading by vmLoading.isLoading
     val context = LocalContext.current
     val notificationService = NotificationService(context)
     if (isLoading) {
@@ -105,7 +110,7 @@ fun ActiveProposalsV(
                 .padding(15.dp)
         ) {
             val proposalsPage = vmProposals.proposalsPage.collectAsLazyPagingItems()
-            activeLoaderMaxProposals(proposalsPage, vmProposals)
+            activeLoaderMax(proposalsPage, vmLoading)
 
             if (proposalsPage.itemCount == 0) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {

@@ -31,26 +31,33 @@ import com.practica.buscov2.ui.components.InsertImage
 import com.practica.buscov2.ui.components.LoaderMaxSize
 import com.practica.buscov2.ui.components.Space
 import com.practica.buscov2.ui.components.Title
+import com.practica.buscov2.ui.viewModel.LoadingViewModel
 import com.practica.buscov2.ui.viewModel.auth.RecoverPasswordViewModel
 
 @Composable
 fun RecoverPassword(
     vmRecover: RecoverPasswordViewModel,
+    vmLoading: LoadingViewModel,
     navController: NavController
 ) {
     Box(
         modifier = Modifier
             .fillMaxSize()
     ) {
-        Recover(Modifier.align(Alignment.Center), vmRecover, navController)
+        Recover(Modifier.align(Alignment.Center), vmRecover, vmLoading, navController)
     }
 }
 
 @Composable
-fun Recover(modifier: Modifier, vmRecover: RecoverPasswordViewModel, navController: NavController) {
+fun Recover(
+    modifier: Modifier,
+    vmRecover: RecoverPasswordViewModel,
+    vmLoading: LoadingViewModel,
+    navController: NavController
+) {
     val email by vmRecover.email
     val buttonEnabled by vmRecover.buttonEnabled
-    val isLoading by vmRecover.isLoading
+    val isLoading by vmLoading.isLoading
     val error = vmRecover.error
     val showError = remember {
         mutableStateOf(false)
@@ -98,13 +105,15 @@ fun Recover(modifier: Modifier, vmRecover: RecoverPasswordViewModel, navControll
         }
         Space(size = 20.dp)
         ButtonPrincipal(text = "Enviar", enabled = buttonEnabled) {
-            vmRecover.sendCode({
-                //En caso de error
-                showError.value = true
-            }) {
-                val userJson = Gson().toJson(User(email = email))
-                //En caso de exito
-                navController.navigate("CheckEmailView/$userJson/recover-password")
+            vmLoading.withLoading {
+                vmRecover.sendCode({
+                    //En caso de error
+                    showError.value = true
+                }) {
+                    val userJson = Gson().toJson(User(email = email))
+                    //En caso de exito
+                    navController.navigate("CheckEmailView/$userJson/recover-password")
+                }
             }
         }
     }

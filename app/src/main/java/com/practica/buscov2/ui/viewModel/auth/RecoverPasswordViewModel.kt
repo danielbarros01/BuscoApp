@@ -27,9 +27,6 @@ class RecoverPasswordViewModel @Inject constructor(
     private val _buttonEnabled: MutableState<Boolean> = mutableStateOf(false)
     val buttonEnabled: State<Boolean> = _buttonEnabled
 
-    private val _isLoading: MutableState<Boolean> = mutableStateOf(false)
-    val isLoading: State<Boolean> = _isLoading
-
     var error by mutableStateOf(ErrorBusco())
         private set
 
@@ -44,9 +41,6 @@ class RecoverPasswordViewModel @Inject constructor(
     fun sendCode(onError: () -> Unit, onSuccess: () -> Unit) {
         try {
             viewModelScope.launch(Dispatchers.IO) {
-                //activo el loader
-                _isLoading.value = true
-
                 val response = repo.sendCode(email.value)
 
                 when (response) {
@@ -69,14 +63,9 @@ class RecoverPasswordViewModel @Inject constructor(
                         }
                     }
                 }
-
-                //Desactivo el loading
-                _isLoading.value = false
             }
         } catch (e: Exception) {
             Log.d("Error al enviar codigo de recuperacion", e.toString())
-            //desactivo el loader
-            _isLoading.value = false
         }
     }
 }

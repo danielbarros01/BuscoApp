@@ -29,10 +29,6 @@ class CompleteDataViewModel @Inject constructor(
     private val repo: UsersRepository,
     private val repoGeoref: GeorefRepository
 ) : ViewModel() {
-    //Para el progressIndicator
-    private val _isLoading = mutableStateOf(false)
-    val isLoading: State<Boolean> = _isLoading
-
     var user by mutableStateOf(User())
         private set
 
@@ -240,7 +236,6 @@ class CompleteDataViewModel @Inject constructor(
             viewModelScope.launch(Dispatchers.IO) {
                 // Activo el loading
                 withContext(Dispatchers.Main) {
-                    _isLoading.value = true
                     _error.value = ErrorBusco()
                 }
 
@@ -263,17 +258,10 @@ class CompleteDataViewModel @Inject constructor(
                     }
                 }
 
-                // Desactivo el loading
-                withContext(Dispatchers.Main) {
-                    _isLoading.value = false
-                }
             }
         } catch (e: Exception) {
             Log.e("Error", e.message.toString())
-            // Desactivo el loading y manejo el error
-            _isLoading.value = false
             _error.value = ErrorBusco(message = "Ha ocurrido un error inesperado")
-
         }
     }
 

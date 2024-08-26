@@ -18,6 +18,7 @@ import com.practica.buscov2.ui.viewModel.users.CompleteDataViewModel
 import com.practica.buscov2.ui.viewModel.auth.GoogleLoginViewModel
 import com.practica.buscov2.ui.viewModel.HomeViewModel
 import com.practica.buscov2.ui.viewModel.JobsViewModel
+import com.practica.buscov2.ui.viewModel.LoadingViewModel
 import com.practica.buscov2.ui.viewModel.NewPublicationViewModel
 import com.practica.buscov2.ui.viewModel.NotificationsViewModel
 import com.practica.buscov2.ui.viewModel.QualificationsViewModel
@@ -73,8 +74,8 @@ fun NavManager() {
     val tokenViewModel: TokenViewModel = hiltViewModel()
     val loginGoogleViewModel: GoogleLoginViewModel = hiltViewModel()
     val searchViewModel: SearchViewModel = hiltViewModel()
-    val notificationsViewModel: NotificationsViewModel = hiltViewModel()
-    notificationsViewModel.apllyContext(context)
+    //val notificationsViewModel: NotificationsViewModel = hiltViewModel()
+    //notificationsViewModel.apllyContext(context)
 
     NavHost(navController = navController, startDestination = "Start") {
         composable("Start") {
@@ -85,7 +86,15 @@ fun NavManager() {
         composable("Login") {
             val loginViewModel: LoginViewModel = hiltViewModel()
             val userViewModel: UserViewModel = hiltViewModel()
-            LoginView(loginViewModel, userViewModel, loginGoogleViewModel, navController)
+            val loadingViewModel: LoadingViewModel = hiltViewModel()
+
+            LoginView(
+                loginViewModel,
+                userViewModel,
+                loginGoogleViewModel,
+                loadingViewModel,
+                navController
+            )
         }
 
         composable(
@@ -94,11 +103,13 @@ fun NavManager() {
         ) {
             val username = it.arguments?.getString("username") ?: ""
             val completeDataViewModel: CompleteDataViewModel = hiltViewModel()
+            val loadingViewModel: LoadingViewModel = hiltViewModel()
 
             CompleteDataView(
                 completeDataViewModel,
                 navController,
                 tokenViewModel,
+                loadingViewModel,
                 username
             )
         }
@@ -119,13 +130,29 @@ fun NavManager() {
 
             val forView = it.arguments?.getString("forView") ?: "check-email"
 
-            CheckEmailView(checkEmailViewModel, tokenViewModel, navController, user, forView)
+            val loadingViewModel: LoadingViewModel = hiltViewModel()
+
+            CheckEmailView(
+                checkEmailViewModel,
+                tokenViewModel,
+                loadingViewModel,
+                navController,
+                user,
+                forView
+            )
         }
 
         composable("RegisterView") {
             val registerViewModel: RegisterViewModel = hiltViewModel()
             val userViewModel: UserViewModel = hiltViewModel()
-            RegisterView(registerViewModel, userViewModel, loginGoogleViewModel, navController)
+            val loadingViewModel: LoadingViewModel = hiltViewModel()
+            RegisterView(
+                registerViewModel,
+                userViewModel,
+                loginGoogleViewModel,
+                loadingViewModel,
+                navController
+            )
         }
 
         composable("Home") {
@@ -133,7 +160,7 @@ fun NavManager() {
             val userViewModel: UserViewModel = hiltViewModel()
             val vmCompleteData: CompleteDataViewModel = hiltViewModel()
             val professionsViewModel: ProfessionsViewModel = hiltViewModel()
-
+            val loadingViewModel: LoadingViewModel = hiltViewModel()
 
             HomeView(
                 homeViewModel,
@@ -143,21 +170,25 @@ fun NavManager() {
                 vmCompleteData,
                 professionsViewModel,
                 searchViewModel,
+                loadingViewModel,
                 navController
             )
         }
 
         composable("RecoverPassword") {
             val recoverPasswordViewModel: RecoverPasswordViewModel = hiltViewModel()
+            val loadingViewModel: LoadingViewModel = hiltViewModel()
             RecoverPassword(
                 vmRecover = recoverPasswordViewModel,
+                loadingViewModel,
                 navController = navController
             )
         }
 
         composable("ResetPassword") {
             val resetPasswordViewModel: ResetPasswordViewModel = hiltViewModel()
-            ResetPassword(resetPasswordViewModel, tokenViewModel, navController)
+            val loadingViewModel: LoadingViewModel = hiltViewModel()
+            ResetPassword(resetPasswordViewModel, tokenViewModel, loadingViewModel, navController)
         }
 
         composable("OkResetPassword") {
@@ -170,7 +201,13 @@ fun NavManager() {
 
         composable("RegisterWorker") {
             val registerWorkerViewModel: RegisterWorkerViewModel = hiltViewModel()
-            RegisterWorkerView(registerWorkerViewModel, tokenViewModel, navController)
+            val loadingViewModel: LoadingViewModel = hiltViewModel()
+            RegisterWorkerView(
+                registerWorkerViewModel,
+                tokenViewModel,
+                loadingViewModel,
+                navController
+            )
         }
 
         composable("Configuration")
@@ -191,6 +228,7 @@ fun NavManager() {
 
             val qualificationsViewModel: QualificationsViewModel = hiltViewModel()
             val vmJobs: JobsViewModel = hiltViewModel()
+            val loadingViewModel: LoadingViewModel = hiltViewModel()
 
             ProfileView(
                 id,
@@ -200,6 +238,7 @@ fun NavManager() {
                 proposalsViewModel,
                 qualificationsViewModel,
                 vmJobs,
+                loadingViewModel,
                 navController
             )
         }
@@ -209,12 +248,13 @@ fun NavManager() {
             val userViewModel: UserViewModel = hiltViewModel()
             val registerWorkerViewModel: RegisterWorkerViewModel = hiltViewModel()
             val completeDataViewModel: CompleteDataViewModel = hiltViewModel()
-
+            val loadingViewModel: LoadingViewModel = hiltViewModel()
             EditUserView(
                 userViewModel,
                 tokenViewModel,
                 registerWorkerViewModel,
                 completeDataViewModel,
+                loadingViewModel,
                 navController
             )
         }
@@ -223,6 +263,7 @@ fun NavManager() {
             val userViewModel: UserViewModel = hiltViewModel()
             val professionsViewModel: ProfessionsViewModel = hiltViewModel()
             val newPublicationViewModel: NewPublicationViewModel = hiltViewModel()
+            val loadingViewModel: LoadingViewModel = hiltViewModel()
 
             NewPublicationView(
                 userViewModel,
@@ -230,6 +271,7 @@ fun NavManager() {
                 tokenViewModel,
                 professionsViewModel,
                 newPublicationViewModel,
+                loadingViewModel,
                 navController
             )
         }
@@ -243,6 +285,7 @@ fun NavManager() {
             val professionsViewModel: ProfessionsViewModel = hiltViewModel()
             val newPublicationViewModel: NewPublicationViewModel = hiltViewModel()
             val proposalViewModel: ProposalViewModel = hiltViewModel()
+            val loadingViewModel: LoadingViewModel = hiltViewModel()
 
             EditProposalView(
                 id,
@@ -252,6 +295,7 @@ fun NavManager() {
                 professionsViewModel,
                 newPublicationViewModel,
                 proposalViewModel,
+                loadingViewModel,
                 navController
             )
         }
@@ -259,11 +303,14 @@ fun NavManager() {
         composable("Proposals") {
             val userViewModel: UserViewModel = hiltViewModel()
             val proposalsViewModel: ProposalsViewModel = hiltViewModel()
+            val loadingViewModel: LoadingViewModel = hiltViewModel()
+
             ProposalsView(
                 vmUser = userViewModel,
                 vmGoogle = loginGoogleViewModel,
                 vmToken = tokenViewModel,
                 vmProposals = proposalsViewModel,
+                vmLoading = loadingViewModel,
                 navController = navController
             )
         }
@@ -277,6 +324,7 @@ fun NavManager() {
             val proposalViewModel: ProposalViewModel = hiltViewModel()
             val applicantsViewModel: ApplicationsViewModel = hiltViewModel()
             val qualificationsViewModel: QualificationsViewModel = hiltViewModel()
+            val loadingViewModel: LoadingViewModel = hiltViewModel()
 
             ProposalView(
                 id,
@@ -286,6 +334,7 @@ fun NavManager() {
                 proposalViewModel,
                 applicantsViewModel,
                 qualificationsViewModel,
+                loadingViewModel,
                 navController
             )
         }
@@ -298,12 +347,15 @@ fun NavManager() {
             val proposalId = it.arguments?.getInt("proposalId") ?: 0
             val userViewModel: UserViewModel = hiltViewModel()
             val applicantsViewModel: ApplicationsViewModel = hiltViewModel()
+            val loadingViewModel: LoadingViewModel = hiltViewModel()
+
             ApplicantsView(
                 proposalId,
                 userViewModel,
                 loginGoogleViewModel,
                 tokenViewModel,
                 applicantsViewModel,
+                loadingViewModel,
                 navController
             )
         }
@@ -312,6 +364,7 @@ fun NavManager() {
             val userViewModel: UserViewModel = hiltViewModel()
             val proposalsViewModel: ProposalsViewModel = hiltViewModel()
             val jobsViewModel: JobsViewModel = hiltViewModel()
+            val loadingViewModel: LoadingViewModel = hiltViewModel()
 
             JobsView(
                 userViewModel,
@@ -319,17 +372,19 @@ fun NavManager() {
                 tokenViewModel,
                 proposalsViewModel,
                 jobsViewModel,
+                loadingViewModel,
                 navController
             )
         }
 
-        composable(
+        /*composable(
             "Proposals/me/active/{toWorkerId}",
             arguments = listOf(navArgument("toWorkerId") { type = NavType.IntType })
         ) {
             val toWorkerId = it.arguments?.getInt("toWorkerId") ?: 0
             val userViewModel: UserViewModel = hiltViewModel()
             val proposalsViewModel: ProposalsViewModel = hiltViewModel()
+            val loadingViewModel: LoadingViewModel = hiltViewModel()
 
             ActiveProposalsView(
                 toWorkerId,
@@ -337,19 +392,22 @@ fun NavManager() {
                 tokenViewModel,
                 proposalsViewModel,
                 notificationsViewModel,
+                loadingViewModel,
                 navController
             )
-        }
+        }*/
 
         composable("Applications/me") {
             val userViewModel: UserViewModel = hiltViewModel()
             val vmApplications: ApplicationsViewModel = hiltViewModel()
+            val loadingViewModel: LoadingViewModel = hiltViewModel()
 
             ApplicationsView(
                 vmUser = userViewModel,
                 vmGoogle = loginGoogleViewModel,
                 vmToken = tokenViewModel,
                 vmApplications = vmApplications,
+                vmLoading = loadingViewModel,
                 navController = navController
             )
         }
@@ -361,6 +419,7 @@ fun NavManager() {
             val typeSearch = it.arguments?.getString("typeSearch") ?: "workers"
             val userViewModel: UserViewModel = hiltViewModel()
             val completeDataViewModel: CompleteDataViewModel = hiltViewModel()
+            val loadingViewModel: LoadingViewModel = hiltViewModel()
 
             SearchView(
                 typeSearch = typeSearch,
@@ -369,6 +428,7 @@ fun NavManager() {
                 vmToken = tokenViewModel,
                 vmSearch = searchViewModel,
                 completeDataViewModel,
+                loadingViewModel,
                 navController = navController
             )
         }

@@ -29,8 +29,6 @@ class LoginViewModel @Inject constructor(
     private val storeToken: StoreToken
 ) : ViewModel() {
 
-    //Start
-
     private val _email: MutableState<String> = mutableStateOf("")
     val email: State<String> = _email
 
@@ -41,16 +39,12 @@ class LoginViewModel @Inject constructor(
     private var _loginEnabled = mutableStateOf(false)
     val loginEnabled: State<Boolean> = _loginEnabled
 
-    //Para el progressIndicator
-    private val _isLoading = mutableStateOf(false)
-    val isLoading: State<Boolean> = _isLoading
-
     var error by mutableStateOf(ErrorBusco())
         private set
 
     //Cambiar los valores
     fun onLoginChanged(email: String, password: String) {
-        _email.value = email //siempre va a tener el ultimo valor real del textfield
+        _email.value = email
         _password.value = password
         _loginEnabled.value = isValidEmail(email) && isValidPassword(password)
     }
@@ -60,13 +54,9 @@ class LoginViewModel @Inject constructor(
 
     private fun isValidPassword(password: String): Boolean = password.length >= 6;
 
-    //api
     fun login(onError: () -> Unit, onSuccess: (String) -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                //Activo el loading
-                _isLoading.value = true
-
                 val response: LoginResult? = repo.login(email.value, password.value)
 
                 //Si hay un error
@@ -76,8 +66,6 @@ class LoginViewModel @Inject constructor(
                         title = response.error.title,
                         message = response.error.message
                     )
-                    //Desactivo el loading
-                    _isLoading.value = false
                     onError()
                     return@launch // Exit the coroutine if error occurs
                 }
@@ -94,12 +82,8 @@ class LoginViewModel @Inject constructor(
                 loginToken?.let { onSuccess(it.token) }
             } catch (e: Exception) {
                 Log.d("Error", "Error: $e")
-            }finally {
-                //Desactivo el loading
-                _isLoading.value = false
             }
         }
-
     }
 
     fun loginWithGoogle(
@@ -108,9 +92,6 @@ class LoginViewModel @Inject constructor(
         onSuccess: (String) -> Unit
     ) {
         try {
-            //Activo el loading
-            _isLoading.value = true
-
             val account = completedTask.getResult(ApiException::class.java)
 
             // Obtener el nombre, el ID de Google y el correo electrónico
@@ -136,9 +117,6 @@ class LoginViewModel @Inject constructor(
                         message = response.error.message
                     )
 
-                    //Desactivo el loading
-                    _isLoading.value = false
-
                     onError()
                     return@launch // Exit the coroutine if error occurs
                 }
@@ -150,16 +128,11 @@ class LoginViewModel @Inject constructor(
                 if (loginToken != null) storeToken.saveToken(loginToken)
 
                 loginToken?.let {
-                    //Desactivo el loading
-                    _isLoading.value = false
-
                     onSuccess(it.token)
                 }
             }
         } catch (e: ApiException) {
             Log.w("Error", "signInResult:failed code=" + e.statusCode)
-            //Desactivo el loading
-            _isLoading.value = false
         }
     }
 }

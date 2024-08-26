@@ -24,12 +24,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ProposalViewModel @Inject constructor(
-    private val repo: ProposalsRepository
+    private val repo: ProposalsRepository,
 ) : ViewModel() {
     /*UI*/
-    private val _isLoading = MutableStateFlow(false)
-    val isLoading: StateFlow<Boolean> get() = _isLoading
-
     private var _error = mutableStateOf(ErrorBusco())
     var error: State<ErrorBusco> = _error
 
@@ -43,8 +40,6 @@ class ProposalViewModel @Inject constructor(
     fun getProposal(id: Int, onError: () -> Unit, onSuccess: (Proposal) -> Unit) {
         viewModelScope.launch {
             try {
-                _isLoading.value = true
-
                 val response = withContext(Dispatchers.IO) {
                     repo.getProposal(id)
                 }
@@ -65,8 +60,6 @@ class ProposalViewModel @Inject constructor(
                     message = "Ha ocurrido un error inesperado, intentalo de nuevo más tarde"
                 )
                 onError()
-            } finally {
-                _isLoading.value = false
             }
         }
     }
@@ -74,8 +67,6 @@ class ProposalViewModel @Inject constructor(
     fun deleteProposal(id: Int, token: String, onError: () -> Unit, onSuccess: () -> Unit) {
         viewModelScope.launch {
             try {
-                _isLoading.value = true
-
                 val response = withContext(Dispatchers.IO) {
                     repo.deleteProposal(id, token)
                 }
@@ -99,8 +90,6 @@ class ProposalViewModel @Inject constructor(
                     message = "Ha ocurrido un error inesperado, intentalo de nuevo más tarde"
                 )
                 onError()
-            } finally {
-                _isLoading.value = false
             }
         }
     }
@@ -109,8 +98,6 @@ class ProposalViewModel @Inject constructor(
     fun finalizeProposal(id: Int, token: String, onError: () -> Unit, onSuccess: () -> Unit) {
         viewModelScope.launch {
             try {
-                _isLoading.value = true
-
                 val response = withContext(Dispatchers.IO) {
                     repo.finalizeProposal(token, id)
                 }
@@ -134,16 +121,12 @@ class ProposalViewModel @Inject constructor(
                     message = "Ha ocurrido un error inesperado, intentalo de nuevo más tarde"
                 )
                 onError()
-            } finally {
-                _isLoading.value = false
             }
         }
     }
 
-
     fun editProposal(
         context: Context,
-        proposal: Proposal,
         uri: Uri,
         token: String,
         onError: () -> Unit,
@@ -151,16 +134,24 @@ class ProposalViewModel @Inject constructor(
     ) {
         viewModelScope.launch {
             try {
-                _isLoading.value = true
+                var uriModified: Uri? = uri
 
-                val filePart = if (!uri.scheme.isNullOrEmpty() && !uri.path.isNullOrEmpty()) {
-                    FilesUtils.getFilePart(context, uri, "image")
-                } else {
-                    null
+                /**Esto es porque si tiene http, la imagen no se modifico
+                 * Es la que ya venia del servidor, por eso no hay que volver a enviarla y
+                 * el valor es nulo*/
+                if (uri.toString().contains("http")) {
+                    uriModified = null
                 }
 
+                val filePart =
+                    if (!uriModified?.scheme.isNullOrEmpty() && !uriModified?.path.isNullOrEmpty()) {
+                        FilesUtils.getFilePart(context, uri, "image")
+                    } else {
+                        null
+                    }
+
                 val response = withContext(Dispatchers.IO) {
-                    repo.editProposal(proposal, filePart, token)
+                    proposal.value?.let { repo.editProposal(it, filePart, token) }
                 }
 
                 when (response) {
@@ -182,8 +173,6 @@ class ProposalViewModel @Inject constructor(
                     message = "Ha ocurrido un error inesperado, intentalo de nuevo más tarde"
                 )
                 onError()
-            } finally {
-                _isLoading.value = false
             }
         }
     }

@@ -39,10 +39,6 @@ class CheckEmailViewModel @Inject constructor(
     private var _verificarEnabled = mutableStateOf(false)
     val verificarEnabled: State<Boolean> = _verificarEnabled
 
-    //Para el progressIndicator
-    private val _isLoading = mutableStateOf(false)
-    val isLoading: State<Boolean> = _isLoading
-
     var error by mutableStateOf(ErrorBusco())
         private set
 
@@ -61,11 +57,6 @@ class CheckEmailViewModel @Inject constructor(
         n3: Int?,
         n4: Int?
     ) {
-        /*for ((index, digit) in _digits.withIndex()) {
-            _digits[index] =
-                if (index == 0) n1 else if (index == 1) n2 else if (index == 2) n3 else n4
-        }*/
-
         _digits[0] = n1
         _digits[1] = n2
         _digits[2] = n3
@@ -102,11 +93,6 @@ class CheckEmailViewModel @Inject constructor(
     ) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                withContext(Dispatchers.Main) {
-                    //Activo el loading
-                    _isLoading.value = true
-                }
-
                 val response = repo.confirmCode(resend, token, code.toInt(), email)
 
                 //Si no se pudo confirmar la cuenta
@@ -114,7 +100,6 @@ class CheckEmailViewModel @Inject constructor(
                     is Boolean -> {
                         if (response) { // si este Boolean es true:
                             withContext(Dispatchers.Main) {
-                                _isLoading.value = false
                                 onSuccess()
                             }
                         }
@@ -126,7 +111,6 @@ class CheckEmailViewModel @Inject constructor(
                         if (loginToken != null) storeToken.saveToken(loginToken)
 
                         withContext(Dispatchers.Main) {
-                            _isLoading.value = false
                             onSuccess()
                         }
                     }
@@ -138,15 +122,12 @@ class CheckEmailViewModel @Inject constructor(
                             message = response.message
                         )
                         withContext(Dispatchers.Main) {
-                            _isLoading.value = false
                             onError()
                         }
                     }
                 }
             } catch (e: Exception) {
                 Log.e("Error", e.message.toString())
-                //Desactivo el loading
-                _isLoading.value = false
             }
         }
     }
@@ -165,9 +146,6 @@ class CheckEmailViewModel @Inject constructor(
     ) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                //Activo el loading
-                _isLoading.value = true
-
                 val response =
                     if (resend) token?.let { repo.resendCode(it) } else repo.sendCode(email)
 
@@ -191,13 +169,8 @@ class CheckEmailViewModel @Inject constructor(
                         }
                     }
                 }
-
-                //Desactivo el loading
-                _isLoading.value = false
             } catch (e: Exception) {
                 Log.e("Error", e.message.toString())
-                //Desactivo el loading
-                _isLoading.value = false
             }
         }
     }

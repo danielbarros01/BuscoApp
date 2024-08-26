@@ -44,6 +44,7 @@ import com.practica.buscov2.ui.components.Space
 import com.practica.buscov2.ui.components.Title
 import com.practica.buscov2.ui.theme.GrayPlaceholder
 import com.practica.buscov2.ui.theme.GrayText
+import com.practica.buscov2.ui.viewModel.LoadingViewModel
 import com.practica.buscov2.ui.viewModel.confirmation.CheckEmailViewModel
 import com.practica.buscov2.ui.viewModel.auth.TokenViewModel
 import java.util.concurrent.TimeUnit
@@ -52,6 +53,7 @@ import java.util.concurrent.TimeUnit
 fun CheckEmailView(
     vm: CheckEmailViewModel,
     vmToken: TokenViewModel,
+    vmLoading: LoadingViewModel,
     navController: NavController,
     user: User,
     forView: String = "check-email" //or recover-password
@@ -60,7 +62,15 @@ fun CheckEmailView(
         modifier = Modifier
             .fillMaxSize()
     ) {
-        CheckEmail(Modifier.align(Alignment.Center), vm, vmToken, navController, user, forView)
+        CheckEmail(
+            Modifier.align(Alignment.Center),
+            vm,
+            vmToken,
+            vmLoading,
+            navController,
+            user,
+            forView
+        )
     }
 }
 
@@ -69,6 +79,7 @@ fun CheckEmail(
     modifier: Modifier,
     vm: CheckEmailViewModel,
     vmToken: TokenViewModel,
+    vmLoading: LoadingViewModel,
     navController: NavController,
     user: User,
     forView: String
@@ -80,7 +91,7 @@ fun CheckEmail(
 
     val error = vm.error
     val showError = remember { mutableStateOf(false) }
-    val isLoading: Boolean by vm.isLoading
+    val isLoading: Boolean by vmLoading.isLoading
     val navigate = remember { mutableStateOf(false) }
 
     var digit1 by remember { mutableStateOf("") }
@@ -179,33 +190,37 @@ fun CheckEmail(
             Space(size = 5.dp)
 
             ButtonTransparent(text = "Reenviar código", enabled = enabledSendCode) {
-                //token?.let {
-                vm.resendCode(resend, token = token?.token, email = user.email ?: "", onError = {
-                    showError.value = true
-                }) {
-                    vm.startTimer(vm.waitingTimeMillis)
-                    enabledSendCode = false
+                vmLoading.withLoading {
+                    vm.resendCode(
+                        resend,
+                        token = token?.token,
+                        email = user.email ?: "",
+                        onError = {
+                            showError.value = true
+                        }) {
+                        vm.startTimer(vm.waitingTimeMillis)
+                        enabledSendCode = false
+                    }
                 }
-                //}
             }
             Space(size = 5.dp)
             ButtonPrincipal(text = "Verificar", enabled = enabledPrincipal) {
-                //token?.let {
-                vm.validateCode(
-                    resend = resend,
-                    token = token?.token ?: "",
-                    code = vm.digitsString,
-                    email = user.email ?: "",
-                    {
-                        showError.value = true
-                    }) {
-                    if (resend) {
-                        navController.navigate("CompleteData/${user.username}")
-                    } else {
-                        navController.navigate("ResetPassword")
+                vmLoading.withLoading {
+                    vm.validateCode(
+                        resend = resend,
+                        token = token?.token ?: "",
+                        code = vm.digitsString,
+                        email = user.email ?: "",
+                        {
+                            showError.value = true
+                        }) {
+                        if (resend) {
+                            navController.navigate("CompleteData/${user.username}")
+                        } else {
+                            navController.navigate("ResetPassword")
+                        }
                     }
                 }
-                //}
             }
             Space(size = 5.dp)
             ButtonTransparent(

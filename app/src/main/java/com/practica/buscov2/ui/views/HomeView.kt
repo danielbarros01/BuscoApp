@@ -109,12 +109,14 @@ import com.practica.buscov2.ui.theme.Rubik
 import com.practica.buscov2.ui.theme.ShadowColor
 import com.practica.buscov2.ui.viewModel.auth.GoogleLoginViewModel
 import com.practica.buscov2.ui.viewModel.HomeViewModel
+import com.practica.buscov2.ui.viewModel.LoadingViewModel
 import com.practica.buscov2.ui.viewModel.SearchViewModel
 import com.practica.buscov2.ui.viewModel.auth.TokenViewModel
 import com.practica.buscov2.ui.viewModel.professions.ProfessionsViewModel
 import com.practica.buscov2.ui.viewModel.proposals.ProposalsViewModel
 import com.practica.buscov2.ui.viewModel.users.CompleteDataViewModel
 import com.practica.buscov2.ui.viewModel.users.UserViewModel
+import com.practica.buscov2.ui.views.util.ActiveLoader.Companion.activeLoaderMax
 import com.practica.buscov2.util.AppUtils
 import kotlinx.coroutines.launch
 
@@ -128,6 +130,7 @@ fun HomeView(
     vmCompleteData: CompleteDataViewModel,
     vmProfessions: ProfessionsViewModel,
     vmSearch: SearchViewModel,
+    vmLoading:LoadingViewModel,
     navController: NavHostController
 ) {
     val token by vmToken.token.collectAsState()
@@ -158,6 +161,7 @@ fun HomeView(
                 vmCompleteData,
                 vmProfessions,
                 vmSearch,
+                vmLoading,
                 navController,
                 user!!
             )
@@ -175,6 +179,7 @@ fun Home(
     vmCompleteData: CompleteDataViewModel,
     vmProfessions: ProfessionsViewModel,
     vmSearch: SearchViewModel,
+    vmLoading:LoadingViewModel,
     navController: NavHostController,
     user: User
 ) {
@@ -184,7 +189,7 @@ fun Home(
 
     val navigationRoutes = RoutesBottom.allRoutes
 
-    val isLoading by homeVm.isLoading.collectAsState()
+    val isLoading by vmLoading.isLoading
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
@@ -292,13 +297,7 @@ fun Home(
 
                     if (isSearchWork) {
                         val proposalsPage = homeVm.proposalsPage.collectAsLazyPagingItems()
-                        activeLoaderMax(proposalsPage, homeVm)
-                        /*ButtonPrincipal(
-                            text = "Buscar",
-                            enabled = true,
-                            modifier = Modifier.padding(bottom = 15.dp)
-                        ) {
-                        }*/
+                        activeLoaderMax(proposalsPage, vmLoading)
 
                         SearchSection(vmProfessions, onQueryChange = { query ->
                             vmSearch.onQueryChange(query)
@@ -310,7 +309,7 @@ fun Home(
                         ShowProposals(proposalsPage, navController)
                     } else {
                         val workersPage = homeVm.workersPage.collectAsLazyPagingItems()
-                        activeLoaderMax(workersPage, homeVm)
+                        activeLoaderMax(workersPage, vmLoading)
 
 
                         SearchSection(vmProfessions, onQueryChange = { query ->
@@ -517,13 +516,4 @@ fun OutlinedTitle(text: String) {
             )
         )
     }
-}
-
-fun <T : Any> activeLoaderMax(
-    itemsPage: LazyPagingItems<T>,
-    vmHomeViewModel: HomeViewModel
-) {
-    val loadState = itemsPage.loadState
-    val isLoading = loadState.refresh is LoadState.Loading || loadState.prepend is LoadState.Loading
-    vmHomeViewModel.setLoading(isLoading)
 }

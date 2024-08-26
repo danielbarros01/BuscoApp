@@ -29,9 +29,6 @@ class ResetPasswordViewModel @Inject constructor(
     private val _buttonEnabled: MutableState<Boolean> = mutableStateOf(false)
     val buttonEnabled: State<Boolean> = _buttonEnabled
 
-    private val _isLoading: MutableState<Boolean> = mutableStateOf(false)
-    val isLoading: State<Boolean> = _isLoading
-
     var error by mutableStateOf(ErrorBusco())
         private set
 
@@ -53,9 +50,7 @@ class ResetPasswordViewModel @Inject constructor(
     fun changePassword(token: String, onError: () -> Unit, onSuccess: () -> Unit) {
         try {
             viewModelScope.launch(Dispatchers.IO) {
-                // Activo el loading
                 withContext(Dispatchers.Main) {
-                    _isLoading.value = true
                     error = ErrorBusco()
                 }
 
@@ -77,16 +72,9 @@ class ResetPasswordViewModel @Inject constructor(
                         }
                     }
                 }
-
-                // Desactivo el loading
-                withContext(Dispatchers.Main) {
-                    _isLoading.value = false
-                }
             }
         } catch (e: Exception) {
             Log.e("Error", e.message.toString())
-            // Desactivo el loading y manejo el error
-            _isLoading.value = false
             error = ErrorBusco(message = "Ha ocurrido un error inesperado")
         }
     }

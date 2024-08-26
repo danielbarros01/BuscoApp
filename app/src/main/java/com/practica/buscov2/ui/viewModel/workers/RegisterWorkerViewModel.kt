@@ -26,10 +26,6 @@ class RegisterWorkerViewModel @Inject constructor(
     private val professionsRepo: ProfessionsRepository,
     private val workersRepository: WorkersRepository,
 ) : ViewModel() {
-    //Para el progressIndicator
-    private val _isLoading = mutableStateOf(false)
-    val isLoading: State<Boolean> = _isLoading
-
     private val _buttonEnabled = mutableStateOf(false)
     val buttonEnabled: State<Boolean> = _buttonEnabled
 
@@ -68,49 +64,9 @@ class RegisterWorkerViewModel @Inject constructor(
         fetchCategories()
     }
 
-    fun getWorker(id:Int){
-        viewModelScope.launch {
-            try {
-                _isLoading.value = true
-
-                val response = withContext(Dispatchers.IO) {
-                    professionsRepo.getWorker(id)
-                }
-
-                val title = response?.title
-                val yearsExperience = response?.yearsExperience
-                val description = response?.description
-                val webPage = response?.webPage
-
-                worker = worker.copy(
-                    userId = response?.userId,
-                    title = title,
-                    yearsExperience = yearsExperience,
-                    description = description,
-                    webPage = webPage,
-                )
-
-                //onCategoryChange()
-                //onProfessionChange()
-                onTitleChange(title ?: "")
-                onYearsChange(yearsExperience.toString())
-                onDescriptionChange(description ?: "")
-                onWebpageChange(webPage ?: "")
-
-            }catch (e: Exception){
-                _error.value = ErrorBusco(message = "Ha ocurrido un error inesperado")
-                Log.e("Error", e.toString())
-            }finally {
-                _isLoading.value = false
-            }
-        }
-    }
-
     private fun fetchCategories() {
         viewModelScope.launch {
             try {
-                _isLoading.value = true
-
                 val response = withContext(Dispatchers.IO) {
                     professionsRepo.getCategories()
                 }
@@ -119,8 +75,6 @@ class RegisterWorkerViewModel @Inject constructor(
             } catch (e: Exception) {
                 _error.value = ErrorBusco(message = "Ha ocurrido un error inesperado")
                 Log.e("Error", e.toString())
-            } finally {
-                _isLoading.value = false
             }
         }
     }
@@ -130,8 +84,6 @@ class RegisterWorkerViewModel @Inject constructor(
 
         viewModelScope.launch {
             try {
-                _isLoading.value = true
-
                 val response = withContext(Dispatchers.IO) {
                     professionsRepo.getProfessions(categoryId)
                 }
@@ -141,8 +93,6 @@ class RegisterWorkerViewModel @Inject constructor(
             } catch (e: Exception) {
                 _error.value = ErrorBusco(message = "Ha ocurrido un error inesperado")
                 Log.e("Error", e.toString())
-            } finally {
-                _isLoading.value = false
             }
         }
     }
@@ -150,8 +100,6 @@ class RegisterWorkerViewModel @Inject constructor(
     fun updateWorker(token: String, onError: () -> Unit, onSuccess: () -> Unit) {
         viewModelScope.launch {
             try {
-                _isLoading.value = true
-
                 val response = withContext(Dispatchers.IO) {
                     worker.let {
                         //Validar pagina web
@@ -175,8 +123,6 @@ class RegisterWorkerViewModel @Inject constructor(
             } catch (e: Exception) {
                 _error.value = ErrorBusco(message = "Ha ocurrido un error inesperado")
                 Log.e("Error", e.toString())
-            } finally {
-                _isLoading.value = false
             }
         }
     }
@@ -192,8 +138,6 @@ class RegisterWorkerViewModel @Inject constructor(
     fun registerWorker(token: String, onError: () -> Unit, onSuccess: () -> Unit) {
         viewModelScope.launch {
             try {
-                _isLoading.value = true
-
                 val response = withContext(Dispatchers.IO) {
                     worker.let {
                         workersRepository.createWorker(token, it)
@@ -213,8 +157,6 @@ class RegisterWorkerViewModel @Inject constructor(
             } catch (e: Exception) {
                 _error.value = ErrorBusco(message = "Ha ocurrido un error inesperado")
                 Log.e("Error", e.toString())
-            } finally {
-                _isLoading.value = false
             }
         }
     }

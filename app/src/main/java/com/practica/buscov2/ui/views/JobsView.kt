@@ -40,13 +40,12 @@ import com.practica.buscov2.ui.components.TabsComponent
 import com.practica.buscov2.ui.components.TopBar
 import com.practica.buscov2.ui.theme.GrayText
 import com.practica.buscov2.ui.viewModel.JobsViewModel
+import com.practica.buscov2.ui.viewModel.LoadingViewModel
 import com.practica.buscov2.ui.viewModel.auth.GoogleLoginViewModel
 import com.practica.buscov2.ui.viewModel.auth.TokenViewModel
 import com.practica.buscov2.ui.viewModel.proposals.ProposalsViewModel
 import com.practica.buscov2.ui.viewModel.users.UserViewModel
-import com.practica.buscov2.ui.views.proposals.NoProposals
-import com.practica.buscov2.ui.views.proposals.activeLoaderMaxProposals
-import com.practica.buscov2.util.AppUtils
+import com.practica.buscov2.ui.views.util.ActiveLoader.Companion.activeLoaderMax
 
 @Composable
 fun JobsView(
@@ -55,6 +54,7 @@ fun JobsView(
     vmToken: TokenViewModel,
     vmProposals: ProposalsViewModel,
     vmJobs: JobsViewModel,
+    vmLoading: LoadingViewModel,
     navController: NavHostController
 ) {
     val token by vmToken.token.collectAsState()
@@ -86,6 +86,7 @@ fun JobsView(
                 vmProposals,
                 vmJobs,
                 user!!,
+                vmLoading,
                 navController
             )
         }
@@ -100,12 +101,13 @@ fun JobsV(
     vmProposals: ProposalsViewModel,
     vmJobs: JobsViewModel,
     user: User,
+    vmLoading: LoadingViewModel,
     navController: NavHostController
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-    val isLoading = vmJobs.isLoading.collectAsState()
+    val isLoading = vmLoading.isLoading
 
-    if(isLoading.value){
+    if (isLoading.value) {
         LoaderMaxSize()
     }
 
@@ -127,7 +129,7 @@ fun JobsV(
                     .padding(15.dp)
                     .fillMaxSize()
             ) {
-                TabsPages(vmJobs, navController)
+                TabsPages(vmJobs, vmLoading, navController)
             }
         }
     }
@@ -135,9 +137,9 @@ fun JobsV(
 
 
 @Composable
-fun Jobs(vmJobs: JobsViewModel, navController: NavController) {
+fun Jobs(vmJobs: JobsViewModel, vmLoading: LoadingViewModel, navController: NavController) {
     val jobsPage = vmJobs.jobsPage.collectAsLazyPagingItems()
-    activeLoaderMaxJobs(jobsPage, vmJobs)
+    activeLoaderMax(jobsPage, vmLoading)
 
     if (jobsPage.itemCount == 0) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -185,7 +187,11 @@ private fun ShowJobs(jobsPage: LazyPagingItems<Proposal>, navController: NavCont
 }
 
 @Composable
-private fun TabsPages(vm: JobsViewModel, navController: NavHostController) {
+private fun TabsPages(
+    vm: JobsViewModel,
+    vmLoading: LoadingViewModel,
+    navController: NavHostController
+) {
     val tabs = ItemTabJob.pagesJobs
     val pagerState = rememberPagerState(pageCount = { tabs.size })
 
@@ -195,7 +201,7 @@ private fun TabsPages(vm: JobsViewModel, navController: NavHostController) {
             vm.changeIsFinished(tabs[index].title != "En proceso")
             vm.refreshProposals()
         }
-        TabsContent(tabs, pagerState, vm, navController)
+        TabsContent(tabs, pagerState, vm, vmLoading, navController)
     }
 }
 
@@ -204,20 +210,12 @@ private fun TabsContent(
     tabs: List<ItemTabJob>,
     pagerState: PagerState,
     vm: JobsViewModel,
+    vmLoading: LoadingViewModel,
     navController: NavHostController
 ) {
     HorizontalPager(
         state = pagerState
     ) { page ->
-        tabs[page].screen(vm, navController)
+        tabs[page].screen(vm, vmLoading, navController)
     }
-}
-
-fun activeLoaderMaxJobs(
-    proposalsPage: LazyPagingItems<Proposal>,
-    vmJobs: JobsViewModel
-) {
-    val loadState = proposalsPage.loadState
-    val isLoading = loadState.refresh is LoadState.Loading || loadState.prepend is LoadState.Loading
-    vmJobs.setLoading(isLoading)
 }

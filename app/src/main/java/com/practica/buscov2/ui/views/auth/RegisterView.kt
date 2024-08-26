@@ -35,6 +35,7 @@ import com.practica.buscov2.ui.components.PasswordField
 import com.practica.buscov2.ui.components.SeparatoryLine
 import com.practica.buscov2.ui.components.Space
 import com.practica.buscov2.ui.components.Title
+import com.practica.buscov2.ui.viewModel.LoadingViewModel
 import com.practica.buscov2.ui.viewModel.auth.GoogleLoginViewModel
 import com.practica.buscov2.ui.viewModel.auth.RegisterViewModel
 import com.practica.buscov2.ui.viewModel.users.UserViewModel
@@ -44,13 +45,14 @@ fun RegisterView(
     vm: RegisterViewModel,
     userVm: UserViewModel,
     vmGoogle: GoogleLoginViewModel,
+    vmLoading: LoadingViewModel,
     navController: NavController
 ) {
     Box(
         modifier = Modifier
             .fillMaxSize()
     ) {
-        Register(Modifier.align(Alignment.Center), vm, vmGoogle, userVm, navController)
+        Register(Modifier.align(Alignment.Center), vm, vmGoogle, userVm, vmLoading, navController)
     }
 }
 
@@ -60,6 +62,7 @@ fun Register(
     viewModel: RegisterViewModel,
     vmGoogle: GoogleLoginViewModel,
     vmUser: UserViewModel,
+    vmLoading: LoadingViewModel,
     navController: NavController
 ) {
     val username: String by viewModel.username
@@ -70,7 +73,7 @@ fun Register(
     val buttonEnabled: Boolean by viewModel.buttonEnabled
     val showError = remember { mutableStateOf(false) }
     val error = viewModel.error
-    val isLoading: Boolean by viewModel.isLoading
+    val isLoading: Boolean by vmLoading.isLoading
 
 
     if (showError.value) {
@@ -124,9 +127,11 @@ fun Register(
             Space(10.dp)
 
             ButtonPrincipal(text = "Registrarse", enabled = buttonEnabled) {
-                viewModel.register(onError = { showError.value = true }) {
-                    val userJson = Gson().toJson(User(email = email, username = username))
-                    navController.navigate("CheckEmailView/$userJson/check-email")
+                vmLoading.withLoading {
+                    viewModel.register(onError = { showError.value = true }) {
+                        val userJson = Gson().toJson(User(email = email, username = username))
+                        navController.navigate("CheckEmailView/$userJson/check-email")
+                    }
                 }
             }
         }
@@ -139,7 +144,7 @@ fun Register(
         Space(4.dp)
         SeparatoryLine()
         Space(4.dp)
-        GoogleRegister(vmGoogle, viewModel, vmUser, navController) {
+        GoogleRegister(vmGoogle, viewModel, vmUser, vmLoading, navController) {
             //En caso de error
             showError.value = true
         }
@@ -151,6 +156,7 @@ fun GoogleRegister(
     vmGoogle: GoogleLoginViewModel,
     vmRegister: RegisterViewModel,
     vmUser: UserViewModel,
+    vmLoading: LoadingViewModel,
     navController: NavController,
     onError: () -> Unit
 ) {
@@ -165,16 +171,18 @@ fun GoogleRegister(
                         GoogleSignIn.getSignedInAccountFromIntent(intent)
 
                     //Iniciar sesion
-                    vmRegister.loginWithGoogle(task, onError = { onError() }) { token ->
-                        //Obtener el usuario
-                        vmUser.getMyProfile(token, {}) {
-                            //Si los datos estan completados, ir a Home
-                            if (it.name != null && it.lastname != null) {
-                                navController.navigate("Home")
-                            }
-                            //Si no estan completados los datos, ir a CompleteData
-                            else {
-                                navController.navigate("CompleteData/${it.username}")
+                    vmLoading.withLoading {
+                        vmRegister.loginWithGoogle(task, onError = { onError() }) { token ->
+                            //Obtener el usuario
+                            vmUser.getMyProfile(token, {}) {
+                                //Si los datos estan completados, ir a Home
+                                if (it.name != null && it.lastname != null) {
+                                    navController.navigate("Home")
+                                }
+                                //Si no estan completados los datos, ir a CompleteData
+                                else {
+                                    navController.navigate("CompleteData/${it.username}")
+                                }
                             }
                         }
                     }

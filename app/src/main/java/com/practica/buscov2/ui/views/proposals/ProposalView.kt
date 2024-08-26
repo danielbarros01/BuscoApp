@@ -74,6 +74,7 @@ import com.practica.buscov2.ui.theme.GrayText
 import com.practica.buscov2.ui.theme.GreenBusco
 import com.practica.buscov2.ui.theme.OrangePrincipal
 import com.practica.buscov2.ui.theme.RedBusco
+import com.practica.buscov2.ui.viewModel.LoadingViewModel
 import com.practica.buscov2.ui.viewModel.QualificationsViewModel
 import com.practica.buscov2.ui.viewModel.auth.GoogleLoginViewModel
 import com.practica.buscov2.ui.viewModel.auth.TokenViewModel
@@ -91,6 +92,7 @@ fun ProposalView(
     vmProposal: ProposalViewModel,
     applicationsViewModel: ApplicationsViewModel,
     qualificationsViewModel: QualificationsViewModel,
+    vmLoading: LoadingViewModel,
     navController: NavHostController
 ) {
     val token by vmToken.token.collectAsState()
@@ -119,6 +121,7 @@ fun ProposalView(
                 token,
                 applicationsViewModel,
                 qualificationsViewModel,
+                vmLoading,
                 navController
             )
         }
@@ -136,6 +139,7 @@ fun ProposalV(
     token: LoginToken?,
     applicationsViewModel: ApplicationsViewModel,
     qualificationsViewModel: QualificationsViewModel,
+    vmLoading: LoadingViewModel,
     navController: NavHostController
 ) {
     val error by vmProposal.error
@@ -177,26 +181,28 @@ fun ProposalV(
     val buttonEnabledQualify by qualificationsViewModel.buttonEnabled
 
     LaunchedEffect(Unit) {
-        vmProposal.getProposal(proposalId, onError = {
-            // Manejo de error
-            showErrorClient = true
-        }) {
-            // Manejo de éxito
-            showSuccess = true
+        vmLoading.withLoading {
+            vmProposal.getProposal(proposalId, onError = {
+                // Manejo de error
+                showErrorClient = true
+            }) {
+                // Manejo de éxito
+                showSuccess = true
 
-            //Traigo al usuario que creo la propuesta
-            it.userId?.let { userId ->
-                vmUser.getProfile(userId, {}) { user ->
-                    vmProposal.changeUserOwner(user)
+                //Traigo al usuario que creo la propuesta
+                it.userId?.let { userId ->
+                    vmUser.getProfile(userId, {}) { user ->
+                        vmProposal.changeUserOwner(user)
+                    }
                 }
-            }
 
-            if (it.status != null) {
-                //en proceso de trabajo
-                //Traigo la aplicacion que contiene al trabajador
-                applicationsViewModel.getAcceptedApplication(it.id!!) { worker ->
-                    worker?.userId?.let {
-                        qualificationsViewModel.setWorkerId(worker.userId)
+                if (it.status != null) {
+                    //en proceso de trabajo
+                    //Traigo la aplicacion que contiene al trabajador
+                    applicationsViewModel.getAcceptedApplication(it.id!!) { worker ->
+                        worker?.userId?.let {
+                            qualificationsViewModel.setWorkerId(worker.userId)
+                        }
                     }
                 }
             }
@@ -214,11 +220,13 @@ fun ProposalV(
         token?.let { loginToken ->
             proposal?.id?.let { proposalId ->
                 //Eliminar propuesta
-                vmProposal.deleteProposal(proposalId, loginToken.token, onError = {
-                    showError.value = true
-                }) {
-                    //Exito
-                    navController.navigate("Proposals")
+                vmLoading.withLoading {
+                    vmProposal.deleteProposal(proposalId, loginToken.token, onError = {
+                        showError.value = true
+                    }) {
+                        //Exito
+                        navController.navigate("Proposals")
+                    }
                 }
             }
         }
@@ -232,16 +240,18 @@ fun ProposalV(
             user,
             onClick = {
                 //Aplicar e ir a aplicaciones
-                applicationsViewModel.applyToProposal(
-                    proposalId,
-                    onError = {
-                        vmProposal.setError(it)
-                        showError.value = true
-                    },
-                    onSuccess = {
-                        //Ir a mis trabajos
-                        navController.navigate("Jobs/me")
-                    })
+                vmLoading.withLoading {
+                    applicationsViewModel.applyToProposal(
+                        proposalId,
+                        onError = {
+                            vmProposal.setError(it)
+                            showError.value = true
+                        },
+                        onSuccess = {
+                            //Ir a mis trabajos
+                            navController.navigate("Jobs/me")
+                        })
+                }
             })
     }
 
@@ -250,13 +260,14 @@ fun ProposalV(
         //Abrir alert de calificacion
         token?.let { loginToken ->
             proposal?.id?.let { proposalId ->
-                //Eliminar propuesta
-                vmProposal.finalizeProposal(proposalId, loginToken.token, onError = {
-                    showError.value = true
-                }) {
-                    //Exito
-                    //Poder calificar al trabajador
-                    showQualify.value = true
+                vmLoading.withLoading {
+                    vmProposal.finalizeProposal(proposalId, loginToken.token, onError = {
+                        showError.value = true
+                    }) {
+                        //Exito
+                        //Poder calificar al trabajador
+                        showQualify.value = true
+                    }
                 }
             }
         }
@@ -348,16 +359,18 @@ fun ProposalV(
                                             showAlertDifferentJob.value = true
                                         } else {
                                             //Aplicar e ir a aplicaciones
-                                            applicationsViewModel.applyToProposal(
-                                                proposalId,
-                                                onError = {
-                                                    vmProposal.setError(it)
-                                                    showError.value = true
-                                                },
-                                                onSuccess = {
-                                                    //Ir a mis trabajos
-                                                    navController.navigate("Jobs/me")
-                                                })
+                                            vmLoading.withLoading {
+                                                applicationsViewModel.applyToProposal(
+                                                    proposalId,
+                                                    onError = {
+                                                        vmProposal.setError(it)
+                                                        showError.value = true
+                                                    },
+                                                    onSuccess = {
+                                                        //Ir a mis trabajos
+                                                        navController.navigate("Jobs/me")
+                                                    })
+                                            }
                                         }
                                     }
                                 }

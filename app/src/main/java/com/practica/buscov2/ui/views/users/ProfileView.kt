@@ -1,5 +1,6 @@
 package com.practica.buscov2.ui.views.users
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -14,7 +15,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
@@ -80,6 +80,7 @@ import com.practica.buscov2.ui.theme.GrayText
 import com.practica.buscov2.ui.theme.GreenBusco
 import com.practica.buscov2.ui.theme.OrangePrincipal
 import com.practica.buscov2.ui.viewModel.JobsViewModel
+import com.practica.buscov2.ui.viewModel.LoadingViewModel
 import com.practica.buscov2.ui.viewModel.QualificationsViewModel
 import com.practica.buscov2.ui.viewModel.auth.GoogleLoginViewModel
 import com.practica.buscov2.ui.viewModel.auth.TokenViewModel
@@ -87,8 +88,7 @@ import com.practica.buscov2.ui.viewModel.proposals.ProposalsViewModel
 import com.practica.buscov2.ui.viewModel.users.UserViewModel
 import com.practica.buscov2.ui.views.proposals.NoProposals
 import com.practica.buscov2.ui.views.proposals.ShowProposals
-import com.practica.buscov2.ui.views.proposals.activeLoaderMaxProposals
-import kotlinx.coroutines.Job
+import com.practica.buscov2.ui.views.util.ActiveLoader.Companion.activeLoaderMax
 import kotlinx.coroutines.launch
 
 @Composable
@@ -100,6 +100,7 @@ fun ProfileView(
     vmProposals: ProposalsViewModel,
     vmQualifications: QualificationsViewModel,
     vmJobs: JobsViewModel,
+    vmLoading: LoadingViewModel,
     navController: NavHostController
 ) {
     val token by vmToken.token.collectAsState()
@@ -150,6 +151,7 @@ fun ProfileView(
                 vmProposals,
                 vmQualifications,
                 vmJobs,
+                vmLoading,
                 navController
             )
         }
@@ -166,9 +168,10 @@ fun ProfileV(
     vmProposals: ProposalsViewModel,
     vmQualifications: QualificationsViewModel,
     vmJobs: JobsViewModel,
+    vmLoading: LoadingViewModel,
     navController: NavHostController
 ) {
-    val isLoading by vmProposals.isLoading.collectAsState()
+    val isLoading by vmLoading.isLoading
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     var showPhotoFullScreen by remember { mutableStateOf(false) }
 
@@ -230,7 +233,7 @@ fun ProfileV(
                             modifier = Modifier
                                 .width(140.dp)
                                 .height(34.dp)
-                        ){
+                        ) {
                             //Send message
                             //Abrir el chat con esa persona
                             navController.navigate("Chat/${userProfile.id}")
@@ -243,7 +246,7 @@ fun ProfileV(
                             modifier = Modifier
                                 .width(140.dp)
                                 .height(34.dp)
-                        ){
+                        ) {
                             navController.navigate("Proposals/me/active/${userProfile.id}")
                         }
                     }
@@ -251,7 +254,14 @@ fun ProfileV(
 
                 Title(text = "${userProfile.name} ${userProfile.lastname}")
 
-                TabsPages(userProfile, vmProposals, vmQualifications, vmJobs, navController)
+                TabsPages(
+                    userProfile,
+                    vmProposals,
+                    vmQualifications,
+                    vmJobs,
+                    vmLoading,
+                    navController
+                )
 
             }
         }
@@ -264,6 +274,7 @@ private fun TabsPages(
     vmProposals: ProposalsViewModel,
     vmQualifications: QualificationsViewModel,
     vmJobs: JobsViewModel,
+    vmLoading: LoadingViewModel,
     navController: NavController
 ) {
     val tabs = if (user.worker == null) ItemTabProfile.pagesUser else ItemTabProfile.pagesWorker
@@ -272,7 +283,16 @@ private fun TabsPages(
 
     Column(modifier = Modifier.fillMaxSize()) {
         Tabs(tabs, pagerState)
-        TabsContent(tabs, pagerState, user, vmProposals, vmQualifications, vmJobs, navController)
+        TabsContent(
+            tabs,
+            pagerState,
+            user,
+            vmProposals,
+            vmQualifications,
+            vmJobs,
+            vmLoading,
+            navController
+        )
     }
 }
 
@@ -284,12 +304,13 @@ private fun TabsContent(
     vmProposals: ProposalsViewModel,
     vmQualifications: QualificationsViewModel,
     vmJobs: JobsViewModel,
+    vmLoading: LoadingViewModel,
     navController: NavController
 ) {
     HorizontalPager(
         state = pagerState
     ) { page ->
-        tabs[page].screen(user, vmProposals, navController, vmQualifications, vmJobs)
+        tabs[page].screen(user, vmProposals, navController, vmQualifications, vmJobs, vmLoading)
     }
 }
 
@@ -334,11 +355,11 @@ private fun Tabs(tabs: List<ItemTabProfile>, pagerState: PagerState) {
 @Composable
 fun WorksCompletedProfile(
     vmJobs: JobsViewModel,
-    vmProposals: ProposalsViewModel,
+    vmLoading: LoadingViewModel,
     navController: NavController
 ) {
     val jobsPage = vmJobs.jobsCompletedPage.collectAsLazyPagingItems()
-    activeLoaderMaxProposals(jobsPage, vmProposals)
+    activeLoaderMax(jobsPage, vmLoading)
 
     if (jobsPage.itemCount == 0) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -360,13 +381,14 @@ fun ShowJobs(jobsPage: LazyPagingItems<Proposal>, navController: NavController) 
 }
 
 @Composable
-fun Qualifications(vmQualifications: QualificationsViewModel, vmProposals: ProposalsViewModel) {
+fun Qualifications(vmQualifications: QualificationsViewModel, vmLoading: LoadingViewModel) {
     val qualificationsPage = vmQualifications.qualificationsPage.collectAsLazyPagingItems()
-    activeLoaderMaxProposals(qualificationsPage, vmProposals)
+    activeLoaderMax(qualificationsPage, vmLoading)
 
     ShowQualifications(qualificationsPage, vmQualifications)
 }
 
+@SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun ShowQualifications(
     qualificationsPage: LazyPagingItems<Qualification>,
@@ -540,9 +562,13 @@ fun ElementRowInformation(
 }
 
 @Composable
-fun Proposals(vmProposals: ProposalsViewModel, navController: NavController) {
+fun Proposals(
+    vmProposals: ProposalsViewModel,
+    vmLoading: LoadingViewModel,
+    navController: NavController
+) {
     val proposalsPage = vmProposals.proposalsPage.collectAsLazyPagingItems()
-    activeLoaderMaxProposals(proposalsPage, vmProposals)
+    activeLoaderMax(proposalsPage, vmLoading)
 
     if (proposalsPage.itemCount == 0) {
         NoProposals()

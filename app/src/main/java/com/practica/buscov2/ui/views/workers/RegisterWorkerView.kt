@@ -41,6 +41,7 @@ import com.practica.buscov2.ui.components.Space
 import com.practica.buscov2.ui.theme.GrayPlaceholder
 import com.practica.buscov2.ui.theme.GrayText
 import com.practica.buscov2.ui.theme.OrangePrincipal
+import com.practica.buscov2.ui.viewModel.LoadingViewModel
 import com.practica.buscov2.ui.viewModel.auth.TokenViewModel
 import com.practica.buscov2.ui.viewModel.workers.RegisterWorkerViewModel
 
@@ -48,10 +49,17 @@ import com.practica.buscov2.ui.viewModel.workers.RegisterWorkerViewModel
 fun RegisterWorkerView(
     vmWorker: RegisterWorkerViewModel,
     vmToken: TokenViewModel,
+    vmLoading: LoadingViewModel,
     navController: NavController
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
-        RegisterWorker(Modifier.align(Alignment.Center), vmWorker, vmToken, navController)
+        RegisterWorker(
+            Modifier.align(Alignment.Center),
+            vmWorker,
+            vmToken,
+            vmLoading,
+            navController
+        )
     }
 }
 
@@ -60,10 +68,11 @@ fun RegisterWorker(
     modifier: Modifier,
     vmWorker: RegisterWorkerViewModel,
     vmToken: TokenViewModel,
+    vmLoading: LoadingViewModel,
     navController: NavController
 ) {
     val token by vmToken.token.collectAsState()
-    val isLoading by vmWorker.isLoading
+    val isLoading by vmLoading.isLoading
     val buttonEnabled by vmWorker.buttonEnabled
     val error = vmWorker.error
     val showError = remember { mutableStateOf(false) }
@@ -105,12 +114,14 @@ fun RegisterWorker(
                 ButtonPrincipal(text = "Continuar", enabled = buttonEnabled) {
                     token?.let {
                         //Guardar datos de trabajador
-                        vmWorker.registerWorker(it.token, {
-                            //En caso de error
-                            showError.value = true
-                        }) {
-                            //Exito
-                            navController.navigate("Home")
+                        vmLoading.withLoading {
+                            vmWorker.registerWorker(it.token, {
+                                //En caso de error
+                                showError.value = true
+                            }) {
+                                //Exito
+                                navController.navigate("Home")
+                            }
                         }
                     }
                 }
