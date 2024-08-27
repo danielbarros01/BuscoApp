@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import com.practica.buscov2.navigation.NavManager
 import com.practica.buscov2.ui.theme.BuscoV2Theme
 import com.practica.buscov2.util.permissions.PermissionNotifications
@@ -19,15 +20,16 @@ class MainActivity : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         setContent {
             BuscoV2Theme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background,
                 ) {
+                    val context = LocalContext.current
+
                     PermissionNotifications(context = this)
-                    NavManager()
+                    NavManager(context)
                 }
             }
         }

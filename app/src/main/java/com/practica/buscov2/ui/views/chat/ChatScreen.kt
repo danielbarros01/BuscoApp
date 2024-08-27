@@ -132,7 +132,6 @@ fun ChatPrincipal(
                 items(chats.size) { index ->
                     val chat = chats[index]
                     CardChatUser(chat){
-                        //Ir al chat con el otro usuario
                         navController.navigate("Chat/${chat.user?.id}")
                     }
                 }

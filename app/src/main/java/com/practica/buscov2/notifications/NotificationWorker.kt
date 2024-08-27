@@ -17,16 +17,22 @@ import kotlin.random.Random
 class NotificationWorker(context: Context, params:WorkerParameters): Worker(context, params) {
 
     override fun doWork(): Result {
+        val title = inputData.getString("TITLE") ?: return Result.failure()
         val message = inputData.getString("MESSAGE") ?: return Result.failure()
-        showNotification(message)
+        val type = inputData.getString("TYPE") ?: return Result.failure()
+
+        val icon = if(type == "MESSAGE") R.drawable.message else R.drawable.notification
+
+        showNotification(message, title, icon)
+
         return Result.success()
     }
 
-    private fun showNotification(message: String) {
+    private fun showNotification(message: String, title: String = "Notificación de BuscoApp", icon: Int) {
         val notification = NotificationCompat.Builder(applicationContext, "notification_one")
-            .setContentTitle("Notificación de BuscoApp")
+            .setContentTitle(title)
             .setContentText(message)
-            .setSmallIcon(R.drawable.notification)
+            .setSmallIcon(icon)
             .setPriority(NotificationManager.IMPORTANCE_HIGH)
             .setAutoCancel(true)
             .build()
@@ -41,7 +47,9 @@ class NotificationWorker(context: Context, params:WorkerParameters): Worker(cont
                 .build()
 
             val inputData = Data.Builder()
+                .putString("TITLE", n.title)
                 .putString("MESSAGE", n.text)
+                .putString("TYPE", n.notificationType)
                 .build()
 
             val notificationWork = OneTimeWorkRequestBuilder<NotificationWorker>()

@@ -12,9 +12,11 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
+import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.microsoft.signalr.HubConnection
 import com.microsoft.signalr.HubConnectionBuilder
+import com.microsoft.signalr.HubConnectionState
 import com.practica.buscov2.data.dataStore.StoreToken
 import com.practica.buscov2.data.pagination.NotificationsDataSource
 import com.practica.buscov2.data.pagination.QualificationsDataSource
@@ -42,32 +44,20 @@ import javax.inject.Inject
 @HiltViewModel
 class NotificationsViewModel @Inject constructor(
     private val storeToken: StoreToken,
-    private val notificationsRepo:NotificationsRepository
+    private val notificationsRepo: NotificationsRepository
 ) : ViewModel() {
     private val _token = MutableStateFlow<LoginToken?>(null)
     val token: StateFlow<LoginToken?> = _token
 
     private val _context = MutableStateFlow<Context?>(null)
 
-    private val hubConnection: HubConnection
+    private var hubConnection: HubConnection? = null
+    private var hubConnectionChat: HubConnection? = null
 
     private val _refreshTrigger = MutableStateFlow(0)
 
     init {
         observeToken()
-
-        hubConnection = HubConnectionBuilder.create(Constants.BASE_URL_NOTIFICATIONS)
-            .withAccessTokenProvider(Single.defer {
-                Single.just(token.value!!.token)
-            })
-            .build()
-
-        hubConnection.on("ReceiveNotification", { n: Notification ->
-            // Manejar el mensaje recibido
-            NotificationWorker.releaseNotification(_context.value!!, n)
-        }, String::class.java)
-
-        hubConnection.start().blockingAwait()
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -82,15 +72,46 @@ class NotificationsViewModel @Inject constructor(
         }
 
     fun sendNotification(notification: Notification) {
-        hubConnection.send("SendNotification", notification)
+        hubConnection?.send("SendNotification", notification)
     }
 
     private fun observeToken() {
         viewModelScope.launch(Dispatchers.IO) {
             storeToken.getTokenFlow()
                 .catch { e -> Log.e("Error al obtener el token", e.message.toString()) }
-                .collect { newToken -> _token.value = newToken }
+                .collect { newToken ->
+                    _token.value = newToken
+                    newToken?.let { setupHubConnection(it.token) }
+                }
         }
+    }
+
+    private fun setupHubConnection(token: String) {
+        hubConnection = HubConnectionBuilder.create(Constants.BASE_URL_NOTIFICATIONS)
+            .withAccessTokenProvider(Single.defer { Single.just(token) })
+            .build()
+
+        hubConnectionChat = HubConnectionBuilder.create(Constants.BASE_URL_CHAT)
+            .withAccessTokenProvider(Single.defer { Single.just(token) })
+            .build()
+
+        hubConnection?.on("ReceiveNotification", { notification: Notification ->
+            NotificationWorker.releaseNotification(_context.value!!, notification)
+        }, Notification::class.java)
+
+        hubConnectionChat?.on("ReceiveMessageNotification", { message: Message ->
+            NotificationWorker.releaseNotification(_context.value!!, Notification(
+                userReceiveId = message.userIdReceiver,
+                userSenderId = message.userIdSender,
+                text = message.text,
+                dateAndTime = message.dateAndTime,
+                title = message.userSender?.username ?: "Usuario ${message.userIdSender}",
+                notificationType = "MESSAGE"
+            ))
+        }, Message::class.java)
+
+        hubConnection?.start()?.blockingAwait()
+        hubConnectionChat?.start()?.blockingAwait()
     }
 
     fun apllyContext(context: Context) {

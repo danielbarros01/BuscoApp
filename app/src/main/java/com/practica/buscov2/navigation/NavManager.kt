@@ -1,5 +1,6 @@
 package com.practica.buscov2.navigation
 
+import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
@@ -67,15 +68,13 @@ import com.practica.buscov2.ui.views.workers.RegisterWorkerView
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun NavManager() {
-    val context = LocalContext.current
-
+fun NavManager(context: Context) {
     val navController = rememberNavController()
     val tokenViewModel: TokenViewModel = hiltViewModel()
     val loginGoogleViewModel: GoogleLoginViewModel = hiltViewModel()
     val searchViewModel: SearchViewModel = hiltViewModel()
-    //val notificationsViewModel: NotificationsViewModel = hiltViewModel()
-    //notificationsViewModel.apllyContext(context)
+    val notificationsViewModel: NotificationsViewModel = hiltViewModel()
+    notificationsViewModel.apllyContext(context)
 
     NavHost(navController = navController, startDestination = "Start") {
         composable("Start") {
@@ -377,7 +376,7 @@ fun NavManager() {
             )
         }
 
-        /*composable(
+        composable(
             "Proposals/me/active/{toWorkerId}",
             arguments = listOf(navArgument("toWorkerId") { type = NavType.IntType })
         ) {
@@ -395,7 +394,7 @@ fun NavManager() {
                 loadingViewModel,
                 navController
             )
-        }*/
+        }
 
         composable("Applications/me") {
             val userViewModel: UserViewModel = hiltViewModel()
