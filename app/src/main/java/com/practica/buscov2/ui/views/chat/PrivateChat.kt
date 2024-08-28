@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -35,6 +36,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -186,12 +188,14 @@ fun ChatP(
         ) {
             items(chats.size) { index ->
                 val msg = chats[index]
-
                 Column(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalAlignment = if (msg.userIdSender == user.id) Alignment.End else Alignment.Start
                 ) {
-                    MessageView(sending = msg.userIdSender == user.id, message = msg)
+                    MessageView(
+                        sending = msg.userIdSender == user.id,
+                        message = msg
+                    )
                 }
             }
         }
@@ -221,16 +225,20 @@ fun SectionSendMessage(vm: ChatViewModel, toUserId: Int) {
                         unfocusedIndicatorColor = Color.Transparent
                     ),
                     shape = RoundedCornerShape(20.dp),
-                    modifier = Modifier.weight(1f).padding(start = 15.dp)
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(start = 15.dp)
                 )
 
                 //Space(size = 4.dp)
-                IconButton(modifier = Modifier
-                    .width(70.dp)
-                    .size(60.dp), onClick = {
-                    vm.sendMessage(toUserId, message)
-                    message = ""
-                }, enabled = message.isNotEmpty()) {
+                IconButton(
+                    modifier = Modifier
+                        .width(70.dp)
+                        .size(60.dp), onClick = {
+                        vm.sendMessage(toUserId, message)
+                        message = ""
+                    }, enabled = message.isNotEmpty()
+                ) {
                     Icon(
                         modifier = Modifier.size(40.dp),
                         painter = painterResource(id = R.drawable.send2),
@@ -244,11 +252,13 @@ fun SectionSendMessage(vm: ChatViewModel, toUserId: Int) {
 }
 
 @Composable
-fun MessageView(sending: Boolean, message: Message) {
+fun MessageView(modifier: Modifier = Modifier, sending: Boolean, message: Message) {
     Box(
-        modifier = Modifier
-            .clip(
-                if (sending) RoundedCornerShape(
+        modifier = modifier
+            .background(
+                if (sending) OrangePrincipal
+                else Color.LightGray.copy(alpha = 0.5f),
+                shape = if (sending) RoundedCornerShape(
                     topStart = 20.dp,
                     topEnd = 20.dp,
                     bottomStart = 20.dp,
@@ -262,11 +272,9 @@ fun MessageView(sending: Boolean, message: Message) {
                         bottomEnd = 20.dp
                     )
             )
-            .background(
-                if (sending) OrangePrincipal
-                else Color.LightGray.copy(alpha = 0.5f)
-            )
+
             .padding(12.dp)
+
     ) {
         Text(
             text = message.text,
@@ -280,3 +288,5 @@ fun MessageView(sending: Boolean, message: Message) {
         fontSize = 12.sp
     )
 }
+
+
