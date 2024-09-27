@@ -304,7 +304,8 @@ fun CardWorkerRecommendation(
             ) {
                 InsertCircleProfileImage(
                     image = user.image ?: "",
-                    modifier = Modifier.size(100.dp)
+                    modifier = Modifier.size(100.dp),
+                    onClick = onClick
                 )
                 Box() {
                     Text(
@@ -398,7 +399,8 @@ fun CardProposalRecommendation(
             ) {
                 InsertCircleProfileImage(
                     image = proposal.user?.image ?: "",
-                    modifier = Modifier.size(100.dp)
+                    modifier = Modifier.size(100.dp),
+                    onClick = onClick
                 )
                 Text(
                     text = proposal.user?.name ?: "",
@@ -560,7 +562,8 @@ fun CardWorker(
                     image = image,
                     modifier = Modifier
                         .width(90.dp)
-                        .height(90.dp)
+                        .height(90.dp),
+                    onClick = onClick
                 )
 
 
@@ -624,7 +627,10 @@ fun CardQualificationOfUser(user: User, qualification: Qualification) {
         HorizontalDivider()
         Space(size = 4.dp)
         Row(verticalAlignment = Alignment.CenterVertically) {
-            InsertCircleProfileImage(image = user.image ?: "", modifier = Modifier.size(40.dp))
+            InsertCircleProfileImage(
+                image = user.image ?: "",
+                modifier = Modifier.size(40.dp),
+            )
             Space(size = 8.dp)
             Text(
                 text = "${user.name} ${user.lastname}",

@@ -8,6 +8,7 @@ import androidx.camera.view.PreviewView
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -65,6 +66,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -119,6 +121,7 @@ import com.practica.buscov2.ui.viewModel.users.UserViewModel
 import com.practica.buscov2.ui.views.util.ActiveLoader.Companion.activeLoaderMax
 import com.practica.buscov2.util.AppUtils
 import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
@@ -385,9 +388,10 @@ fun SearchSection(
 fun ShowWorkers(workersPage: LazyPagingItems<User>, navController: NavController) {
     ItemsInLazy(workersPage) {
         CardWorkerRecommendation(
-            modifier = Modifier.padding(vertical = 10.dp),
+            modifier = Modifier
+                .padding(vertical = 10.dp),
             user = it,
-            qualification = 99
+            qualification = it.worker?.averageQualification?.roundToInt() ?: 0
         ) {
             // Ir al perfil del usuario
             navController.navigate("Profile/${it.id}")

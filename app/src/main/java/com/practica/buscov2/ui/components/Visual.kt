@@ -59,6 +59,7 @@ import com.practica.buscov2.ui.theme.GrayField
 import com.practica.buscov2.ui.theme.GrayPlaceholder
 import com.practica.buscov2.ui.theme.GrayText
 import com.practica.buscov2.ui.theme.GreenBusco
+import com.practica.buscov2.ui.theme.OrangePrincipal
 import com.practica.buscov2.ui.theme.YellowStar
 import com.practica.buscov2.util.Constants.Companion.API_URL
 import kotlin.io.path.Path
@@ -193,6 +194,7 @@ fun LoaderMaxSize() {
         contentAlignment = Alignment.Center
     ) {
         CircularProgressIndicator(
+            color = OrangePrincipal,
             strokeWidth = 10.dp,
             modifier = Modifier.size(80.dp)
         )

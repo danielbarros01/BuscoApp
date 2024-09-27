@@ -27,6 +27,8 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRowDefaults
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDrawerState
@@ -330,6 +332,14 @@ private fun Tabs(tabs: List<ItemTabProfile>, pagerState: PagerState) {
         ScrollableTabRow(
             selectedTabIndex = selectedTab,
             edgePadding = if (tabs.size > 2) 0.dp else 15.dp,
+            indicator = {tabPositions ->
+                TabRowDefaults.PrimaryIndicator(
+                    Modifier.fillMaxWidth().tabIndicatorOffset(tabPositions[selectedTab]),
+                    color = OrangePrincipal,
+                    width = tabPositions[selectedTab].width,
+                    height = 2.dp
+                )
+            }
         ) {
             tabs.forEachIndexed { index, item ->
                 Tab(
