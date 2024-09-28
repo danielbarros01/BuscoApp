@@ -1,76 +1,76 @@
-# Busco App: Búsqueda de Trabajos Autónomos y Trabajadores 🚀
+# Busco App: Freelance Jobs and Workers Search 🚀
 ![ProyectoFlyerCompr](https://github.com/user-attachments/assets/7b3032af-d24f-43fe-80e7-4647770301f5)
 
-## Introducción
-Este proyecto está diseñado para brindar una solución eficiente al desafío de encontrar personas especializadas en ciertos oficios o trabajadores autónomos que buscan empleo. A través de una plataforma intuitiva, tanto los trabajadores como los empleadores podrán conectar de manera rápida y sencilla. 🤝
+## Introduction
+This project is designed to provide an efficient solution to the challenge of finding specialized workers or freelancers looking for jobs. Through an intuitive platform, both workers and employers can connect quickly and easily. 🤝
 
-## Formulación de la Problemática
-¿Cómo podemos fomentar el empleo autónomo en oficios tradicionales y hacer más sencillo encontrar trabajadores autónomos cuando surgen necesidades específicas? 🔍
+## Problem Statement
+How can we promote freelance work in traditional trades and make it easier to find freelancers when specific needs arise? 🔍
 
-## Justificación
-La creación de este proyecto traerá diversos beneficios a la sociedad, tales como:
+## Justification
+The creation of this project brings several benefits to society, such as:
 
-- Fomentar el empleo autónomo. 💼
-- Facilitar la búsqueda de trabajadores especializados en distintos oficios. 🔧
-- Mejorar la economía de los trabajadores independientes. 📈
-- Conectar a personas que buscan servicios con trabajadores de calidad. 🌟
+- Promoting freelance work. 💼
+- Facilitating the search for specialized workers in different trades. 🔧
+- Improving the economy of independent workers. 📈
+- Connecting people looking for services with high-quality workers. 🌟
 
-## Objetivo General de Busco App
-El objetivo fue y es seguir, diseñando y construyendo una aplicación que permita tanto la búsqueda de trabajos como la búsqueda de trabajadores autónomos. 📲
+## General Objective of Busco App
+The goal was, and still is, to design and build an application that allows both job searches and freelance worker searches. 📲
 
-## Objetivos Específicos
-- Crear un sistema de registro de usuarios, donde puedan especificar si son trabajadores de algún oficio. 📝
-- Implementar un buscador avanzado para filtrar trabajos o trabajadores según ubicación, oficio, y experiencia. 🌍
-- Incorporar una funcionalidad de calificaciones, para valorar la calidad del trabajo realizado y la confiabilidad tanto de los trabajadores como de los empleadores. ⭐
-- Desarrollar un sistema de notificaciones para mantener informados a usuarios y trabajadores. 🔔
-- Implementar mensajería interna para facilitar la comunicación. 💬
+## Specific Objectives
+- Create a user registration system where users can specify if they are workers of a certain trade. 📝
+- Implement an advanced search feature to filter jobs or workers by location, trade, and experience. 🌍
+- Incorporate a rating feature to evaluate the quality of the work performed and the reliability of both workers and employers. ⭐
+- Develop a notification system to keep users and workers informed. 🔔
+- Implement internal messaging to facilitate communication. 💬
 
-## Objetivo General del Sistema
-El sistema buscará ser una herramienta intuitiva y fácil de usar que permita:
+## General Objective of the System
+The system will aim to be an intuitive and easy-to-use tool that allows:
 
-- Encontrar trabajos o trabajadores de forma eficiente. 🚀
-- Calificar y recibir calificaciones para mejorar la confianza entre usuarios. 👍
-- Recibir notificaciones sobre nuevas postulaciones o propuestas de trabajo. 📩
-- Comunicar de manera directa a las partes involucradas a través de mensajes internos. 💬
+- Efficiently finding jobs or workers. 🚀
+- Providing and receiving ratings to build trust between users. 👍
+- Receiving notifications about new applications or job offers. 📩
+- Communicating directly between involved parties through internal messages. 💬
 
-## Alcance del Proyecto
-El sistema incluye las siguientes funcionalidades:
+## Project Scope
+The system includes the following functionalities:
 
-- Registro de usuarios y trabajadores. 📝
-- Registro de propuestas de trabajo. 💼
-- Búsqueda de trabajos y trabajadores. 🔍
-- Calificación de usuarios y trabajos. ⭐
-- Notificaciones sobre postulaciones. 🔔
-- Sistema de mensajería interna. 💬
+- User and worker registration. 📝
+- Job proposal registration. 💼
+- Job and worker search. 🔍
+- User and job ratings. ⭐
+- Notifications about applications. 🔔
+- Internal messaging system. 💬
 
-## Tecnologías Utilizadas
-- **Arquitectura Cliente-Servidor**: 
-  - Cliente: Aplicación móvil desarrollada en **Kotlin** utilizando el SDK de Android. 📱
-  - Servidor: API web desarrollada con **.NET** y **C#**. 💻
-  - Base de Datos: **MySQL** será el sistema de gestión utilizado para almacenar y administrar la información. 🗄️
+## Technologies Used
+- **Client-Server Architecture**: 
+  - Client: Mobile app developed in **Kotlin** using the Android SDK. 📱
+  - Server: Web API developed with **.NET** and **C#**. 💻
+  - Database: **MySQL** is the management system used to store and manage information. 🗄️
 
-## Futuras versiones
-- **Expansión a otros países**: Inicialmente, el sistema solo está disponible en Argentina. 🌎
-- **Soporte multilingüe** 🌐
-- **Sistema de geolocalización** 📍
+## Future Versions
+- **Expansion to other countries**: Initially, the system will only be available in Argentina. 🌎
+- **Multilingual support** 🌐
+- **Geolocation system** 📍
 
-## Imágenes
-1. **Publica y acepta como cliente, busca y aplica como trabajador:**
+## Images
+1. **Post and accept as a client, search and apply as a worker:**
 
 ![flyer](https://github.com/user-attachments/assets/92962693-4339-49e8-b99e-af75ea465a1d)
 
-2. **Pantalla de Registro de Usuarios:**
+2. **User Registration Screen:**
 
 ![Flyer](https://github.com/user-attachments/assets/c9255685-9c3e-4a0b-be8a-fb0c4344ffd6)
 
-3. **Interfaz de Búsqueda:**
+3. **Search Interface:**
 
 ![flyer](https://github.com/user-attachments/assets/73db019e-44e4-4077-b147-af11888c4471)
 
-4. **Sistema de Calificación:**
+4. **Rating System:**
 
 ![flyer](https://github.com/user-attachments/assets/76a4d002-d90b-4bc8-96fe-f05411636fd2)
 
 ---
 
-Este proyecto promete cambiar la forma en que los trabajadores autónomos y las personas en búsqueda de servicios se conectan. ¡Sigue con nosotros y sé parte de este cambio! 🚀
+This project promises to change the way freelancers and people seeking services connect. Stay with us and be part of this change! 🚀
