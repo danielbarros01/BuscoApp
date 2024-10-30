@@ -74,6 +74,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.datastore.dataStore
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
@@ -83,10 +84,13 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
+import com.google.android.gms.maps.model.LatLng
 import com.practica.buscov2.R
+import com.practica.buscov2.data.dataStore.StoreUbication
 import com.practica.buscov2.model.busco.Proposal
 import com.practica.buscov2.model.busco.SimpleUbication
 import com.practica.buscov2.model.busco.User
+import com.practica.buscov2.model.busco.Worker
 import com.practica.buscov2.navigation.RoutesBottom
 import com.practica.buscov2.navigation.RoutesDrawer
 import com.practica.buscov2.ui.components.AlertChangeUbication
@@ -116,14 +120,16 @@ import com.practica.buscov2.ui.viewModel.SearchViewModel
 import com.practica.buscov2.ui.viewModel.auth.TokenViewModel
 import com.practica.buscov2.ui.viewModel.professions.ProfessionsViewModel
 import com.practica.buscov2.ui.viewModel.proposals.ProposalsViewModel
+import com.practica.buscov2.ui.viewModel.ubication.MapViewModel
+import com.practica.buscov2.ui.viewModel.ubication.SearchMapViewModel
 import com.practica.buscov2.ui.viewModel.users.CompleteDataViewModel
 import com.practica.buscov2.ui.viewModel.users.UserViewModel
+import com.practica.buscov2.ui.views.maps.MapViewUI
 import com.practica.buscov2.ui.views.util.ActiveLoader.Companion.activeLoaderMax
 import com.practica.buscov2.util.AppUtils
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
-@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun HomeView(
     homeVm: HomeViewModel,
@@ -133,20 +139,20 @@ fun HomeView(
     vmCompleteData: CompleteDataViewModel,
     vmProfessions: ProfessionsViewModel,
     vmSearch: SearchViewModel,
-    vmLoading:LoadingViewModel,
+    vmLoading: LoadingViewModel,
+    searchMapVM: SearchMapViewModel,
+    mapVM: MapViewModel,
     navController: NavHostController
 ) {
     val token by vmToken.token.collectAsState()
     val user by vmUser.user.collectAsState()
 
-    //Ejecuto una unica vez
     LaunchedEffect(Unit) {
         token?.let {
             vmUser.getMyProfile(it.token, {
                 navController.navigate("Login")
             }) { user ->
                 vmCompleteData.onDateChangedInitializedData(user)
-                vmSearch.onUbicationChange(SimpleUbication(user.country, user.province, user.department, user.city))
             }
             homeVm.setToken(it.token)
             homeVm.refreshWorkers()
@@ -161,10 +167,11 @@ fun HomeView(
                 homeVm,
                 vmUser,
                 vmGoogle,
-                vmCompleteData,
                 vmProfessions,
                 vmSearch,
                 vmLoading,
+                searchMapVM,
+                mapVM,
                 navController,
                 user!!
             )
@@ -172,17 +179,17 @@ fun HomeView(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Home(
     modifier: Modifier,
     homeVm: HomeViewModel,
     vmUser: UserViewModel,
     vmGoogle: GoogleLoginViewModel,
-    vmCompleteData: CompleteDataViewModel,
     vmProfessions: ProfessionsViewModel,
     vmSearch: SearchViewModel,
-    vmLoading:LoadingViewModel,
+    vmLoading: LoadingViewModel,
+    searchMapVM: SearchMapViewModel,
+    mapVM: MapViewModel,
     navController: NavHostController,
     user: User
 ) {
@@ -195,7 +202,31 @@ fun Home(
     val isLoading by vmLoading.isLoading
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val ubicationDataStore = StoreUbication(context)
+    val ubication = ubicationDataStore.getUbicationFlow().collectAsState(initial = null)
+    val address = mapVM.address.value
+    val coordinates = searchMapVM.placeCoordinates.value
+    var setUbicationStart by remember { mutableStateOf(false) }
 
+    LaunchedEffect(ubication.value) {
+        val location = ubication.value ?: LatLng(user.latitude!!, user.longitude!!)
+
+        searchMapVM.setLocation(location.latitude, location.longitude)
+
+        searchMapVM.getLocation(location.latitude, location.longitude) { address ->
+            address?.let {
+                mapVM.setAddress(it.formatted_address)
+            }
+        }
+
+        homeVm.setUbication(location.latitude, location.longitude)
+
+        setUbicationStart = true
+    }
+
+
+    //El usuario que busca es trabajador y esta buscando propuestas
     var isSearchWork by remember {
         mutableStateOf(false)
     }
@@ -208,11 +239,30 @@ fun Home(
         LoaderMaxSize()
     }
 
-    AlertChangeUbication(
-        changeUbication,
-        vmCompleteData
-    ) { pais, provincia, departamento, localidad ->
-        vmSearch.onUbicationChange(SimpleUbication(pais, provincia, departamento, localidad))
+    if (changeUbication.value) {
+        MapViewUI(
+            coordinates.latitude,
+            coordinates.longitude,
+            searchMapVM,
+            mapVM,
+            navController,
+            actionClose = {
+                changeUbication.value = false //Close Map
+            }) {
+            //Cambiar ubicacion en la memoria del celular
+            scope.launch {
+                ubicationDataStore.saveUbication(it)
+                homeVm.setUbication(it.latitude, it.longitude)
+                changeUbication.value = false //close map
+
+                //Actualizar recomendaciones
+                if (isSearchWork) {
+                    homeVm.refreshProposals()
+                } else {
+                    homeVm.refreshWorkers()
+                }
+            }
+        }
     }
 
     ModalNavigationDrawer(
@@ -288,42 +338,42 @@ fun Home(
                 //Buscar
                 Column {
                     ButtonUbication(
-                        ubication = SimpleUbication(
-                            country = vmCompleteData.pais.value,
-                            province = vmCompleteData.provincia.value,
-                            department = vmCompleteData.departamento.value,
-                            city = vmCompleteData.localidad.value
-                        ), modifier = Modifier.offset(x = -(15.dp))
+                        if (setUbicationStart) {
+                            address
+                        } else "Cargando ubicación...",
+                        modifier = Modifier.offset(x = -(15.dp))
                     ) {
-                        changeUbication.value = true
+                        changeUbication.value = true //Open Map
                     }
 
-                    if (isSearchWork) {
-                        val proposalsPage = homeVm.proposalsPage.collectAsLazyPagingItems()
-                        activeLoaderMax(proposalsPage, vmLoading)
+                    if (setUbicationStart) {
+                        if (isSearchWork) {
+                            val proposalsPage = homeVm.proposalsPage.collectAsLazyPagingItems()
+                            activeLoaderMax(proposalsPage, vmLoading)
 
-                        SearchSection(vmProfessions, onQueryChange = { query ->
-                            vmSearch.onQueryChange(query)
-                        }, onSearch = {
-                            //pasar en la ruta el query
-                            navController.navigate("Search/${typeSearch}")
-                        })
+                            SearchSection(vmProfessions, onQueryChange = { query ->
+                                vmSearch.onQueryChange(query)
+                            }, onSearch = {
+                                navController.navigate("Search/${typeSearch}")
+                            })
 
-                        ShowProposals(proposalsPage, navController)
-                    } else {
-                        val workersPage = homeVm.workersPage.collectAsLazyPagingItems()
-                        activeLoaderMax(workersPage, vmLoading)
+                            Space(size = 10.dp)
+                            ShowProposals(proposalsPage, navController)
+                        } else {
+                            val workersPage: LazyPagingItems<Worker> =
+                                homeVm.workersPage.collectAsLazyPagingItems()
+                            activeLoaderMax(workersPage, vmLoading)
 
 
-                        SearchSection(vmProfessions, onQueryChange = { query ->
-                            vmSearch.onQueryChange(query)
-                        }, onSearch = {
-                            //pasar en la ruta el query
-                            navController.navigate("Search/${typeSearch}")
-                        })
+                            SearchSection(vmProfessions, onQueryChange = { query ->
+                                vmSearch.onQueryChange(query)
+                            }, onSearch = {
+                                navController.navigate("Search/${typeSearch}")
+                            })
 
-                        Space(size = 10.dp)
-                        ShowWorkers(workersPage, navController)
+                            Space(size = 10.dp)
+                            ShowWorkers(workersPage, navController)
+                        }
                     }
                 }
             }
@@ -385,16 +435,16 @@ fun SearchSection(
 }
 
 @Composable
-fun ShowWorkers(workersPage: LazyPagingItems<User>, navController: NavController) {
+fun ShowWorkers(workersPage: LazyPagingItems<Worker>, navController: NavController) {
     ItemsInLazy(workersPage) {
         CardWorkerRecommendation(
             modifier = Modifier
                 .padding(vertical = 10.dp),
-            user = it,
-            qualification = it.worker?.averageQualification?.roundToInt() ?: 0
+            worker = it,
+            qualification = it.averageQualification?.roundToInt() ?: 0
         ) {
             // Ir al perfil del usuario
-            navController.navigate("Profile/${it.id}")
+            navController.navigate("Profile/${it.userId}")
         }
     }
 }

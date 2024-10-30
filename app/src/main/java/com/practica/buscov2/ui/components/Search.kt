@@ -35,18 +35,31 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import com.practica.buscov2.R
 import com.practica.buscov2.ui.theme.GrayField
+import com.practica.buscov2.ui.theme.GrayInput
 import com.practica.buscov2.ui.theme.GrayPlaceholder
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchField(onQueryChange: (String) -> Unit = {}, onSearch:() -> Unit = {}, content: @Composable () -> Unit) {
-    val colors1 = SearchBarDefaults.colors()
+fun SearchField(
+    onQueryChange: (String) -> Unit = {},
+    onSearch: () -> Unit = {},
+    color: Color = GrayInput,
+    value: String = "",
+    content: @Composable (onClick: () -> Unit) -> Unit,
+) {
+    val colors1 = SearchBarDefaults.colors(
+        containerColor = color,
+    )
 
     var query by remember {
-        mutableStateOf("")
+        mutableStateOf(value)
     }
     var active by remember {
         mutableStateOf(false)
+    }
+
+    LaunchedEffect(value) {
+        query = value
     }
 
     SearchBar(
@@ -62,6 +75,7 @@ fun SearchField(onQueryChange: (String) -> Unit = {}, onSearch:() -> Unit = {}, 
                     onQueryChange(it)
                 },
                 onSearch = {
+                    active = false
                     onSearch()
                 },
                 expanded = active, //active
@@ -98,9 +112,9 @@ fun SearchField(onQueryChange: (String) -> Unit = {}, onSearch:() -> Unit = {}, 
         },
         expanded = active, //active
         onExpandedChange = { }, //onactivechange
-        colors = colors1,
-        content = { content() } //donde mostramos resultados de busqueda
-    )
+        colors = colors1
+    ) { content { active = false } } //donde mostramos resultados de busqueda
+
 }
 
 

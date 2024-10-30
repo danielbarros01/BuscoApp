@@ -3,10 +3,9 @@ package com.practica.buscov2.ui.views.users
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,6 +14,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
@@ -22,6 +22,7 @@ import androidx.compose.material3.DatePickerState
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
@@ -38,20 +39,27 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.paint
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
+import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.Marker
+import com.google.maps.android.compose.MarkerState
+import com.google.maps.android.compose.rememberCameraPositionState
+import com.google.maps.android.compose.rememberMarkerState
 import com.practica.buscov2.R
 import com.practica.buscov2.model.busco.auth.ErrorBusco
 import com.practica.buscov2.model.busco.User
-import com.practica.buscov2.model.georef.Departamento
-import com.practica.buscov2.model.georef.Localidad
 import com.practica.buscov2.model.georef.Pais
-import com.practica.buscov2.model.georef.Provincia
 import com.practica.buscov2.ui.components.AlertError
 import com.practica.buscov2.ui.components.ArrowBack
 import com.practica.buscov2.ui.components.CommonField
@@ -59,16 +67,16 @@ import com.practica.buscov2.ui.components.DateField
 import com.practica.buscov2.ui.components.InsertImage
 import com.practica.buscov2.ui.components.LoaderMaxSize
 import com.practica.buscov2.ui.components.OnBoardNavButton
-import com.practica.buscov2.ui.components.OptionsField
 import com.practica.buscov2.ui.components.PagerIndicator
+import com.practica.buscov2.ui.components.SearchField
 import com.practica.buscov2.ui.components.Space
 import com.practica.buscov2.ui.components.Title
 import com.practica.buscov2.ui.theme.GrayText
 import com.practica.buscov2.ui.theme.OrangePrincipal
 import com.practica.buscov2.ui.viewModel.LoadingViewModel
 import com.practica.buscov2.ui.viewModel.users.CompleteDataViewModel
-import com.practica.buscov2.ui.viewModel.others.GeorefViewModel
 import com.practica.buscov2.ui.viewModel.auth.TokenViewModel
+import com.practica.buscov2.ui.viewModel.ubication.SearchMapViewModel
 import com.practica.buscov2.util.ConstantsDates.Companion.MAX_DATE_BIRTHDATE
 import com.practica.buscov2.util.ConstantsDates.Companion.MIN_DATE_BIRTHDATE
 import java.time.Instant
@@ -82,6 +90,7 @@ fun CompleteDataView(
     navController: NavController,
     vmToken: TokenViewModel,
     vmLoading: LoadingViewModel,
+    vmSearch: SearchMapViewModel,
     username: String
 ) {
     Box(
@@ -93,6 +102,7 @@ fun CompleteDataView(
             viewModel,
             vmToken,
             vmLoading,
+            vmSearch,
             navController,
             username
         )
@@ -107,6 +117,7 @@ fun CompleteData(
     viewModel: CompleteDataViewModel,
     vmToken: TokenViewModel,
     vmLoading: LoadingViewModel,
+    vmSearch: SearchMapViewModel,
     navController: NavController,
     username: String
 ) {
@@ -124,10 +135,6 @@ fun CompleteData(
     val selectedDateMillis = remember { mutableStateOf<Long?>(null) }
     val stateDataPicker = rememberDatePickerState()
     selectedDateMillis.value = stateDataPicker.selectedDateMillis
-
-    //Georef, provincias, departamentos y ciudades
-    val provincias by viewModel.provincias.collectAsState()
-
 
     //Configurar validaciones de fecha
     LaunchedEffect(stateDataPicker.selectedDateMillis) {
@@ -195,9 +202,10 @@ fun CompleteData(
                 //Si es pagina 1
                 if (currentPage.intValue == 0) {
                     PageOne(viewModel, stateDataPicker, showError, enabledButtonDate)
+                    //PageTwo(vm = viewModel, vmSearch = vmSearch)
                 } else if (currentPage.intValue == 1) {
                     //Segunda pagina
-                    PageTwo(vm = viewModel)
+                    PageTwo(vm = viewModel, vmSearch = vmSearch)
                 }
             }
         }
@@ -319,167 +327,81 @@ fun PageOne(
 @Composable
 fun PageTwo(
     vm: CompleteDataViewModel,
-    onData: (String, String, String, String?) -> Unit = { a, b, c, d -> }
+    vmSearch: SearchMapViewModel
 ) {
-    val provincias by vm.provincias.collectAsState()
-    val departamentos by vm.departamentos.collectAsState()
-    val localidades by vm.localidades.collectAsState()
-
-    val pais by vm.pais
-    val provincia by vm.provincia
-    val departamento by vm.departamento
-    val localidad by vm.localidad
-
-    val enabledField by vm.enableChooseCity
-
-    Column {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(90.dp)
-        ) {
-            DropDownMenu() {
-                vm.onDateChangedUbication(it, provincia, departamento, localidad)
-                onData(it, provincia, departamento, localidad)
-            }
-            Spacer(modifier = Modifier.width(10.dp))
-            SelectProvince(provincias, provincia) {
-                vm.onDateChangedUbication(pais, it, departamento, localidad)
-                onData(it, provincia, departamento, localidad)
-                vm.fetchDepartamentos()
-            }
-        }
-
-        Space(5.dp)
-        SelectDepartment(departamentos, departamento) {
-            vm.onDateChangedUbication(pais, provincia, it, localidad)
-            onData(it, provincia, departamento, localidad)
-            vm.fetchLocalidades()
-        }
-        Space(10.dp)
-        SelectCity(localidades, localidad ?: "", enabledField) {
-            vm.onDateChangedUbication(pais, provincia, departamento, it)
-            onData(it, provincia, departamento, localidad)
-        }
-    }
-}
-
-@Composable
-fun SelectCity(
-    localidades: List<Localidad>,
-    localidad: String,
-    enabled: Boolean,
-    onChanged: (String) -> Unit
-) {
-    var options = listOf("Seleccione una localidad")
-
-    if (localidades.isNotEmpty()) {
-        options = localidades.map { it.nombre }
-    }
-
-    Column {
-        Text(text = "Ciudad", color = GrayText)
-        OptionsField(options, localidad, enabled) {
-            onChanged(it)
-        }
-    }
-}
-
-@Composable
-fun SelectDepartment(
-    departamentos: List<Departamento>,
-    departamento: String,
-    onChanged: (String) -> Unit
-) {
-    var options = listOf("Seleccione un departamento")
-
-    if (departamentos.isNotEmpty()) {
-        options = departamentos.map { it.nombre }
-    }
-
-    Column {
-        Text(text = "Departamento", color = GrayText)
-        OptionsField(options, departamento) {
-            onChanged(it)
-        }
-    }
-}
-
-@Composable
-fun SelectProvince(provincias: List<Provincia>, provincia: String, onChanged: (String) -> Unit) {
-    var options = listOf("Seleccione una provincia")
-    //var text by remember { mutableStateOf(options[0]) }
-
-    if (provincias.isNotEmpty()) {
-        options = provincias.map { it.nombre }
-    }
-
-    Column {
-        Text(text = "Provincia", color = GrayText)
-        OptionsField(options, provincia) {
-            onChanged(it)
-        }
-    }
-
-}
-
-@Composable
-fun DropDownMenu(onChanged: (String) -> Unit) {
-    val countriesMap: Map<String, Pais> = mapOf(
-        "Argentina" to Pais(
-            name = "Argentina",
-            image = R.mipmap.ic_argentina_background
-        ),//podria poner mas paises
-    )
-
-    var expanded by remember {
+    var search by remember { mutableStateOf("") }
+    val places by vmSearch.places
+    var showMarker by remember {
         mutableStateOf(false)
     }
+    val placeCoordinates by vmSearch.placeCoordinates
 
-    var country by remember {
-        mutableStateOf(countriesMap["Argentina"])
-    }
+    val markerState = remember { mutableStateOf(MarkerState(position = placeCoordinates)) }
+    val cameraPosition = remember { CameraPosition.fromLatLngZoom(placeCoordinates, 2f) }
+    val cameraState = rememberCameraPositionState { position = cameraPosition }
 
-    //Ejecutar la primera vez para establecer el pais por defecto
-    country?.let { onChanged(it.name) }
-
-    Column {
-        Text(text = "País", color = GrayText)
-        IconButton(modifier = Modifier
-            .fillMaxHeight()
-            .size(80.dp)
-            .padding(bottom = 10.dp)
-            .paint(
-                painterResource(country?.image ?: R.drawable.flag),
-                contentScale = ContentScale.FillWidth
-            ),
-            onClick = { expanded = true })
-        {}
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false },
-        ) {
-            for ((key, value) in countriesMap) {
-                DropdownMenuItem(
-                    text = { Text(countriesMap[key]?.name ?: "") },
-                    onClick = {
-                        expanded = false
-                        country = countriesMap[key]
-                        country?.let { onChanged(it.name) }
-                    },
-                    leadingIcon = {
-                        Image(
-                            painter = painterResource(
-                                id = countriesMap[key]?.image ?: R.drawable.flag
-                            ),
-                            contentDescription = value.name,
-                            modifier = Modifier.size(30.dp)
-                        )
-                    })
-            }
+    LaunchedEffect(placeCoordinates) {
+        if (showMarker) {
+            markerState.value = MarkerState(position = placeCoordinates)
+            cameraState.animate(CameraUpdateFactory.newLatLngZoom(placeCoordinates, 8f))
         }
     }
 
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(text = "¿Dónde vives?", fontSize = 20.sp)
+        SearchField(
+            onQueryChange = {
+                search = it
+
+                if (search.isNotEmpty()) {
+                    vmSearch.getLocation(search)
+                }
+            },
+            onSearch = {
+                if (search.isNotEmpty()) {
+                    vmSearch.getLocation(search)
+                }
+            },
+            content = {
+                places.results.forEach { p ->
+                    val lat = p.geometry.location.lat
+                    val lng = p.geometry.location.lng
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                vmSearch.setLocation(lat, lng)
+                                vm.changeUbication(lat, lng)
+                                showMarker = true
+                                it() //Close search
+                            }
+                            .padding(10.dp)
+                    ) {
+                        Text(text = p.formatted_address, fontSize = 18.sp)
+                    }
+
+                    HorizontalDivider(color = Color.Gray, thickness = 1.dp)
+
+                }
+            })
+        Space(size = 8.dp)
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+                .clip(shape = RoundedCornerShape(10.dp))
+        ) {
+            GoogleMap(
+                modifier = Modifier.matchParentSize(),
+                cameraPositionState = cameraState
+            ) {
+                if (showMarker) Marker(state = markerState.value)
+            }
+        }
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -569,7 +491,10 @@ private fun BottomBarPart(
 
 @Composable
 private fun TitleAndName(name: String) {
-    Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         Title(text = "Bienvenido", size = 30.sp, verticalPadding = 0.dp)
         Title(
             text = "@$name",

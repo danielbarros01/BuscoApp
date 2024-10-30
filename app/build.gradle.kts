@@ -22,6 +22,7 @@ android {
         val properties = Properties()
         properties.load(project.rootProject.file("local.properties").inputStream())
         buildConfigField("String", "GOOGLE_OAUTH_ID", properties.getProperty("GOOGLE_AUTH_GPC_ID"))
+        buildConfigField("String", "API_KEY_MAPS", properties.getProperty("API_KEY_MAPS"))
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -111,6 +112,14 @@ dependencies {
 
     val work_version = "2.9.0"
     implementation("androidx.work:work-runtime:$work_version")
+
+    //Maps
+    implementation("com.google.maps.android:maps-compose:4.3.3")
+    implementation(libs.play.services.maps)
+
+    //Places
+    runtimeOnly(libs.places)
+
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

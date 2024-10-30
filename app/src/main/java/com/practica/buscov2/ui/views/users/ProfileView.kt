@@ -507,7 +507,7 @@ fun Information(user: User) {
         //Datos ubicacion
         ElementRowInformation(
             imageId = R.drawable.argentina,
-            text = "${if (user.city.isNullOrEmpty()) user.department else user.city}, ${user.province}, ${user.country}."
+            text = "ubicacion"
         )
 
         if (user.worker != null) {
@@ -521,7 +521,7 @@ fun Information(user: User) {
 
             Space(size = 4.dp)
             Title(
-                text = "${user.worker.workersProfessions?.first()?.profession?.name}, ${user.worker.title}",
+                text = "${user.worker.professions?.first()?.name}, ${user.worker.title}",
                 textAlign = TextAlign.Start,
                 size = 20.sp
             )
@@ -598,7 +598,7 @@ fun BoxUsername(user: User) {
     ) {
         val username =
             if (user.worker == null) ("@${user.username}")
-            else user.worker.workersProfessions?.firstOrNull()?.profession?.name
+            else user.worker.professions?.firstOrNull()?.name
                 ?: ""
 
         Text(text = username, fontSize = 12.sp, modifier = Modifier.padding(horizontal = 6.dp))

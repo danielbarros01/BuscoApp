@@ -15,7 +15,7 @@ import javax.inject.Inject
 class WorkersRepository @Inject constructor(private val api: ApiBusco) {
     suspend fun createWorker(token: String, worker: Worker): Any {
         try {
-            val response = api.updateWorker("Bearer $token", worker)
+            val response = api.addWorker("Bearer $token", worker)
 
             return when (response.code()) {
                 in 200..300 -> true
@@ -47,9 +47,11 @@ class WorkersRepository @Inject constructor(private val api: ApiBusco) {
         token: String,
         page: Int? = null,
         pageSize: Int? = null,
-    ): List<User> {
+        lat: Double? = null,
+        lng: Double? = null
+    ): List<Worker> {
         delay(2000) //para demostracion
-        val response = api.getRecommendedWorkers("Bearer $token", page, pageSize)
+        val response = api.getRecommendedWorkers("Bearer $token", page, pageSize,lat, lng)
         return response.body() ?: emptyList()
     }
 

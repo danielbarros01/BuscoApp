@@ -178,12 +178,7 @@ fun SearchV(
                             .background(OrangePrincipal)
                     ) {
                         ButtonUbication(
-                            ubication = SimpleUbication(
-                                country = vmSearch.ubication.value.country,
-                                province = vmSearch.ubication.value.province,
-                                department = vmSearch.ubication.value.department,
-                                city = vmSearch.ubication.value.city
-                            ),
+                            "adasdasd",
                             textColor = Color.White
                         ) {
                             changeUbication.value = true

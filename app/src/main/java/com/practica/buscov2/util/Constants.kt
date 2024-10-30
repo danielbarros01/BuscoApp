@@ -2,11 +2,11 @@ package com.practica.buscov2.util
 
 class Constants {
     companion object{
-        const val API_URL = "<url>"
-        const val ESQ_HOST = "http://localhost:<port>"
-        const val BASE_URL = "http://$API_URL:<port>/api/"
-        const val BASE_URL_CHAT = "http://$API_URL:<port>/chathub"
-        const val BASE_URL_NOTIFICATIONS = "http://$API_URL:<port>/notificationhub"
+        const val API_URL = "192.168.100.7"
+        const val ESQ_HOST = "http://localhost:5029"
+        const val BASE_URL = "http://$API_URL:5029/api/"
+        const val BASE_URL_CHAT = "http://$API_URL:5029/chathub"
+        const val BASE_URL_NOTIFICATIONS = "http://$API_URL:5029/notificationhub"
         const val ENDPOINT_USERS = "users"
         const val ENDPOINT_LOGIN = "login"
         const val ENDPOINT_REGISTER = "create"

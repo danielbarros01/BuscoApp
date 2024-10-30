@@ -10,13 +10,14 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
-import com.practica.buscov2.data.dataStore.StoreToken
+import com.google.android.gms.maps.model.LatLng
 import com.practica.buscov2.data.pagination.ProposalsDataSource
 import com.practica.buscov2.data.pagination.UsersDataSource
 import com.practica.buscov2.data.repository.busco.ProposalsRepository
 import com.practica.buscov2.data.repository.busco.UsersRepository
 import com.practica.buscov2.data.repository.busco.WorkersRepository
 import com.practica.buscov2.model.busco.SimpleUbication
+import com.practica.buscov2.model.maps.Geolocation
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -36,15 +37,18 @@ class HomeViewModel @Inject constructor(
     private val _userId = MutableStateFlow<Int?>(null)
     private val userId = _userId
 
+    private val _ubication = mutableStateOf<LatLng?>(null)
+    var ubication: State<LatLng?> = _ubication
+
     private val _refreshTriggerWorkers = MutableStateFlow(0)
     private val _refreshTriggerProposals = MutableStateFlow(0)
 
     val workersPage = _refreshTriggerWorkers.flatMapLatest {
         Pager(PagingConfig(pageSize = 6)) {
-            //Traer trabajadores recomendadas para mi
-            UsersDataSource(repoWorkers, token.value!!)
+            UsersDataSource(repoWorkers, token.value!!, ubicationP = ubication.value)
         }.flow.cachedIn(viewModelScope)
     }
+
 
     val proposalsPage = _refreshTriggerProposals.flatMapLatest {
         Pager(PagingConfig(pageSize = 6)) {
@@ -53,34 +57,25 @@ class HomeViewModel @Inject constructor(
                 repoProposals,
                 status = true,
                 tokenP = token.value,
-                function = "getRecommendedProposals"
+                function = "getRecommendedProposals",
+                ubicationP = ubication.value
             )
         }.flow.cachedIn(viewModelScope)
-    }
-
-    fun refreshWorkers() {
-        _refreshTriggerWorkers.value++
     }
 
     fun refreshProposals() {
         _refreshTriggerProposals.value++
     }
 
+    fun refreshWorkers() {
+        _refreshTriggerWorkers.value++
+    }
+
     fun setToken(token: String) {
         _token.value = token
     }
 
-    //UBICACION
-
-    private val _pais: MutableState<String> = mutableStateOf("")
-    val pais: State<String> = _pais
-
-    private val _provincia: MutableState<String> = mutableStateOf("Seleccione una provincia")
-    val provincia: State<String> = _provincia
-
-    private val _departamento: MutableState<String> = mutableStateOf("Seleccione un departamento")
-    val departamento: State<String> = _departamento
-
-    private val _localidad: MutableState<String?> = mutableStateOf("Seleccione una localidad")
-    val localidad: State<String?> = _localidad
+    fun setUbication(lat: Double, lng: Double) {
+        _ubication.value = LatLng(lat, lng)
+    }
 }

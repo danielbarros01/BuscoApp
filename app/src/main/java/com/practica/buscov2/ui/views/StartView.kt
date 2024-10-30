@@ -54,6 +54,7 @@ fun StartView(
                         //Si los datos estan completados, ir a Home, si no, a completar los datos
                         if (currentUser.name != null && currentUser.lastname != null) {
                             navController.navigate("Home")
+                            //navController.navigate("Map/${32.726081873071266}/${-117.15301096027939}")
                         } else {
                             navController.navigate("CompleteData/${currentUser.username}")
                         }

@@ -211,12 +211,7 @@ fun NewPublication(
                             .background(OrangePrincipal)
                     ) {
                         ButtonUbication(
-                            ubication = SimpleUbication(
-                                country = user.country,
-                                province = user.province,
-                                department = user.department,
-                                city = user.city
-                            ),
+                            "adasdasdsa",
                             textColor = Color.White
                         )
                     }

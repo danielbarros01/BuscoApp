@@ -8,6 +8,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.android.gms.maps.model.LatLng
 import com.practica.buscov2.data.repository.busco.UsersRepository
 import com.practica.buscov2.data.repository.others.GeorefRepository
 import com.practica.buscov2.model.busco.auth.ErrorBusco
@@ -48,147 +49,22 @@ class CompleteDataViewModel @Inject constructor(
     private var _error = mutableStateOf(ErrorBusco())
     var error: State<ErrorBusco> = _error
 
-    //Provincia, Departamento y ciudad
-    private val _provincias = MutableStateFlow<List<Provincia>>(emptyList())
-    val provincias = _provincias.asStateFlow()
-
-    private val _departamentos = MutableStateFlow<List<Departamento>>(emptyList())
-    val departamentos = _departamentos.asStateFlow()
-
-    private val _localidades = MutableStateFlow<List<Localidad>>(emptyList())
-    val localidades = _localidades.asStateFlow()
-
-    //view
-    private val _pais: MutableState<String> = mutableStateOf("")
-    val pais: State<String> = _pais
-
-    private val _provincia: MutableState<String> = mutableStateOf("Seleccione una provincia")
-    val provincia: State<String> = _provincia
-
-    private val _departamento: MutableState<String> = mutableStateOf("Seleccione un departamento")
-    val departamento: State<String> = _departamento
-
-    private val _localidad: MutableState<String?> = mutableStateOf("Seleccione una localidad")
-    val localidad: State<String?> = _localidad
-
-    //En el caso de la ciudad autonoma no tiene localidades, pero si departamentos
-    private val _enableChooseCity = mutableStateOf(true)
-    val enableChooseCity: State<Boolean> = _enableChooseCity
-
-    init {
-        fetchProvincias()
-    }
-
-    private fun fetchProvincias() {
-        viewModelScope.launch {
-            withContext(Dispatchers.IO) {
-                val result = repoGeoref.getProvincias()
-                _provincias.value = result ?: emptyList()
-            }
-        }
-    }
-
-    fun fetchDepartamentos(ok:() -> Unit = {}) {
-        viewModelScope.launch {
-            withContext(Dispatchers.IO) {
-                val result = repoGeoref.getDepartamentos(provincia.value)
-                _departamentos.value = result ?: emptyList()
-
-                _departamento.value = "Seleccione un departamento"
-                _localidades.value = emptyList()
-                _localidad.value = "Seleccione una localidad"
-                _buttonNextEnable.value = false
-            }
-
-            ok()
-        }
-    }
-
-    fun fetchLocalidades(ok:() -> Unit = {}) {
-        viewModelScope.launch {
-            withContext(Dispatchers.IO) {
-                val result = repoGeoref.getLocalidades(provincia.value, departamento.value)
-                _localidades.value = result ?: emptyList()
-
-                _localidad.value = "Seleccione una localidad"
-                if (_enableChooseCity.value) _buttonNextEnable.value = false
-            }
-
-            ok()
-        }
-    }
+    private val _ubication = mutableStateOf<LatLng?>(null)
+    var ubication: State<LatLng?> = _ubication
 
     fun onDateChangedInitializedData(userP: User) {
         viewModelScope.launch {
-            val country = userP.country
-            val province = userP.province
-            val department = userP.department
-            val city = userP.city
-
-            _provincia.value = province ?: ""
-
-            fetchDepartamentos(ok = {
-                _departamento.value = department ?: ""
-                fetchLocalidades(ok = {
-                    _localidad.value = city ?: ""
-                })
-            })
-
-            user = user.copy(
-                country = country, province = province, department = department, city = city
-            )
         }
     }
 
     //cambiar los valores de ubicacion
-    fun onDateChangedUbication(
-        country: String,
-        province: String,
-        department: String,
-        city: String?
-    ) {
-        viewModelScope.launch {
-            _pais.value = country
-            _provincia.value = province
-            _departamento.value = department
+    fun changeUbication(lat:Double, lng:Double) {
+        user = user.copy(
+            latitude = lat,
+            longitude = lng
+        )
 
-            //CABA no tiene localidades
-            if (province.equals("Ciudad Autónoma de Buenos Aires", ignoreCase = true)) {
-                _localidad.value = null
-                _enableChooseCity.value = false
-                _buttonNextEnable.value =
-                    isValidProvincia(province) && isValidDepartamento(department)
-            } else {
-                _localidad.value = city
-                _enableChooseCity.value = true
-                _buttonNextEnable.value = isValidPais(country) && isValidProvincia(province)
-                        && isValidDepartamento(department)
-                        && city?.let { isValidCiudad(it) } == true
-            }
-
-            user = user.copy(
-                country = country, province = province, department = department, city = city
-            )
-        }
-    }
-
-    private fun isValidProvincia(provinceName: String): Boolean {
-        val provinceList = _provincias.value // Get the latest list of Localidad objects
-        return provinceList.any { province -> province.nombre == provinceName }
-    }
-
-    private fun isValidDepartamento(departmentName: String): Boolean {
-        val departmentList = _departamentos.value // Get the latest list of Localidad objects
-        return departmentList.any { department -> department.nombre == departmentName }
-    }
-
-    private fun isValidCiudad(cityName: String): Boolean {
-        val localidadesList = _localidades.value // Get the latest list of Localidad objects
-        return localidadesList.any { localidad -> localidad.nombre == cityName }
-    }
-
-    private fun isValidPais(country: String): Boolean {
-        return country.lowercase(Locale.ROOT) == "argentina" || country.isNotEmpty()
+        _buttonNextEnable.value = true
     }
 
     fun changeEnabledButton(enable: Boolean) {
@@ -225,7 +101,6 @@ class CompleteDataViewModel @Inject constructor(
     fun setError(errorP: ErrorBusco) {
         _error.value = errorP
     }
-
 
     private fun isValidName(name: String): Boolean = name.length > 3
     private fun isValidLastName(lastname: String): Boolean = lastname.length > 3

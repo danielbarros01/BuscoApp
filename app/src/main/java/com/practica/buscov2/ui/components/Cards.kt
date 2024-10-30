@@ -241,7 +241,7 @@ fun CardJob(
                     }
                 )
                 Text(
-                    text = worker.workersProfessions?.firstOrNull()?.profession?.name ?: "",
+                    text = worker.professions?.firstOrNull()?.name ?: "",
                     textAlign = TextAlign.Start,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -269,7 +269,7 @@ fun CardJob(
 @Composable
 fun CardWorkerRecommendation(
     modifier: Modifier = Modifier,
-    user: User,
+    worker: Worker,
     qualification: Int,
     onClick: () -> Unit
 ) {
@@ -303,7 +303,7 @@ fun CardWorkerRecommendation(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 InsertCircleProfileImage(
-                    image = user.image ?: "",
+                    image = worker.user?.image ?: "",
                     modifier = Modifier.size(100.dp),
                     onClick = onClick
                 )
@@ -341,7 +341,7 @@ fun CardWorkerRecommendation(
                     modifier = Modifier.weight(1f)
                 ) {
                     Text(
-                        text = user.worker?.workersProfessions?.first()?.profession?.name ?: "",
+                        text = worker.professions?.first()?.name ?: "",
                         color = Color.White,
                         fontSize = 30.sp,
                         fontWeight = FontWeight.ExtraBold,
@@ -349,10 +349,10 @@ fun CardWorkerRecommendation(
                         maxLines = 3,
                         overflow = TextOverflow.Ellipsis
                     )
-                    Text(text = "${user.name} ${user.lastname}", color = Color.White)
+                    Text(text = "${worker.user?.name} ${worker.user?.lastname}", color = Color.White)
                 }
                 Text(
-                    text = "${user.worker?.yearsExperience} años de experiencia",
+                    text = "${worker.yearsExperience} años de experiencia",
                     color = Color.White,
                     textAlign = TextAlign.Center
                 )

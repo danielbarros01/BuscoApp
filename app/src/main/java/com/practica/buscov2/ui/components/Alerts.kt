@@ -287,7 +287,7 @@ fun AlertDifferentJob(
     onClick: () -> Unit
 ) {
     val forJob = proposal.profession?.name ?: ""
-    val youAre = user?.worker?.workersProfessions?.first()?.profession?.name ?: ""
+    val youAre = user?.worker?.professions?.first()?.name ?: ""
 
     if (showDialog.value) {
         AlertDialog(
@@ -454,20 +454,11 @@ fun AlertChangeUbication(
     onDismiss: () -> Unit = { showDialog.value = false },
     onChange: (String, String, String, String) -> Unit
 ) {
-    var country by remember { mutableStateOf("") }
-    var province by remember { mutableStateOf("") }
-    var department by remember { mutableStateOf("") }
-    var city by remember { mutableStateOf("") }
+
 
     if (showDialog.value) {
         AlertDialog(
             title = {
-                PageTwo(vm) { pais, provincia, departamento, localidad ->
-                    country = pais
-                    province = provincia
-                    department = departamento
-                    city = localidad ?: ""
-                }
             },
             icon = {
                 Icon(
@@ -494,7 +485,7 @@ fun AlertChangeUbication(
                     Space(size = 5.dp)
                     Box(modifier = Modifier.weight(1f)) {
                         ButtonPrincipal(text = "Cambiar", enabled = true, color = GreenBusco) {
-                            onChange(country, province, department, city)
+                            //onChange(country, province, department, city)
                             showDialog.value = false
                         }
                     }

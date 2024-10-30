@@ -351,7 +351,7 @@ fun ProposalV(
                                         navController.navigate("Applicants/${proposalId}")
                                     } else {
                                         //Verificar el tipo de trabajador que buscan
-                                        if (user.worker?.workersProfessions?.firstOrNull()?.professionId?.equals(
+                                        if (user.worker?.professions?.firstOrNull()?.id?.equals(
                                                 proposal?.professionId
                                             ) == false
                                         ) {

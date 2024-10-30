@@ -36,6 +36,8 @@ import com.practica.buscov2.ui.viewModel.proposals.ProposalViewModel
 import com.practica.buscov2.ui.viewModel.users.UserViewModel
 import com.practica.buscov2.ui.viewModel.workers.RegisterWorkerViewModel
 import com.practica.buscov2.ui.viewModel.proposals.ProposalsViewModel
+import com.practica.buscov2.ui.viewModel.ubication.MapViewModel
+import com.practica.buscov2.ui.viewModel.ubication.SearchMapViewModel
 import com.practica.buscov2.ui.views.ApplicationsView
 import com.practica.buscov2.ui.views.workers.BeWorkerView
 import com.practica.buscov2.ui.views.ChatView
@@ -57,6 +59,7 @@ import com.practica.buscov2.ui.views.auth.ResetPassword
 import com.practica.buscov2.ui.views.StartView
 import com.practica.buscov2.ui.views.chat.ChatPrivateScreen
 import com.practica.buscov2.ui.views.chat.ChatScreen
+import com.practica.buscov2.ui.views.maps.MapViewUI
 import com.practica.buscov2.ui.views.proposals.ActiveProposals
 import com.practica.buscov2.ui.views.proposals.ActiveProposalsView
 import com.practica.buscov2.ui.views.proposals.ApplicantsView
@@ -103,12 +106,14 @@ fun NavManager(context: Context) {
             val username = it.arguments?.getString("username") ?: ""
             val completeDataViewModel: CompleteDataViewModel = hiltViewModel()
             val loadingViewModel: LoadingViewModel = hiltViewModel()
+            val searchMapViewModel: SearchMapViewModel = hiltViewModel()
 
             CompleteDataView(
                 completeDataViewModel,
                 navController,
                 tokenViewModel,
                 loadingViewModel,
+                searchMapViewModel,
                 username
             )
         }
@@ -161,6 +166,9 @@ fun NavManager(context: Context) {
             val professionsViewModel: ProfessionsViewModel = hiltViewModel()
             val loadingViewModel: LoadingViewModel = hiltViewModel()
 
+            val searchMapViewModel: SearchMapViewModel = hiltViewModel()
+            val mapVM: MapViewModel = hiltViewModel()
+
             HomeView(
                 homeViewModel,
                 userViewModel,
@@ -170,8 +178,29 @@ fun NavManager(context: Context) {
                 professionsViewModel,
                 searchViewModel,
                 loadingViewModel,
+                searchMapViewModel,
+                mapVM,
                 navController
             )
+        }
+
+        composable(
+            "Map/{lat}/{lng}", arguments = listOf(
+                navArgument("lat") { type = NavType.FloatType },
+                navArgument("lng") { type = NavType.FloatType })
+        ) {
+            val searchMapViewModel: SearchMapViewModel = hiltViewModel()
+            val mapVM: MapViewModel = hiltViewModel()
+
+            val lat = it.arguments?.getFloat("lat") ?: 0.0
+            val lng = it.arguments?.getFloat("lng") ?: 0.0
+            MapViewUI(
+                lat.toDouble(),
+                lng.toDouble(),
+                searchMapViewModel,
+                mapVM,
+                navController,
+                {}) {}
         }
 
         composable("RecoverPassword") {

@@ -209,12 +209,7 @@ fun EditPublication(
                             .background(OrangePrincipal)
                     ) {
                         ButtonUbication(
-                            ubication = SimpleUbication(
-                                country = user.country,
-                                province = user.province,
-                                department = user.department,
-                                city = user.city
-                            ),
+                            "dasdasdasd",
                             textColor = Color.White
                         )
                     }

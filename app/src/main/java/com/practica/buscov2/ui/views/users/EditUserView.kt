@@ -125,13 +125,13 @@ private fun initializeUserData(
 
     user.worker?.let {
         vmWorker.onCategoryChangeForId(
-            it.workersProfessions?.first()?.profession?.categoryId ?: 1
+            it.professions?.first()?.categoryId ?: 1
         )
 
         vmLoading.withLoading {
             vmWorker.fetchProfessions {
                 vmWorker.onProfessionChange(
-                    it.workersProfessions?.first()?.profession?.name ?: ""
+                    it.professions?.first()?.name ?: ""
                 )
             }
         }
@@ -323,7 +323,7 @@ fun EditUser(
                         showError = showError,
                         enabledButtonDate = enabledButtonDate
                     )
-                    PageTwo(vm = vmCompleteData)
+                    //PageTwo(vm = vmCompleteData)
                     SaveButton(
                         token,
                         vmCompleteData = vmCompleteData,

@@ -1,11 +1,13 @@
 package com.practica.buscov2.data.repository.busco
 
 import android.util.Log
+import com.google.android.gms.maps.model.LatLng
 import com.practica.buscov2.data.ApiBusco
 import com.practica.buscov2.model.busco.Proposal
 import com.practica.buscov2.model.busco.User
 import com.practica.buscov2.model.busco.Worker
 import com.practica.buscov2.model.busco.auth.ErrorBusco
+import com.practica.buscov2.model.maps.Geolocation
 import com.practica.buscov2.util.ServerUtils
 import kotlinx.coroutines.delay
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -136,16 +138,28 @@ class ProposalsRepository @Inject constructor(private val api: ApiBusco) {
     }
 
     suspend fun getRecommendedProposals(
-        token:String,
+        token: String,
         page: Int? = null,
         pageSize: Int? = null,
+        lat: Double? = null,
+        lng: Double? = null
     ): List<Proposal> {
         delay(2000) //para demostracion
-        val response = api.getRecommendedProposals("Bearer $token",page, pageSize)
-        return response.body() ?: emptyList()
+        try {
+            val response = api.getRecommendedProposals(
+                "Bearer $token",
+                page,
+                pageSize,
+                lat, lng
+            )
+            return response.body() ?: emptyList()
+        } catch (error: Exception) {
+            Log.d("Error", error.toString())
+            return emptyList()
+        }
     }
 
-    suspend fun finalizeProposal(token:String, proposalId: Int): Any {
+    suspend fun finalizeProposal(token: String, proposalId: Int): Any {
         try {
             val response = api.finalizeProposal("Bearer $token", proposalId)
 
@@ -154,7 +168,7 @@ class ProposalsRepository @Inject constructor(private val api: ApiBusco) {
                 in 400..599 -> ServerUtils.gsonError(response) //return ErrorBusco
                 else -> ErrorBusco(0, "Error", message = "Error desconocido, intentalo de nuevo")
             }
-        }catch (e:Exception){
+        } catch (e: Exception) {
             return ErrorBusco(0, "Error", message = "Error desconocido, intentalo de nuevo")
         }
     }

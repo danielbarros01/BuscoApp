@@ -2,8 +2,10 @@ package com.practica.buscov2.data.pagination
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
+import com.google.android.gms.maps.model.LatLng
 import com.practica.buscov2.data.repository.busco.ProposalsRepository
 import com.practica.buscov2.model.busco.Proposal
+import com.practica.buscov2.model.maps.Geolocation
 
 class ProposalsDataSource(
     private val repo: ProposalsRepository,
@@ -16,11 +18,13 @@ class ProposalsDataSource(
     departmentP: String? = null,
     provinceP: String? = null,
     categoryIdP: Int? = null,
+    ubicationP: LatLng? = null
 ) : PagingSource<Int, Proposal>() {
     private val userId2 = userId
     private val status2 = status
     private val functionCall = function
     private val token = tokenP
+    private val ubication = ubicationP
 
     private val query = queryP
     private val city = cityP
@@ -68,7 +72,9 @@ class ProposalsDataSource(
                     repo.getRecommendedProposals(
                         token!!,
                         page = nextPageNumber,
-                        pageSize = 6
+                        pageSize = 6,
+                        ubication?.latitude,
+                        ubication?.longitude
                     )
                 }
             // Devuelve los resultados cargados en una página

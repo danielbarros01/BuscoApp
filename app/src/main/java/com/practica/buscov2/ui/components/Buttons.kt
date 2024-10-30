@@ -37,6 +37,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
@@ -287,7 +288,7 @@ fun ButtonClose(color: Color = Color.White, onClick: () -> Unit) {
 
 @Composable
 fun ButtonUbication(
-    ubication: SimpleUbication,
+    address: String,
     modifier: Modifier = Modifier,
     textColor: Color = GrayField,
     onClick: () -> Unit = {}
@@ -309,9 +310,11 @@ fun ButtonUbication(
                     .padding(end = 5.dp)
             )
             Text(
-                text = (ubication.city ?: ubication.department) + ", " + ubication.country,
+                text = address,
                 color = textColor,
-                fontSize = 15.sp
+                fontSize = 15.sp,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
         }
     }

@@ -18,8 +18,6 @@ class StoreToken(private val context: Context) {
         val TOKEN_EXPIRATION = stringPreferencesKey("token_expiration")
     }
 
-    //val getToken : Flow<LoginToken> = getTokenFun()
-
     suspend fun saveToken(loginToken: LoginToken) {
         context.dataStore.edit { preferences ->
             preferences[TOKEN] = loginToken.token
@@ -40,9 +38,6 @@ class StoreToken(private val context: Context) {
                 }
             }
     }
-
-    // Función para obtener el token de forma síncrona
-    suspend fun getTokenFun(): LoginToken? = getTokenFlow().firstOrNull()
 
     suspend fun clearToken() {
         context.dataStore.edit { preferences ->
