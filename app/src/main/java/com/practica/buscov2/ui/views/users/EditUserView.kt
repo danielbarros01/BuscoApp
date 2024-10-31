@@ -4,9 +4,13 @@ import com.practica.buscov2.ui.views.images.SelectImageFromGallery
 import android.net.Uri
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -26,14 +30,17 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavHostController
 import com.practica.buscov2.R
+import com.practica.buscov2.data.dataStore.StoreUbication
 import com.practica.buscov2.model.busco.User
 import com.practica.buscov2.model.busco.auth.LoginToken
 import com.practica.buscov2.ui.components.AlertError
@@ -42,17 +49,26 @@ import com.practica.buscov2.ui.components.AlertShowPicture
 import com.practica.buscov2.ui.components.AlertSuccess
 import com.practica.buscov2.ui.components.ButtonBack
 import com.practica.buscov2.ui.components.ButtonPrincipal
+import com.practica.buscov2.ui.components.ButtonTransparent
+import com.practica.buscov2.ui.components.ClickableText
+import com.practica.buscov2.ui.components.CommonField
 import com.practica.buscov2.ui.components.InsertCirlceProfileEditImage
+import com.practica.buscov2.ui.components.LinkText
 import com.practica.buscov2.ui.components.LoaderMaxSize
 import com.practica.buscov2.ui.components.Space
+import com.practica.buscov2.ui.theme.GrayText
 import com.practica.buscov2.ui.viewModel.LoadingViewModel
 import com.practica.buscov2.ui.viewModel.auth.TokenViewModel
+import com.practica.buscov2.ui.viewModel.ubication.MapViewModel
+import com.practica.buscov2.ui.viewModel.ubication.SearchMapViewModel
 import com.practica.buscov2.ui.viewModel.users.CompleteDataViewModel
 import com.practica.buscov2.ui.viewModel.users.UserViewModel
 import com.practica.buscov2.ui.viewModel.workers.RegisterWorkerViewModel
 import com.practica.buscov2.ui.views.images.UseCamera
+import com.practica.buscov2.ui.views.maps.MapViewUI
 import com.practica.buscov2.ui.views.workers.DataWorker
 import com.practica.buscov2.util.AppUtils.Companion.toLocalDate
+import kotlinx.coroutines.launch
 import java.time.ZoneId
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -64,6 +80,8 @@ fun EditUserView(
     vmWorker: RegisterWorkerViewModel,
     vmCompleteData: CompleteDataViewModel,
     vmLoading: LoadingViewModel,
+    searchMapVM: SearchMapViewModel,
+    mapVM: MapViewModel,
     navController: NavHostController
 ) {
     val token by vmToken.token.collectAsState()
@@ -74,7 +92,19 @@ fun EditUserView(
         token?.let {
             vmUser.getMyProfile(it.token, {
                 navController.navigate("Login")
-            }) {}
+            }) {
+                it.latitude?.let { latitude ->
+                    it.longitude?.let { longitude ->
+                        searchMapVM.getLocation(latitude, longitude) { address ->
+                            address?.let {
+                                searchMapVM.setAddress(it.formatted_address)
+                            }
+                        }
+
+                        vmCompleteData.changeUbication(latitude, longitude)
+                    }
+                }
+            }
         }
     }
 
@@ -101,6 +131,8 @@ fun EditUserView(
                 vmCompleteData,
                 token,
                 vmLoading,
+                searchMapVM,
+                mapVM,
                 navController,
                 stateDataPicker
             )
@@ -154,6 +186,8 @@ fun EditUser(
     vmCompleteData: CompleteDataViewModel,
     token: LoginToken?,
     vmLoading: LoadingViewModel,
+    searchMapVM: SearchMapViewModel,
+    mapVM: MapViewModel,
     navController: NavHostController,
     stateDataPicker: DatePickerState
 ) {
@@ -163,6 +197,8 @@ fun EditUser(
     val buttonEnabled by vmWorker.buttonEnabled
     val error = vmWorker.error
     val errorData = vmCompleteData.error
+    val scope = rememberCoroutineScope()
+
     val showError = remember { mutableStateOf(false) }
     val showDialog = remember { mutableStateOf(false) }
     val dataWorker = remember { mutableStateOf(false) }
@@ -180,6 +216,34 @@ fun EditUser(
     val newUriPicture = remember {
         mutableStateOf(Uri.EMPTY)
     }
+
+    val changeUbication = remember {
+        mutableStateOf(false)
+    }
+    val ubicationDataStore = StoreUbication(context)
+
+
+    if (changeUbication.value) {
+        MapViewUI(
+            user.latitude!!,
+            user.longitude!!,
+            searchMapVM,
+            mapVM,
+            navController,
+            actionClose = {
+                changeUbication.value = false //Close Map
+            }) {
+            //Cambiar ubicacion en la memoria del celular
+            scope.launch {
+                ubicationDataStore.saveUbication(it)
+                searchMapVM.setLocation(it.latitude, it.longitude)
+                vmCompleteData.changeUbication(it.latitude, it.longitude)
+                changeUbication.value = false //close map
+            }
+        }
+    }
+
+    val address = searchMapVM.address.value
 
     // Configure date picker limits
     LaunchedEffect(stateDataPicker.selectedDateMillis) {
@@ -323,6 +387,24 @@ fun EditUser(
                         showError = showError,
                         enabledButtonDate = enabledButtonDate
                     )
+
+                    //Ubicacion
+                    Column {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(text = "Ubicación", color = GrayText)
+                            ClickableText(text = "Cambiar", fontSize = 14.sp, enabled = true) {
+                                changeUbication.value = true
+                            }
+                        }
+                        CommonField(address, "Ubicación") {
+
+                        }
+                    }
+
                     //PageTwo(vm = vmCompleteData)
                     SaveButton(
                         token,

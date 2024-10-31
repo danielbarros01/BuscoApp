@@ -79,7 +79,7 @@ fun NavManager(context: Context) {
     val notificationsViewModel: NotificationsViewModel = hiltViewModel()
     notificationsViewModel.apllyContext(context)
 
-    NavHost(navController = navController, startDestination = "Start") {
+    NavHost(navController = navController, startDestination = "EditProfile") {
         composable("Start") {
             val userViewModel: UserViewModel = hiltViewModel()
             StartView(tokenViewModel, userViewModel, navController)
@@ -257,6 +257,7 @@ fun NavManager(context: Context) {
             val qualificationsViewModel: QualificationsViewModel = hiltViewModel()
             val vmJobs: JobsViewModel = hiltViewModel()
             val loadingViewModel: LoadingViewModel = hiltViewModel()
+            val searchMapViewModel: SearchMapViewModel = hiltViewModel()
 
             ProfileView(
                 id,
@@ -267,6 +268,7 @@ fun NavManager(context: Context) {
                 qualificationsViewModel,
                 vmJobs,
                 loadingViewModel,
+                searchMapViewModel,
                 navController
             )
         }
@@ -277,12 +279,17 @@ fun NavManager(context: Context) {
             val registerWorkerViewModel: RegisterWorkerViewModel = hiltViewModel()
             val completeDataViewModel: CompleteDataViewModel = hiltViewModel()
             val loadingViewModel: LoadingViewModel = hiltViewModel()
+            val searchMapViewModel: SearchMapViewModel = hiltViewModel()
+            val mapViewModel: MapViewModel = hiltViewModel()
+
             EditUserView(
                 userViewModel,
                 tokenViewModel,
                 registerWorkerViewModel,
                 completeDataViewModel,
                 loadingViewModel,
+                searchMapViewModel,
+                mapViewModel,
                 navController
             )
         }

@@ -87,6 +87,7 @@ import com.practica.buscov2.ui.viewModel.QualificationsViewModel
 import com.practica.buscov2.ui.viewModel.auth.GoogleLoginViewModel
 import com.practica.buscov2.ui.viewModel.auth.TokenViewModel
 import com.practica.buscov2.ui.viewModel.proposals.ProposalsViewModel
+import com.practica.buscov2.ui.viewModel.ubication.SearchMapViewModel
 import com.practica.buscov2.ui.viewModel.users.UserViewModel
 import com.practica.buscov2.ui.views.proposals.NoProposals
 import com.practica.buscov2.ui.views.proposals.ShowProposals
@@ -103,13 +104,13 @@ fun ProfileView(
     vmQualifications: QualificationsViewModel,
     vmJobs: JobsViewModel,
     vmLoading: LoadingViewModel,
+    searchMapVM: SearchMapViewModel,
     navController: NavHostController
 ) {
     val token by vmToken.token.collectAsState()
     val user by vmUser.user.collectAsState()
     val userProfile by vmUser.userProfile.collectAsState()
 
-    //Ejecuto una unica vez
     LaunchedEffect(Unit) {
         token?.let {
             vmUser.getMyProfile(it.token, {
@@ -118,20 +119,40 @@ fun ProfileView(
                 vmUser.changeUser(user)
 
                 if (user.id != id) {
-                    //Si yo no soy el usuario traer el perfil de ese usuario
-                    vmUser.getProfile(id, {}) { userProfile ->
-                        //Seteamos el valor del perfil de usuario
-                        vmUser.changeUserProfile(userProfile)
-                        //proposals para traer las propuestas
-                        userProfile.id?.let { userId ->
+                    // Si yo no soy el usuario, trae el perfil de ese usuario
+                    vmUser.getProfile(id, {}) { fetchedUserProfile ->
+                        vmUser.changeUserProfile(fetchedUserProfile)
+                        fetchedUserProfile.id?.let { userId ->
                             vmProposals.changeUserId(userId)
+                        }
+
+                        // Ubicación, después de que userProfile está actualizado
+                        fetchedUserProfile.latitude?.let { latitude ->
+                            fetchedUserProfile.longitude?.let { longitude ->
+                                searchMapVM.getLocation(latitude, longitude) { address ->
+                                    address?.let {
+                                        searchMapVM.setAddress(it.formatted_address)
+                                    }
+                                }
+                            }
                         }
                     }
                 } else {
-                    //Si yo soy el usuario
+                    // Si yo soy el usuario
                     vmUser.changeUserProfile(user)
                     user.id.let { userId ->
                         vmProposals.changeUserId(userId)
+                    }
+
+                    // Ubicación para el propio usuario
+                    user.latitude?.let { latitude ->
+                        user.longitude?.let { longitude ->
+                            searchMapVM.getLocation(latitude, longitude) { address ->
+                                address?.let {
+                                    searchMapVM.setAddress(it.formatted_address)
+                                }
+                            }
+                        }
                     }
                 }
 
@@ -140,6 +161,7 @@ fun ProfileView(
             }
         }
     }
+
 
 
     if (userProfile != null) {
@@ -154,6 +176,7 @@ fun ProfileView(
                 vmQualifications,
                 vmJobs,
                 vmLoading,
+                searchMapVM,
                 navController
             )
         }
@@ -171,6 +194,7 @@ fun ProfileV(
     vmQualifications: QualificationsViewModel,
     vmJobs: JobsViewModel,
     vmLoading: LoadingViewModel,
+    vmSearchMap: SearchMapViewModel,
     navController: NavHostController
 ) {
     val isLoading by vmLoading.isLoading
@@ -262,6 +286,7 @@ fun ProfileV(
                     vmQualifications,
                     vmJobs,
                     vmLoading,
+                    vmSearchMap,
                     navController
                 )
 
@@ -277,6 +302,7 @@ private fun TabsPages(
     vmQualifications: QualificationsViewModel,
     vmJobs: JobsViewModel,
     vmLoading: LoadingViewModel,
+    vmSearchMap: SearchMapViewModel,
     navController: NavController
 ) {
     val tabs = if (user.worker == null) ItemTabProfile.pagesUser else ItemTabProfile.pagesWorker
@@ -293,6 +319,7 @@ private fun TabsPages(
             vmQualifications,
             vmJobs,
             vmLoading,
+            vmSearchMap,
             navController
         )
     }
@@ -307,12 +334,21 @@ private fun TabsContent(
     vmQualifications: QualificationsViewModel,
     vmJobs: JobsViewModel,
     vmLoading: LoadingViewModel,
+    vmSearchMap: SearchMapViewModel,
     navController: NavController
 ) {
     HorizontalPager(
         state = pagerState
     ) { page ->
-        tabs[page].screen(user, vmProposals, navController, vmQualifications, vmJobs, vmLoading)
+        tabs[page].screen(
+            user,
+            vmProposals,
+            navController,
+            vmQualifications,
+            vmJobs,
+            vmLoading,
+            vmSearchMap
+        )
     }
 }
 
@@ -332,9 +368,11 @@ private fun Tabs(tabs: List<ItemTabProfile>, pagerState: PagerState) {
         ScrollableTabRow(
             selectedTabIndex = selectedTab,
             edgePadding = if (tabs.size > 2) 0.dp else 15.dp,
-            indicator = {tabPositions ->
+            indicator = { tabPositions ->
                 TabRowDefaults.PrimaryIndicator(
-                    Modifier.fillMaxWidth().tabIndicatorOffset(tabPositions[selectedTab]),
+                    Modifier
+                        .fillMaxWidth()
+                        .tabIndicatorOffset(tabPositions[selectedTab]),
                     color = OrangePrincipal,
                     width = tabPositions[selectedTab].width,
                     height = 2.dp
@@ -498,7 +536,9 @@ fun FrequencyTable(ratingFrequencies: Map<Int, Int>, totalCount: Int) {
 }
 
 @Composable
-fun Information(user: User) {
+fun Information(mapVM: SearchMapViewModel, user: User) {
+    val address = mapVM.address.value
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -506,8 +546,8 @@ fun Information(user: User) {
     ) {
         //Datos ubicacion
         ElementRowInformation(
-            imageId = R.drawable.argentina,
-            text = "ubicacion"
+            imageId = R.drawable.location,
+            text = address
         )
 
         if (user.worker != null) {
@@ -607,7 +647,6 @@ fun BoxUsername(user: User) {
 
 @Composable
 fun PhotoFullScreen(user: User, setShowPhotoFullScreen: (Boolean) -> Unit) {
-    //ESTA COLUMNA
     Column(
         modifier = Modifier
             .fillMaxSize()

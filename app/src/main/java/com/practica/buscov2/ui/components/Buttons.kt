@@ -2,6 +2,8 @@ package com.practica.buscov2.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -17,15 +19,19 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -147,16 +153,21 @@ fun OnBoardNavButton(
 @Composable
 fun ButtonTransparent(
     modifier: Modifier = Modifier,
+    fontSize: TextUnit = 18.sp,
     text: String,
     enabled: Boolean = true,
     textDecoration: TextDecoration? = null,
     onSelected: () -> Unit
 ) {
-    TextButton(onClick = { onSelected() }, enabled = enabled) {
+    TextButton(
+        modifier = modifier,
+        onClick = { onSelected() },
+        enabled = enabled
+    ) {
         Text(
             text = text,
             color = if (enabled) OrangePrincipal else GrayPlaceholder,
-            fontSize = 18.sp,
+            fontSize = fontSize,
             style = TextStyle(textDecoration = textDecoration),
             fontWeight = FontWeight.Bold
         )
@@ -294,7 +305,7 @@ fun ButtonUbication(
     onClick: () -> Unit = {}
 ) {
     Button(
-        onClick = { onClick()}, colors = ButtonDefaults.buttonColors(
+        onClick = { onClick() }, colors = ButtonDefaults.buttonColors(
             containerColor = Color.Transparent,
             contentColor = Color.Transparent,
         ),
@@ -318,4 +329,28 @@ fun ButtonUbication(
             )
         }
     }
+}
+
+
+@Composable
+fun ClickableText(
+    modifier: Modifier = Modifier,
+    text: String,
+    fontSize: TextUnit = 18.sp,
+    enabled: Boolean,
+    onClick: () -> Unit
+) {
+    Text(
+        text = text,
+        color = if (enabled) OrangePrincipal else GrayPlaceholder,
+        fontSize = fontSize,
+        fontWeight = FontWeight.Bold,
+        modifier = modifier
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = ripple(color = OrangePrincipal),
+            ) {
+                onClick()
+            }
+    )
 }
