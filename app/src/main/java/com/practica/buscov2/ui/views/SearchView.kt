@@ -26,6 +26,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -35,7 +37,9 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.paging.compose.collectAsLazyPagingItems
+import com.google.android.gms.maps.model.LatLng
 import com.practica.buscov2.R
+import com.practica.buscov2.data.dataStore.StoreUbication
 import com.practica.buscov2.model.busco.Qualification
 import com.practica.buscov2.model.busco.SimpleUbication
 import com.practica.buscov2.model.busco.User
@@ -60,10 +64,14 @@ import com.practica.buscov2.ui.viewModel.SearchViewModel
 import com.practica.buscov2.ui.viewModel.auth.GoogleLoginViewModel
 import com.practica.buscov2.ui.viewModel.auth.TokenViewModel
 import com.practica.buscov2.ui.viewModel.proposals.ApplicationsViewModel
+import com.practica.buscov2.ui.viewModel.ubication.MapViewModel
+import com.practica.buscov2.ui.viewModel.ubication.SearchMapViewModel
 import com.practica.buscov2.ui.viewModel.users.CompleteDataViewModel
 import com.practica.buscov2.ui.viewModel.users.UserViewModel
+import com.practica.buscov2.ui.views.maps.MapViewUI
 import com.practica.buscov2.ui.views.proposals.NewPublication
 import com.practica.buscov2.util.AppUtils
+import kotlinx.coroutines.launch
 
 @Composable
 fun SearchView(
@@ -74,6 +82,8 @@ fun SearchView(
     vmSearch: SearchViewModel,
     vmCompleteData: CompleteDataViewModel,
     vmLoading: LoadingViewModel,
+    searchMapVM: SearchMapViewModel,
+    mapVM: MapViewModel,
     navController: NavHostController
 ) {
     val token by vmToken.token.collectAsState()
@@ -102,6 +112,8 @@ fun SearchView(
                 vmSearch,
                 vmCompleteData,
                 vmLoading,
+                searchMapVM,
+                mapVM,
                 navController
             )
         }
@@ -118,6 +130,8 @@ fun SearchV(
     vmSearch: SearchViewModel,
     vmCompleteData: CompleteDataViewModel,
     vmLoading:LoadingViewModel,
+    searchMapVM: SearchMapViewModel,
+    mapVM: MapViewModel,
     navController: NavHostController
 ) {
     val isLoading by vmLoading.isLoading
@@ -133,6 +147,57 @@ fun SearchV(
 
     val context = LocalContext.current
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+
+    //Ubication
+    val scope = rememberCoroutineScope()
+    val ubicationDataStore = StoreUbication(context)
+    val ubication = ubicationDataStore.getUbicationFlow().collectAsState(initial = null)
+    val address = mapVM.address.value
+    val coordinates = searchMapVM.placeCoordinates.value
+    var setUbicationStart by remember { mutableStateOf(false) }
+
+    LaunchedEffect(ubication.value) {
+        val location = ubication.value ?: LatLng(user.latitude!!, user.longitude!!)
+
+        searchMapVM.setLocation(location.latitude, location.longitude)
+
+        searchMapVM.getLocation(location.latitude, location.longitude) { address ->
+            address?.let {
+                mapVM.setAddress(it.formatted_address)
+            }
+        }
+
+        //Para la busqueda data source
+        vmSearch.setUbication(location.latitude, location.longitude)
+
+        setUbicationStart = true
+    }
+
+    if (changeUbication.value) {
+        MapViewUI(
+            coordinates.latitude,
+            coordinates.longitude,
+            searchMapVM,
+            mapVM,
+            navController,
+            actionClose = {
+                changeUbication.value = false //Close Map
+            }) {
+            //Cambiar ubicacion en la memoria del celular
+            scope.launch {
+                ubicationDataStore.saveUbication(it)
+                vmSearch.setUbication(it.latitude, it.longitude)
+                changeUbication.value = false //close map
+
+                //Actualizar recomendaciones o trabajadores con refresh ***
+                if (search == "workers") {
+                    vmSearch.refreshWorkers()
+                }else{
+                    vmSearch.refreshProposals()
+                }
+            }
+        }
+    }
 
     //Mostrar loader
     if (isLoading) {
@@ -150,15 +215,6 @@ fun SearchV(
 
         vmSearch.refreshWorkers()
     }
-
-    AlertChangeUbication(
-        changeUbication,
-        vmCompleteData,
-        onChange = { pais, provincia, departamento, localidad ->
-            vmSearch.onUbicationChange(SimpleUbication(pais, provincia, departamento, localidad))
-            vmSearch.refreshWorkers()
-        }
-    )
 
     LateralMenu(
         drawerState = drawerState,
@@ -178,7 +234,7 @@ fun SearchV(
                             .background(OrangePrincipal)
                     ) {
                         ButtonUbication(
-                            "adasdasd",
+                            address,
                             textColor = Color.White
                         ) {
                             changeUbication.value = true

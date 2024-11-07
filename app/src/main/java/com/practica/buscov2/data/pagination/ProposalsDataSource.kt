@@ -14,9 +14,6 @@ class ProposalsDataSource(
     tokenP: String? = null,
     function: String? = null,
     queryP: String? = null,
-    cityP: String? = null,
-    departmentP: String? = null,
-    provinceP: String? = null,
     categoryIdP: Int? = null,
     ubicationP: LatLng? = null
 ) : PagingSource<Int, Proposal>() {
@@ -25,11 +22,7 @@ class ProposalsDataSource(
     private val functionCall = function
     private val token = tokenP
     private val ubication = ubicationP
-
     private val query = queryP
-    private val city = cityP
-    private val department = departmentP
-    private val province = provinceP
     private val categoryId = categoryIdP
 
     //controla el estado de paginacion
@@ -54,12 +47,11 @@ class ProposalsDataSource(
                     repo.searchProposals(
                         token = token!!,
                         query = query!!,
-                        city,
-                        department,
-                        province,
                         categoryId,
                         page = nextPageNumber,
-                        pageSize = 6
+                        pageSize = 6,
+                        ubication?.latitude,
+                        ubication?.longitude
                     )
                 } else if (functionCall != "getRecommendedProposals") {
                     repo.getProposalsOfUser(

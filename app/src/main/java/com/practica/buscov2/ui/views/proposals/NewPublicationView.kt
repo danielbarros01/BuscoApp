@@ -36,6 +36,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -50,7 +51,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavHostController
+import com.google.android.gms.maps.model.LatLng
 import com.practica.buscov2.R
+import com.practica.buscov2.data.dataStore.StoreUbication
 import com.practica.buscov2.model.busco.SimpleUbication
 import com.practica.buscov2.model.busco.User
 import com.practica.buscov2.model.busco.auth.LoginToken
@@ -77,9 +80,13 @@ import com.practica.buscov2.ui.viewModel.NewPublicationViewModel
 import com.practica.buscov2.ui.viewModel.auth.GoogleLoginViewModel
 import com.practica.buscov2.ui.viewModel.auth.TokenViewModel
 import com.practica.buscov2.ui.viewModel.professions.ProfessionsViewModel
+import com.practica.buscov2.ui.viewModel.ubication.MapViewModel
+import com.practica.buscov2.ui.viewModel.ubication.SearchMapViewModel
 import com.practica.buscov2.ui.viewModel.users.UserViewModel
 import com.practica.buscov2.ui.views.images.UseCamera
+import com.practica.buscov2.ui.views.maps.MapViewUI
 import com.practica.buscov2.util.AppUtils.Companion.formatNumber
+import kotlinx.coroutines.launch
 
 @Composable
 fun NewPublicationView(
@@ -89,6 +96,8 @@ fun NewPublicationView(
     vmProfession: ProfessionsViewModel,
     vmNewPublication: NewPublicationViewModel,
     vmLoading: LoadingViewModel,
+    searchMapVM: SearchMapViewModel,
+    mapVM: MapViewModel,
     navController: NavHostController
 ) {
     val token by vmToken.token.collectAsState()
@@ -115,6 +124,8 @@ fun NewPublicationView(
                 vmProfession,
                 vmNewPublication,
                 vmLoading,
+                mapVM,
+                searchMapVM,
                 navController
             )
         }
@@ -131,6 +142,8 @@ fun NewPublication(
     vmProfession: ProfessionsViewModel,
     vmNewPublication: NewPublicationViewModel,
     vmLoading: LoadingViewModel,
+    mapVM: MapViewModel,
+    searchMapVM: SearchMapViewModel,
     navController: NavHostController
 ) {
     val context = LocalContext.current
@@ -149,6 +162,36 @@ fun NewPublication(
     }
 
     val buttonEnabled by vmNewPublication.buttonEnabled
+
+    val scope = rememberCoroutineScope()
+    val ubicationDataStore = StoreUbication(context)
+    val ubication = ubicationDataStore.getUbicationFlow().collectAsState(initial = null)
+    val ubicationPublication = vmNewPublication.ubication
+    val address = mapVM.address.value
+    val coordinates = searchMapVM.placeCoordinates.value
+    var setUbicationStart by remember { mutableStateOf(false) }
+
+    fun updateLocation(location: LatLng) {
+        searchMapVM.setLocation(location.latitude, location.longitude)
+        searchMapVM.getLocation(location.latitude, location.longitude) { address ->
+            address?.let {
+                mapVM.setAddress(it.formatted_address)
+            }
+        }
+        vmNewPublication.setUbication(location.latitude, location.longitude)
+    }
+
+    LaunchedEffect(Unit) {
+        val location = ubication.value ?: LatLng(user.latitude!!, user.longitude!!)
+        updateLocation(location)
+        setUbicationStart = true
+    }
+
+    LaunchedEffect(ubicationPublication.value) {
+        val location = ubicationPublication.value ?: LatLng(user.latitude!!, user.longitude!!)
+        updateLocation(location)
+    }
+
 
     //Mostrar error
     AlertError(showDialog = showError, error.value.title, error.value.message)
@@ -193,6 +236,29 @@ fun NewPublication(
         }
     }
 
+    val changeUbication = remember {
+        mutableStateOf(false)
+    }
+
+    if (changeUbication.value) {
+        MapViewUI(
+            coordinates.latitude,
+            coordinates.longitude,
+            searchMapVM,
+            mapVM,
+            navController,
+            actionClose = {
+                changeUbication.value = false //Close Map
+            }) {
+            //Cambiar ubicacion en la memoria del celular
+            scope.launch {
+                //ubicationDataStore.saveUbication(it) /*La ubicacion de la propuesta debe ser independiente*/
+                vmNewPublication.setUbication(it.latitude, it.longitude)
+                changeUbication.value = false //close map
+            }
+        }
+    }
+
     LateralMenu(
         drawerState = drawerState,
         drawerContent = { list -> MenuNavigation(vmUser, vmGoogle, user, navController, list) }
@@ -211,9 +277,11 @@ fun NewPublication(
                             .background(OrangePrincipal)
                     ) {
                         ButtonUbication(
-                            "adasdasdsa",
+                            address,
                             textColor = Color.White
-                        )
+                        ){
+                            changeUbication.value = true //Open Map
+                        }
                     }
                 }
             }) {

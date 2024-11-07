@@ -79,7 +79,7 @@ fun NavManager(context: Context) {
     val notificationsViewModel: NotificationsViewModel = hiltViewModel()
     notificationsViewModel.apllyContext(context)
 
-    NavHost(navController = navController, startDestination = "EditProfile") {
+    NavHost(navController = navController, startDestination = "Start") {
         composable("Start") {
             val userViewModel: UserViewModel = hiltViewModel()
             StartView(tokenViewModel, userViewModel, navController)
@@ -299,6 +299,8 @@ fun NavManager(context: Context) {
             val professionsViewModel: ProfessionsViewModel = hiltViewModel()
             val newPublicationViewModel: NewPublicationViewModel = hiltViewModel()
             val loadingViewModel: LoadingViewModel = hiltViewModel()
+            val searchMapViewModel: SearchMapViewModel = hiltViewModel()
+            val mapVM: MapViewModel = hiltViewModel()
 
             NewPublicationView(
                 userViewModel,
@@ -307,6 +309,8 @@ fun NavManager(context: Context) {
                 professionsViewModel,
                 newPublicationViewModel,
                 loadingViewModel,
+                searchMapViewModel,
+                mapVM,
                 navController
             )
         }
@@ -321,6 +325,8 @@ fun NavManager(context: Context) {
             val newPublicationViewModel: NewPublicationViewModel = hiltViewModel()
             val proposalViewModel: ProposalViewModel = hiltViewModel()
             val loadingViewModel: LoadingViewModel = hiltViewModel()
+            val searchMapViewModel: SearchMapViewModel = hiltViewModel()
+            val mapVM: MapViewModel = hiltViewModel()
 
             EditProposalView(
                 id,
@@ -331,6 +337,8 @@ fun NavManager(context: Context) {
                 newPublicationViewModel,
                 proposalViewModel,
                 loadingViewModel,
+                searchMapViewModel,
+                mapVM,
                 navController
             )
         }
@@ -360,6 +368,7 @@ fun NavManager(context: Context) {
             val applicantsViewModel: ApplicationsViewModel = hiltViewModel()
             val qualificationsViewModel: QualificationsViewModel = hiltViewModel()
             val loadingViewModel: LoadingViewModel = hiltViewModel()
+            val searchMapViewModel: SearchMapViewModel = hiltViewModel()
 
             ProposalView(
                 id,
@@ -370,6 +379,7 @@ fun NavManager(context: Context) {
                 applicantsViewModel,
                 qualificationsViewModel,
                 loadingViewModel,
+                searchMapViewModel,
                 navController
             )
         }
@@ -455,6 +465,8 @@ fun NavManager(context: Context) {
             val userViewModel: UserViewModel = hiltViewModel()
             val completeDataViewModel: CompleteDataViewModel = hiltViewModel()
             val loadingViewModel: LoadingViewModel = hiltViewModel()
+            val searchMapViewModel: SearchMapViewModel = hiltViewModel()
+            val mapVM: MapViewModel = hiltViewModel()
 
             SearchView(
                 typeSearch = typeSearch,
@@ -464,6 +476,8 @@ fun NavManager(context: Context) {
                 vmSearch = searchViewModel,
                 completeDataViewModel,
                 loadingViewModel,
+                searchMapViewModel,
+                mapVM,
                 navController = navController
             )
         }

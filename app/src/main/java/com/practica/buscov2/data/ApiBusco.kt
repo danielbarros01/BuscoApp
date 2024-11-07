@@ -169,7 +169,9 @@ interface ApiBusco {
         @Part("minBudget") minBudget: RequestBody?,
         @Part("maxBudget") maxBudget: RequestBody?,
         @Part image: MultipartBody.Part?,
-        @Part("professionId") professionId: RequestBody?
+        @Part("professionId") professionId: RequestBody?,
+        @Part("latitude") latitude: RequestBody?,
+        @Part("longitude") longitude: RequestBody?,
     ): Response<ResponseCreatedId>
 
     @GET("$ENDPOINT_PROPOSALS/all/{userId}")
@@ -208,7 +210,9 @@ interface ApiBusco {
         @Part("minBudget") minBudget: RequestBody?,
         @Part("maxBudget") maxBudget: RequestBody?,
         @Part image: MultipartBody.Part?,
-        @Part("professionId") professionId: RequestBody?
+        @Part("professionId") professionId: RequestBody?,
+        @Part("latitude") latitude: RequestBody?,
+        @Part("longitude") longitude: RequestBody?,
     ): Response<Unit>
 
     @GET("$ENDPOINT_PROPOSALS/recommendations")
@@ -297,19 +301,20 @@ interface ApiBusco {
         @Query("filterCategoryId") categoryId: Int?,
         @Query("filterQualification") qualificationStars: Int?,
         @Query("page") page: Int?,
-        @Query("NumberRecordsPerPage") pageSize: Int?
+        @Query("NumberRecordsPerPage") pageSize: Int?,
+        @Query("latitude") latitude: Double?,
+        @Query("longitude") longitude: Double?
     ): Response<List<Worker>>
 
     @GET("$ENDPOINT_PROPOSALS/search")
     suspend fun searchProposals(
         @Header("Authorization") token: String,
         @Query("query") query: String?,
-        @Query("city") city: String?,
-        @Query("department") department: String?,
-        @Query("province") province: String?,
         @Query("filterCategoryId") categoryId: Int?,
         @Query("page") page: Int?,
-        @Query("NumberRecordsPerPage") pageSize: Int?
+        @Query("NumberRecordsPerPage") pageSize: Int?,
+        @Query("latitude") latitude: Double?,
+        @Query("longitude") longitude: Double?
     ): Response<List<Proposal>>
 
 

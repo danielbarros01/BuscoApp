@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
+import com.google.android.gms.maps.model.LatLng
 import com.practica.buscov2.data.pagination.JobsDataSource
 import com.practica.buscov2.data.pagination.ProposalsDataSource
 import com.practica.buscov2.data.pagination.SearchDataSource
@@ -40,8 +41,8 @@ class SearchViewModel @Inject constructor(
     private val _token = MutableStateFlow<String?>(null)
     private val token = _token
 
-    private val _ubication = mutableStateOf(SimpleUbication())
-    val ubication = _ubication
+    private val _ubication = mutableStateOf<LatLng?>(null)
+    var ubication: State<LatLng?> = _ubication
 
     private val _category = mutableStateOf<ProfessionCategory?>(null)
     var category: State<ProfessionCategory?> = _category
@@ -54,45 +55,48 @@ class SearchViewModel @Inject constructor(
 
     private val _refreshTrigger = MutableStateFlow(0)
 
+    private val _refreshTriggerWorkers = MutableStateFlow(0)
+    private val _refreshTriggerProposals = MutableStateFlow(0)
+
     @OptIn(ExperimentalCoroutinesApi::class)
-    val workersPage = _refreshTrigger.flatMapLatest {
+    val workersPage = _refreshTriggerWorkers.flatMapLatest {
         Pager(PagingConfig(pageSize = 6)) {
             SearchDataSource(
                 repo = repoWorkers,
                 tokenP = token.value!!,
                 queryP = query.value,
-                cityP = ubication.value.city,
-                departmentP = ubication.value.department,
-                provinceP = ubication.value.province,
                 categoryIdP = category.value?.id,
                 qualificationStarsP = stars.value,
+                ubicationP = ubication.value
             )
         }.flow.cachedIn(viewModelScope)
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val proposalsPage = _refreshTrigger.flatMapLatest {
+    val proposalsPage = _refreshTriggerProposals.flatMapLatest {
         Pager(PagingConfig(pageSize = 6)) {
             ProposalsDataSource(
                 function = "search",
                 repo = repoProposals,
                 tokenP = token.value!!,
                 queryP = query.value,
-                cityP = ubication.value.city,
-                departmentP = ubication.value.department,
-                provinceP = ubication.value.province,
                 categoryIdP = category.value?.id,
-                status = null
+                status = null,
+                ubicationP = ubication.value
             )
         }.flow.cachedIn(viewModelScope)
     }
 
     fun refreshWorkers() {
-        _refreshTrigger.value++
+        _refreshTriggerWorkers.value++
     }
 
-    fun onUbicationChange(newUbication: SimpleUbication) {
-        _ubication.value = newUbication
+    fun refreshProposals() {
+        _refreshTriggerProposals.value++
+    }
+
+    fun setUbication(lat: Double, lng: Double) {
+        _ubication.value = LatLng(lat, lng)
     }
 
     fun setToken(token: String) {

@@ -34,6 +34,10 @@ class ProposalsRepository @Inject constructor(private val api: ApiBusco) {
                 proposal.maxBudget?.toString()?.toRequestBody("text/plain".toMediaTypeOrNull())
             val professionIdRequestBody =
                 proposal.professionId?.toString()?.toRequestBody("text/plain".toMediaTypeOrNull())
+            val latitudeRequestBody =
+                proposal.latitude?.toString()?.toRequestBody("text/plain".toMediaTypeOrNull())
+            val longitudeIdRequestBody =
+                proposal.longitude?.toString()?.toRequestBody("text/plain".toMediaTypeOrNull())
 
 
             val response = api.createProposal(
@@ -44,7 +48,8 @@ class ProposalsRepository @Inject constructor(private val api: ApiBusco) {
                 minBudget = minBudgetRequestBody,
                 maxBudget = maxBudgetRequestBody,
                 image = filePart, // Tu MultipartBody.Part para la imagen
-                professionId = professionIdRequestBody
+                professionId = professionIdRequestBody,
+                latitudeRequestBody, longitudeIdRequestBody
             )
 
             return when (response.code()) {
@@ -112,7 +117,10 @@ class ProposalsRepository @Inject constructor(private val api: ApiBusco) {
                 proposal.maxBudget?.toString()?.toRequestBody("text/plain".toMediaTypeOrNull())
             val professionIdRequestBody =
                 proposal.professionId?.toString()?.toRequestBody("text/plain".toMediaTypeOrNull())
-
+            val latitudeRequestBody =
+                proposal.latitude?.toString()?.toRequestBody("text/plain".toMediaTypeOrNull())
+            val longitudeIdRequestBody =
+                proposal.longitude?.toString()?.toRequestBody("text/plain".toMediaTypeOrNull())
 
             val response = api.editProposal(
                 token = "Bearer $token",
@@ -123,7 +131,9 @@ class ProposalsRepository @Inject constructor(private val api: ApiBusco) {
                 minBudget = minBudgetRequestBody,
                 maxBudget = maxBudgetRequestBody,
                 image = filePart, // Tu MultipartBody.Part para la imagen
-                professionId = professionIdRequestBody
+                professionId = professionIdRequestBody,
+                latitude = latitudeRequestBody,
+                longitude = longitudeIdRequestBody
             )
 
             return when (response.code()) {
@@ -176,12 +186,11 @@ class ProposalsRepository @Inject constructor(private val api: ApiBusco) {
     suspend fun searchProposals(
         token: String,
         query: String,
-        city: String? = null,
-        department: String? = null,
-        province: String? = null,
         categoryId: Int? = null,
         page: Int? = null,
-        pageSize: Int? = null
+        pageSize: Int? = null,
+        lat: Double? = null,
+        lng: Double? = null
     ): List<Proposal> {
         try {
             delay(1000)
@@ -189,12 +198,10 @@ class ProposalsRepository @Inject constructor(private val api: ApiBusco) {
             val response = api.searchProposals(
                 token = "Bearer $token",
                 query = query,
-                city = city,
-                department = department,
-                province = province,
                 categoryId = categoryId,
                 page = page,
-                pageSize = pageSize
+                pageSize = pageSize,
+                lat, lng
             )
 
             return response.body() ?: emptyList()

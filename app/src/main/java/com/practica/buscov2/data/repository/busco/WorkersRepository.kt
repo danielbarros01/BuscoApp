@@ -64,7 +64,9 @@ class WorkersRepository @Inject constructor(private val api: ApiBusco) {
         categoryId: Int? = null,
         qualificationStars: Int? = null,
         page: Int? = null,
-        pageSize: Int? = null
+        pageSize: Int? = null,
+        lat: Double? = null,
+        lng: Double? = null
     ): List<Worker> {
         try {
             delay(1000)
@@ -78,7 +80,8 @@ class WorkersRepository @Inject constructor(private val api: ApiBusco) {
                 categoryId = categoryId,
                 qualificationStars = qualificationStars,
                 page = page,
-                pageSize = pageSize
+                pageSize = pageSize,
+                lat, lng
             )
 
             return response.body() ?: emptyList()

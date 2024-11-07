@@ -18,6 +18,7 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.Icon
@@ -33,6 +34,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -41,6 +43,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
+import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.Marker
+import com.google.maps.android.compose.MarkerState
+import com.google.maps.android.compose.rememberCameraPositionState
 import com.practica.buscov2.R
 import com.practica.buscov2.model.busco.Application
 import com.practica.buscov2.model.busco.Proposal
@@ -80,7 +88,9 @@ import com.practica.buscov2.ui.viewModel.auth.GoogleLoginViewModel
 import com.practica.buscov2.ui.viewModel.auth.TokenViewModel
 import com.practica.buscov2.ui.viewModel.proposals.ApplicationsViewModel
 import com.practica.buscov2.ui.viewModel.proposals.ProposalViewModel
+import com.practica.buscov2.ui.viewModel.ubication.SearchMapViewModel
 import com.practica.buscov2.ui.viewModel.users.UserViewModel
+import com.practica.buscov2.ui.views.users.ElementRowInformation
 import com.practica.buscov2.util.AppUtils.Companion.convertToIsoDate
 
 @Composable
@@ -93,6 +103,7 @@ fun ProposalView(
     applicationsViewModel: ApplicationsViewModel,
     qualificationsViewModel: QualificationsViewModel,
     vmLoading: LoadingViewModel,
+    searchMapVM: SearchMapViewModel,
     navController: NavHostController
 ) {
     val token by vmToken.token.collectAsState()
@@ -122,6 +133,7 @@ fun ProposalView(
                 applicationsViewModel,
                 qualificationsViewModel,
                 vmLoading,
+                searchMapVM,
                 navController
             )
         }
@@ -140,6 +152,7 @@ fun ProposalV(
     applicationsViewModel: ApplicationsViewModel,
     qualificationsViewModel: QualificationsViewModel,
     vmLoading: LoadingViewModel,
+    searchMapVM: SearchMapViewModel,
     navController: NavHostController
 ) {
     val error by vmProposal.error
@@ -202,6 +215,16 @@ fun ProposalV(
                     applicationsViewModel.getAcceptedApplication(it.id!!) { worker ->
                         worker?.userId?.let {
                             qualificationsViewModel.setWorkerId(worker.userId)
+                        }
+                    }
+                }
+
+                it.latitude?.let { latitude ->
+                    it.longitude?.let { longitude ->
+                        searchMapVM.getLocation(latitude, longitude) { address ->
+                            address?.let {
+                                searchMapVM.setAddress(it.formatted_address)
+                            }
                         }
                     }
                 }
@@ -418,7 +441,13 @@ fun ProposalV(
                                 Finished()
                             }
 
-                            TabsPages(proposal, application, userOwnerProposal, navController)
+                            TabsPages(
+                                proposal,
+                                application,
+                                userOwnerProposal,
+                                searchMapVM,
+                                navController
+                            )
                         }
                     }
                 }
@@ -497,8 +526,16 @@ fun ProposalMoreInfo(
     proposal: Proposal,
     application: Application? = null,
     user: User?,
+    searchMapVM: SearchMapViewModel,
     navController: NavController?
 ) {
+    val address = searchMapVM.address.value
+
+    val coordinates = LatLng(proposal.latitude!!, proposal.longitude!!)
+    val markerState = remember { mutableStateOf(MarkerState(position = coordinates)) }
+    val cameraPosition = remember { CameraPosition.fromLatLngZoom(coordinates, 6f) }
+    val cameraState = rememberCameraPositionState { position = cameraPosition }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -513,37 +550,59 @@ fun ProposalMoreInfo(
             }
         }
 
-        Text(text = "Acerca del cliente:", color = OrangePrincipal)
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .padding(vertical = 10.dp)
-        ) {
+        ElementRowInformation(
+            imageId = R.drawable.location,
+            text = address
+        )
+
+        Column {
             Box(
                 modifier = Modifier
-                    .width(50.dp)
-                    .height(50.dp)
-                    .padding(end = 5.dp)
+                    .fillMaxWidth()
+                    .height(250.dp)
+                    .clip(shape = RoundedCornerShape(10.dp))
             ) {
-                InsertCircleProfileImage(
-                    image = user?.image ?: "",
-                    modifier = Modifier.aspectRatio(1f)
+                GoogleMap(
+                    modifier = Modifier.matchParentSize(),
+                    cameraPositionState = cameraState
+                ) {
+                    Marker(state = markerState.value)
+                }
+            }
+
+            Space(size = 8.dp)
+            Text(text = "Acerca del cliente:", color = OrangePrincipal)
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .padding(vertical = 10.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .width(50.dp)
+                        .height(50.dp)
+                        .padding(end = 5.dp)
+                ) {
+                    InsertCircleProfileImage(
+                        image = user?.image ?: "",
+                        modifier = Modifier.aspectRatio(1f)
+                    )
+                }
+                Text(
+                    text = "${user?.name} ${user?.lastname}",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 24.sp
                 )
             }
+            Text(text = user?.worker?.description ?: "")
             Text(
-                text = "${user?.name} ${user?.lastname}",
+                text = "Ver Perfil",
+                color = BlueLink,
                 fontWeight = FontWeight.Bold,
-                fontSize = 24.sp
-            )
+                modifier = Modifier.clickable {
+                    navController?.navigate("Profile/${user?.id}")
+                })
         }
-        Text(text = user?.worker?.description ?: "")
-        Text(
-            text = "Ver Perfil",
-            color = BlueLink,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.clickable {
-                navController?.navigate("Profile/${user?.id}")
-            })
     }
 }
 
@@ -552,6 +611,7 @@ private fun TabsPages(
     proposal: Proposal,
     application: Application?,
     user: User?,
+    searchMapVM: SearchMapViewModel,
     navController: NavController
 ) {
     val tabs = ItemTabOnlyProposal.pagesProposal
@@ -564,7 +624,7 @@ private fun TabsPages(
             modifier = Modifier.padding(horizontal = 40.dp, vertical = 5.dp),
             fontSize = 14.sp
         )
-        TabsContent(tabs, pagerState, proposal, application, user, navController)
+        TabsContent(tabs, pagerState, proposal, application, user, searchMapVM, navController)
     }
 }
 
@@ -576,12 +636,13 @@ private fun TabsContent(
     proposal: Proposal,
     application: Application? = null,
     user: User?,
+    searchMapVM: SearchMapViewModel,
     navController: NavController
 ) {
     HorizontalPager(
         state = pagerState
     ) { page ->
-        tabs[page].screen(proposal, application, user, navController)
+        tabs[page].screen(proposal, application, user, navController, searchMapVM)
     }
 }
 

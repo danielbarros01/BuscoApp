@@ -2,6 +2,7 @@ package com.practica.buscov2.data.pagination
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
+import com.google.android.gms.maps.model.LatLng
 import com.practica.buscov2.data.repository.busco.WorkersRepository
 import com.practica.buscov2.model.busco.User
 import com.practica.buscov2.model.busco.Worker
@@ -10,19 +11,15 @@ class SearchDataSource(
     private val repo: WorkersRepository,
     tokenP: String,
     queryP: String,
-    cityP: String? = null,
-    departmentP: String? = null,
-    provinceP: String? = null,
     categoryIdP: Int? = null,
-    qualificationStarsP: Int? = null
+    qualificationStarsP: Int? = null,
+    ubicationP: LatLng? = null
 ) : PagingSource<Int, Worker>() {
     private val token = tokenP
     private val query = queryP
-    private val city = cityP
-    private val department = departmentP
-    private val province = provinceP
     private val categoryId = categoryIdP
     private val qualificationStars = qualificationStarsP
+    private val ubication = ubicationP
 
     override fun getRefreshKey(state: PagingState<Int, Worker>): Int? {
         return state.anchorPosition?.let { anchorPosition ->
@@ -37,13 +34,12 @@ class SearchDataSource(
             val response = repo.searchWorkers(
                 token = token,
                 query = query,
-                city,
-                department,
-                province,
-                categoryId,
-                qualificationStars,
+                categoryId = categoryId,
+                qualificationStars = qualificationStars,
                 page = nextPageNumber,
-                pageSize = 6
+                pageSize = 6,
+                lat = ubication?.latitude,
+                lng = ubication?.longitude
             )
 
             PagingSource.LoadResult.Page(

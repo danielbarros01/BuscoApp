@@ -11,9 +11,12 @@ data class Proposal(
     val image:String? = null,
     val status:Boolean? = null,
     val userId:Int? = null,
-    val professionId:Int? = null,
+    var professionId:Int? = null,
 
     val user:User? = null,
     val profession: Profession? = null,
-    val applications: List<Application>? = null
+    val applications: List<Application>? = null,
+
+    val latitude: Double? = null,
+    val longitude: Double? = null
 )

@@ -55,6 +55,7 @@ class ProposalViewModel @Inject constructor(
                 }
             } catch (e: Exception) {
                 Log.e("Error", e.message.toString())
+                Log.e("Error", e.toString())
                 _error.value = ErrorBusco(
                     title = "Error",
                     message = "Ha ocurrido un error inesperado, intentalo de nuevo más tarde"

@@ -10,6 +10,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.android.gms.maps.model.LatLng
 import com.practica.buscov2.data.repository.busco.ProfessionsRepository
 import com.practica.buscov2.data.repository.busco.ProposalsRepository
 import com.practica.buscov2.model.busco.Profession
@@ -62,6 +63,9 @@ class NewPublicationViewModel @Inject constructor(
     private val _image: MutableState<Uri> = mutableStateOf(Uri.EMPTY)
     var image: State<Uri> = _image
 
+    private val _ubication = mutableStateOf<LatLng?>(null)
+    var ubication: State<LatLng?> = _ubication
+
     fun setData(title: String, description: String, requirements: String) {
         _title.value = title
         _description.value = description
@@ -110,9 +114,20 @@ class NewPublicationViewModel @Inject constructor(
     }
 
     fun setImage(uri: Uri?) {
-        val fullImageUrl = "$ESQ_HOST${uri?.path}"
+        if(uri == null) return
+
+        val fullImageUrl = "$ESQ_HOST${uri.path}"
         _image.value = Uri.parse(fullImageUrl)
         _buttonEnabled.value = enabledButton()
+    }
+
+    fun setUbication(lat: Double, lng: Double) {
+        _ubication.value = LatLng(lat, lng)
+
+        proposal = proposal.copy(
+            latitude = lat,
+            longitude = lng
+        )
     }
 
     private fun enabledButton(): Boolean {
@@ -165,4 +180,55 @@ class NewPublicationViewModel @Inject constructor(
     }
 
 
+    fun editProposal(
+        context: Context,
+        uri: Uri,
+        token: String,
+        onError: () -> Unit,
+        onSuccess: () -> Unit
+    ) {
+        viewModelScope.launch {
+            try {
+                var uriModified: Uri? = uri
+
+                /**Esto es porque si tiene http, la imagen no se modifico
+                 * Es la que ya venia del servidor, por eso no hay que volver a enviarla y
+                 * el valor es nulo*/
+                if (uri.toString().contains("http")) {
+                    uriModified = null
+                }
+
+                val filePart =
+                    if (!uriModified?.scheme.isNullOrEmpty() && !uriModified?.path.isNullOrEmpty()) {
+                        FilesUtils.getFilePart(context, uri, "image")
+                    } else {
+                        null
+                    }
+
+                val response = withContext(Dispatchers.IO) {
+                    proposal.let { proposalsRepository.editProposal(it, filePart, token) }
+                }
+
+                when (response) {
+                    is Boolean -> {
+                        if (response) {
+                            onSuccess()
+                        }
+                    }
+
+                    is ErrorBusco -> {
+                        _error.value = response
+                        onError()
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("Error", e.message.toString())
+                _error.value = ErrorBusco(
+                    title = "Error",
+                    message = "Ha ocurrido un error inesperado, intentalo de nuevo más tarde"
+                )
+                onError()
+            }
+        }
+    }
 }
