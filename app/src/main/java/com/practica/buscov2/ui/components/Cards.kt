@@ -70,7 +70,7 @@ fun CardProposal(
     title: String,
     price: String,
     date: String,
-    modifier: Modifier? = Modifier,
+    modifier: Modifier? = null,
     onClick: () -> Unit
 ) {
     val modifierDefault = Modifier

@@ -10,13 +10,19 @@ import androidx.compose.ui.platform.LocalContext
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberPermissionState
 import com.google.accompanist.permissions.isGranted
+import com.practica.buscov2.util.Config.Companion.MAX_IMAGE_SIZE
+import com.practica.buscov2.util.FilesUtils.Companion.sizeFile
 import java.io.File
 import java.io.FileOutputStream
 
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun SelectImageFromGallery(onGalleryClosed: () -> Unit, onImageSelected: (Uri) -> Unit) {
+fun SelectImageFromGallery(
+    onGalleryClosed: () -> Unit,
+    onError: (String) -> Unit = {},
+    onImageSelected: (Uri) -> Unit
+) {
     val context = LocalContext.current
     val permission = Manifest.permission.READ_EXTERNAL_STORAGE
     val permissionState = rememberPermissionState(permission)
@@ -32,14 +38,19 @@ fun SelectImageFromGallery(onGalleryClosed: () -> Unit, onImageSelected: (Uri) -
                     val inputStream = context.contentResolver.openInputStream(imageUri)
                     val outputStream = FileOutputStream(file)
                     inputStream?.copyTo(outputStream)
-                }catch (_:Exception){
 
+                    if (sizeFile(file) <= MAX_IMAGE_SIZE) {
+                        // Obtiene la Uri del archivo temporal
+                        val tempImageUri = Uri.fromFile(file)
+                        onImageSelected(tempImageUri)
+                    } else {
+                        onError("La imagen no puede pesar más de ${MAX_IMAGE_SIZE}mb")
+                        onGalleryClosed()
+                    }
+                } catch (_: Exception) {
+                    onError("Error al procesar la imagen, intentalo de nuevo")
+                    onGalleryClosed()
                 }
-
-                // Obtiene la Uri del archivo temporal
-                val tempImageUri = Uri.fromFile(file)
-
-                onImageSelected(tempImageUri)
             } else {
                 // The gallery was closed without selecting an image
                 onGalleryClosed()

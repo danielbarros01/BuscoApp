@@ -1,6 +1,7 @@
 package com.practica.buscov2.ui.views.images
 
 import android.Manifest
+import android.content.Context
 import android.net.Uri
 import android.view.ViewGroup
 import androidx.camera.core.CameraSelector
@@ -49,6 +50,9 @@ import com.practica.buscov2.R
 import com.practica.buscov2.ui.components.ArrowBack
 import com.practica.buscov2.ui.components.Circle
 import com.practica.buscov2.ui.theme.OrangePrincipal
+import com.practica.buscov2.util.Config.Companion.MAX_IMAGE_SIZE
+import com.practica.buscov2.util.FilesUtils.Companion.compressImage
+import com.practica.buscov2.util.FilesUtils.Companion.sizeFile
 import java.io.File
 import java.util.concurrent.Executor
 
@@ -81,7 +85,7 @@ fun UseCamera(onBack: () -> Unit, onImageCaptured: (Uri) -> Unit) {
                 onClick = {
                     //Al sacar foto
                     val executor = ContextCompat.getMainExecutor(context)
-                    takePicture(cameraController, executor, onImageCaptured)
+                    takePicture(cameraController, executor, context, onImageCaptured)
                 },
                 shape = CircleShape, modifier = Modifier.padding(vertical = 10.dp)
             ) {
@@ -148,9 +152,11 @@ fun UseCamera(onBack: () -> Unit, onImageCaptured: (Uri) -> Unit) {
 private fun takePicture(
     cameraController: LifecycleCameraController,
     executor: Executor,
+    context: Context,
     onImageCaptured: (Uri) -> Unit
 ) {
     val file = File.createTempFile("buscoimg", ".jpg")
+
     val outputDirectory = ImageCapture.OutputFileOptions.Builder(file).build()
 
     cameraController.takePicture(
@@ -158,14 +164,25 @@ private fun takePicture(
         executor,
         object : ImageCapture.OnImageSavedCallback {
             override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
-                outputFileResults.savedUri?.let { onImageCaptured(it) }
+                val savedUri = outputFileResults.savedUri
+                savedUri?.let {
+                    val originalFile = File(it.path!!)
+                    val fileSizeInMb = sizeFile(originalFile)
+
+                    if (fileSizeInMb > MAX_IMAGE_SIZE) {
+                        val compressedFile = compressImage(context, originalFile, fileSizeInMb, MAX_IMAGE_SIZE)
+                        val compressedUri = Uri.fromFile(compressedFile)
+                        onImageCaptured(compressedUri)
+                    } else {
+                        onImageCaptured(it)
+                    }
+                }
             }
 
             override fun onError(exception: ImageCaptureException) {
                 println("Error, no se saco la foto")
             }
         })
-
 }
 
 @Composable

@@ -65,6 +65,7 @@ import com.practica.buscov2.ui.views.images.UseCamera
 import com.practica.buscov2.ui.views.maps.MapViewUI
 import com.practica.buscov2.ui.views.workers.DataWorker
 import com.practica.buscov2.util.AppUtils.Companion.toLocalDate
+import com.practica.buscov2.util.Config.Companion.MAX_IMAGE_SIZE
 import kotlinx.coroutines.launch
 import java.time.ZoneId
 
@@ -239,6 +240,10 @@ fun EditUser(
 
     val address = searchMapVM.address.value
 
+    val errorImage = remember {
+        mutableStateOf("Máx ${MAX_IMAGE_SIZE}mb")
+    }
+
     // Configure date picker limits
     LaunchedEffect(stateDataPicker.selectedDateMillis) {
         stateDataPicker.selectedDateMillis?.let { dateMillis ->
@@ -259,6 +264,7 @@ fun EditUser(
     AlertSuccess(showDialog = showDialog, "Datos guardados con éxito")
     AlertSelectPicture(
         showDialog = openAlertSelectImage,
+        textError = errorImage.value,
         openCamera = {
             openCamera.value = true
             openAlertSelectImage.value = false
@@ -311,9 +317,13 @@ fun EditUser(
         ) {
             SelectImageFromGallery(onGalleryClosed = {
                 openGallery.value = false
+            }, onError = {
+                errorImage.value = it
+                openAlertSelectImage.value = true
             }) { uri ->
                 newUriPicture.value = uri
                 openAlertChangePicture.value = true
+                openGallery.value = false
             }
         }
     }

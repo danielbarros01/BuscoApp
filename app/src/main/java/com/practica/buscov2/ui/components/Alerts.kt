@@ -39,6 +39,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.practica.buscov2.R
@@ -49,6 +50,7 @@ import com.practica.buscov2.ui.theme.GrayText
 import com.practica.buscov2.ui.theme.GreenBusco
 import com.practica.buscov2.ui.theme.OrangePrincipal
 import com.practica.buscov2.ui.theme.RedBusco
+import com.practica.buscov2.util.Config.Companion.MAX_IMAGE_SIZE
 
 @Composable
 fun AlertError(
@@ -134,39 +136,47 @@ fun AlertSuccess(
 @Composable
 fun AlertSelectPicture(
     showDialog: MutableState<Boolean>,
+    textError: String = "Máx 4mb",
     openCamera: () -> Unit,
     openGallery: () -> Unit
 ) {
-    if (showDialog.value) {
+    if(showDialog.value) {
         AlertDialog(
             onDismissRequest = { showDialog.value = false },
-            title = {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceAround
-                ) {
-                    Column(
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally
+            title = null,
+            text = null,
+            confirmButton = {
+                Column(modifier = Modifier) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceAround
                     ) {
-                        IconButton(onClick = { openCamera() }, modifier = Modifier) {
-                            InsertImage(R.drawable.camera, modifier = Modifier.fillMaxSize())
+                        Column(
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            IconButton(onClick = { openCamera() }, modifier = Modifier) {
+                                InsertImage(R.drawable.camera, modifier = Modifier.fillMaxSize())
+                            }
+                            Text(text = "Tomar foto", fontSize = 16.sp, color = GrayText)
                         }
-                        Text(text = "Tomar foto", fontSize = 16.sp)
+
+                        Column(
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            IconButton(onClick = { openGallery() }) {
+                                InsertImage(R.drawable.gallery, modifier = Modifier.fillMaxSize())
+                            }
+                            Text(text = "Abrir galería", fontSize = 16.sp, color = GrayText)
+                        }
                     }
 
-                    Column(
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        IconButton(onClick = { openGallery() }) {
-                            InsertImage(R.drawable.gallery, modifier = Modifier.fillMaxSize())
-                        }
-                        Text(text = "Abrir galería", fontSize = 16.sp)
-                    }
+                    Space(size = 4.dp)
+                    Text(text = "* $textError", fontSize = 12.sp, color = RedBusco)
                 }
-            },
-            confirmButton = { /*TODO*/ }
+            }
         )
     }
 }

@@ -54,6 +54,7 @@ import com.practica.buscov2.ui.viewModel.ubication.SearchMapViewModel
 import com.practica.buscov2.ui.viewModel.users.UserViewModel
 import com.practica.buscov2.ui.views.images.UseCamera
 import com.practica.buscov2.ui.views.maps.MapViewUI
+import com.practica.buscov2.util.Config
 import kotlinx.coroutines.launch
 
 @Composable
@@ -171,6 +172,8 @@ fun EditPublication(
         mutableStateOf(false)
     }
 
+    val errorImage = remember { mutableStateOf("Máx ${Config.MAX_IMAGE_SIZE}mb") }
+
     fun updateLocation(location: LatLng) {
         searchMapVM.setLocation(location.latitude, location.longitude)
         searchMapVM.getLocation(location.latitude, location.longitude) { address ->
@@ -182,7 +185,7 @@ fun EditPublication(
     }
 
     LaunchedEffect(ubicationPublication.value) {
-        val location =  ubicationPublication.value!!
+        val location = ubicationPublication.value!!
         updateLocation(location)
         setUbicationStart = true
     }
@@ -215,6 +218,7 @@ fun EditPublication(
     //Seleccionar forma de elegir imagen
     AlertSelectPicture(
         showDialog = openAlertSelectImage,
+        textError = errorImage.value,
         openCamera = {
             openCamera.value = true
             openAlertSelectImage.value = false
@@ -240,6 +244,9 @@ fun EditPublication(
         ) {
             SelectImageFromGallery(onGalleryClosed = {
                 openGallery.value = false
+            }, onError = {
+                errorImage.value = it
+                openAlertSelectImage.value = true
             }) { uri ->
                 newUriPicture.value = uri
                 openGallery.value = false
@@ -267,7 +274,7 @@ fun EditPublication(
                         ButtonUbication(
                             address,
                             textColor = Color.White
-                        ){
+                        ) {
                             changeUbication.value = true //Open Map
                         }
                     }
