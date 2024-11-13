@@ -20,7 +20,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.practica.buscov2.navigation.ItemTabOnlyProposal
 import com.practica.buscov2.navigation.TabItem
 import com.practica.buscov2.ui.theme.GrayText
 import com.practica.buscov2.ui.theme.OrangePrincipal

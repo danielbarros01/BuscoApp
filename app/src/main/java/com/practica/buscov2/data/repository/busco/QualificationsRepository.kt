@@ -2,7 +2,6 @@ package com.practica.buscov2.data.repository.busco
 
 import com.practica.buscov2.data.ApiBusco
 import com.practica.buscov2.model.busco.ListQualification
-import com.practica.buscov2.model.busco.Proposal
 import com.practica.buscov2.model.busco.Qualification
 import com.practica.buscov2.model.busco.auth.ErrorBusco
 import com.practica.buscov2.util.ServerUtils

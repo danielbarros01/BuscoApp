@@ -4,7 +4,6 @@ import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.practica.buscov2.data.repository.busco.NotificationsRepository
 import com.practica.buscov2.model.busco.Notification
-import com.practica.buscov2.model.busco.Proposal
 
 class NotificationsDataSource(
     private val repo: NotificationsRepository,

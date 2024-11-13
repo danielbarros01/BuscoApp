@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -20,7 +19,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
-import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.practica.buscov2.model.busco.Application
@@ -30,8 +28,6 @@ import com.practica.buscov2.navigation.RoutesBottom
 import com.practica.buscov2.ui.components.AlertError
 import com.practica.buscov2.ui.components.BottomNav
 import com.practica.buscov2.ui.components.CardApplicant
-import com.practica.buscov2.ui.components.CardProposalRecommendation
-import com.practica.buscov2.ui.components.CardWorkerRecommendation
 import com.practica.buscov2.ui.components.ItemsInLazy
 import com.practica.buscov2.ui.components.LateralMenu
 import com.practica.buscov2.ui.components.LoaderMaxSize
@@ -39,7 +35,6 @@ import com.practica.buscov2.ui.components.MenuNavigation
 import com.practica.buscov2.ui.components.Space
 import com.practica.buscov2.ui.components.TopBarWithBack
 import com.practica.buscov2.ui.theme.GrayText
-import com.practica.buscov2.ui.viewModel.HomeViewModel
 import com.practica.buscov2.ui.viewModel.LoadingViewModel
 import com.practica.buscov2.ui.viewModel.auth.GoogleLoginViewModel
 import com.practica.buscov2.ui.viewModel.auth.TokenViewModel
@@ -129,29 +124,27 @@ fun ApplicantsV(
                     .padding(it)
                     .padding(15.dp)
             ) {
-                val applicantsPage = applicantsViewModel.applicantsPage?.collectAsLazyPagingItems()
+                val applicantsPage = applicantsViewModel.applicantsPage.collectAsLazyPagingItems()
 
-                if (applicantsPage != null) {
-                    activeLoaderMax(applicantsPage, vmLoading)
-                    ShowApplicants(applicantsPage, applicantsViewModel, vmLoading, navController,
-                        onErrorDecline = {
-                            showError.value = true
-                        },
-                        onErrorAccept = {
-                            showError.value = true
-                        },
-                        onSuccessDecline = {
-                            applicantsPage.refresh()
-                        }
-                    )
+                activeLoaderMax(applicantsPage, vmLoading)
+                ShowApplicants(applicantsPage, applicantsViewModel, vmLoading, navController,
+                    onErrorDecline = {
+                        showError.value = true
+                    },
+                    onErrorAccept = {
+                        showError.value = true
+                    },
+                    onSuccessDecline = {
+                        applicantsPage.refresh()
+                    }
+                )
 
-                    if (applicantsPage.itemCount == 0) {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(text = "No hay postulantes", color = GrayText)
-                        }
+                if (applicantsPage.itemCount == 0) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = "No hay postulantes", color = GrayText)
                     }
                 }
             }

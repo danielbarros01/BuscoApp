@@ -1,7 +1,6 @@
 package com.practica.buscov2.ui.components
 
 import android.util.Log
-import android.widget.Toast
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
@@ -20,14 +19,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -36,33 +34,25 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import coil.compose.AsyncImage
-import coil.compose.rememberAsyncImagePainter
-import coil.compose.rememberImagePainter
 import coil.request.ImageRequest
 import com.practica.buscov2.R
-import com.practica.buscov2.ui.theme.GrayField
 import com.practica.buscov2.ui.theme.GrayPlaceholder
 import com.practica.buscov2.ui.theme.GrayText
 import com.practica.buscov2.ui.theme.GreenBusco
 import com.practica.buscov2.ui.theme.OrangePrincipal
 import com.practica.buscov2.ui.theme.YellowStar
 import com.practica.buscov2.util.Constants.Companion.API_URL
-import kotlin.io.path.Path
 
 @Composable
 fun InsertImage(image: Int, modifier: Modifier = Modifier) {
@@ -148,7 +138,7 @@ fun InsertCircleProfileImage(image: String, modifier: Modifier, onClick: () -> U
 
 @Composable
 fun InsertCirlceProfileEditImage(image: String, modifier: Modifier, onClick: () -> Unit) {
-    Box() {
+    Box {
         InsertCircleProfileImage(image = image, modifier = modifier, onClick = onClick)
         Box(
             modifier = Modifier
@@ -172,9 +162,9 @@ fun InsertCirlceProfileEditImage(image: String, modifier: Modifier, onClick: () 
 @Composable
 fun SeparatoryLine() {
     Row(verticalAlignment = Alignment.CenterVertically) {
-        Divider(modifier = Modifier.weight(1f), thickness = 1.dp)
+        HorizontalDivider(modifier = Modifier.weight(1f), thickness = 1.dp)
         Text(text = "o", modifier = Modifier.padding(start = 16.dp, end = 16.dp))
-        Divider(modifier = Modifier.weight(1f), thickness = 1.dp)
+        HorizontalDivider(modifier = Modifier.weight(1f), thickness = 1.dp)
     }
 }
 
@@ -272,50 +262,6 @@ fun <T : Any> ItemsInLazy(
         }
     }
 }
-
-
-//EXPERIMENTAL
-@Composable
-fun <T : Any> LazyListScope.ItemsInLazyTwo(
-    itemsPage: LazyPagingItems<T>,
-    secondViewHeader: @Composable () -> Unit = {},
-    view: @Composable (T) -> Unit
-) {
-    item {
-        secondViewHeader()
-    }
-
-    items(itemsPage.itemCount) { index ->
-        val item = itemsPage[index]
-        if (item != null) {
-            view(item)
-        }
-    }
-    when (itemsPage.loadState.append) {
-        is LoadState.NotLoading -> Unit
-        LoadState.Loading -> {
-            item {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 10.dp), contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator(
-                        strokeWidth = 6.dp,
-                        modifier = Modifier.size(40.dp)
-                    )
-                }
-            }
-        }
-
-        is LoadState.Error -> {
-            item {
-                Text(text = "Error al cargar")
-            }
-        }
-    }
-}
-
 
 @Composable
 fun InfiniteRotationIcon(modifier: Modifier = Modifier, iconId: Int = R.drawable.working) {

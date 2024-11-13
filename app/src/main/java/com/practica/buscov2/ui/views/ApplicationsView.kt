@@ -1,5 +1,7 @@
 package com.practica.buscov2.ui.views
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,17 +23,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
-import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.practica.buscov2.model.busco.Application
-import com.practica.buscov2.model.busco.Proposal
 import com.practica.buscov2.model.busco.User
 import com.practica.buscov2.navigation.ItemTabApplication
-import com.practica.buscov2.navigation.ItemTabJob
 import com.practica.buscov2.navigation.RoutesBottom
 import com.practica.buscov2.ui.components.BottomNav
-import com.practica.buscov2.ui.components.CardJob
 import com.practica.buscov2.ui.components.CardProposal
 import com.practica.buscov2.ui.components.ItemsInLazy
 import com.practica.buscov2.ui.components.LateralMenu
@@ -40,7 +38,6 @@ import com.practica.buscov2.ui.components.MenuNavigation
 import com.practica.buscov2.ui.components.TabsComponent
 import com.practica.buscov2.ui.components.TopBar
 import com.practica.buscov2.ui.theme.GrayText
-import com.practica.buscov2.ui.viewModel.JobsViewModel
 import com.practica.buscov2.ui.viewModel.LoadingViewModel
 import com.practica.buscov2.ui.viewModel.auth.GoogleLoginViewModel
 import com.practica.buscov2.ui.viewModel.auth.TokenViewModel
@@ -63,7 +60,7 @@ fun ApplicationsView(
 
     //Ejecuto una unica vez
     LaunchedEffect(Unit) {
-        token?.let { it ->
+        token?.let {
             vmUser.getMyProfile(it.token, {
                 navController.navigate("Login")
             }) { user ->
@@ -131,6 +128,7 @@ fun ApplicationsV(
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ListApplicationsView(
     vm: ApplicationsViewModel,
@@ -149,6 +147,7 @@ fun ListApplicationsView(
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ShowApplications(applicationsPage: LazyPagingItems<Application>, navController: NavController) {
     ItemsInLazy(applicationsPage) {

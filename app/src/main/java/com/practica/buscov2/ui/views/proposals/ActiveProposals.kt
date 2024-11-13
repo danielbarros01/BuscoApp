@@ -1,5 +1,7 @@
 package com.practica.buscov2.ui.views.proposals
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,7 +22,6 @@ import com.practica.buscov2.model.busco.Notification
 import com.practica.buscov2.model.busco.User
 import com.practica.buscov2.navigation.RoutesBottom
 import com.practica.buscov2.notifications.NotificationService
-import com.practica.buscov2.notifications.NotificationWorker
 import com.practica.buscov2.ui.components.BottomNav
 import com.practica.buscov2.ui.components.CardProposalWithButton
 import com.practica.buscov2.ui.components.ItemsInLazy
@@ -35,6 +36,7 @@ import com.practica.buscov2.ui.viewModel.proposals.ProposalsViewModel
 import com.practica.buscov2.ui.viewModel.users.UserViewModel
 import com.practica.buscov2.ui.views.util.ActiveLoader.Companion.activeLoaderMax
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ActiveProposalsView(
     userIdToSend: Int,
@@ -47,7 +49,6 @@ fun ActiveProposalsView(
 ) {
     val token by vmToken.token.collectAsState()
     val user by vmUser.user.collectAsState()
-    val context = LocalContext.current
 
     //Ejecuto una unica vez
     LaunchedEffect(Unit) {
@@ -66,7 +67,6 @@ fun ActiveProposalsView(
         Box(modifier = Modifier.fillMaxSize()) {
             ActiveProposalsV(
                 Modifier.align(Alignment.Center),
-                vmUser,
                 vmProposals,
                 user!!,
                 vmNotifications,
@@ -78,10 +78,10 @@ fun ActiveProposalsView(
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ActiveProposalsV(
     modifier: Modifier,
-    vmUser: UserViewModel,
     vmProposals: ProposalsViewModel,
     user: User,
     vmNotifications: NotificationsViewModel,
@@ -90,8 +90,7 @@ fun ActiveProposalsV(
     navController: NavHostController
 ) {
     val isLoading by vmLoading.isLoading
-    val context = LocalContext.current
-    val notificationService = NotificationService(context)
+
     if (isLoading) {
         LoaderMaxSize()
     }
@@ -103,7 +102,7 @@ fun ActiveProposalsV(
         },
         topBar = {
             TopBarWithBack(title = "Propuestas activas", navController = navController)
-        }) { it ->
+        }) {
         Column(
             modifier = modifier
                 .padding(it)

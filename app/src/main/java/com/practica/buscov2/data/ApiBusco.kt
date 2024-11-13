@@ -1,6 +1,5 @@
 package com.practica.buscov2.data
 
-import com.google.android.gms.maps.model.LatLng
 import com.practica.buscov2.model.busco.Application
 import com.practica.buscov2.model.busco.ListQualification
 import com.practica.buscov2.model.busco.Notification
@@ -14,7 +13,6 @@ import com.practica.buscov2.model.busco.auth.LoginRequest
 import com.practica.buscov2.model.busco.auth.RegisterRequest
 import com.practica.buscov2.model.busco.User
 import com.practica.buscov2.model.busco.Worker
-import com.practica.buscov2.model.maps.Geolocation
 import com.practica.buscov2.util.Constants.Companion.CHANGE_PASSWORD
 import com.practica.buscov2.util.Constants.Companion.CONFIRM_PASSWORD_CODE
 import com.practica.buscov2.util.Constants.Companion.CONFIRM_REGISTER
@@ -140,9 +138,6 @@ interface ApiBusco {
         @Header("Authorization") token: String,
         @Body worker: Worker
     ): Response<Unit>
-
-    @GET("$ENDPOINT_WORKERS/{id}")
-    suspend fun getWorker(@Path("id") id: Int): Response<Worker>
 
     @PUT(ENDPOINT_WORKERS)
     suspend fun updateWorker(

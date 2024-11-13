@@ -19,7 +19,7 @@ sealed class ItemTabProfile(
     var icon: Int? = null,
     var screen: @Composable (User, ProposalsViewModel, NavController, QualificationsViewModel, JobsViewModel, LoadingViewModel, SearchMapViewModel) -> Unit
 ) {
-    object tab_information : ItemTabProfile(
+    data object TabInformation : ItemTabProfile(
         title = "Información",
         screen = { user, vmProposals, navController, vmQualifications, vmJobs, vmLoading, searchMapVM ->
             Information(
@@ -29,7 +29,7 @@ sealed class ItemTabProfile(
         }
     )
 
-    object tab_proposals : ItemTabProfile(
+    data object TabProposals : ItemTabProfile(
         title = "Propuestas",
         icon = R.drawable.hand,
         screen = { user, vmProposals, navController, vmQualifications, vmJobs, vmLoading, searchMapVM ->
@@ -41,7 +41,7 @@ sealed class ItemTabProfile(
         }
     )
 
-    object tab_qualificatios : ItemTabProfile(
+    data object TabQualifications : ItemTabProfile(
         title = "Calificaciones",
         screen = { user, vmProposals, navController, vmQualifications, vmJobs, vmLoading, searchMapVM ->
             Qualifications(
@@ -51,7 +51,7 @@ sealed class ItemTabProfile(
         }
     )
 
-    object tab_jobs : ItemTabProfile(
+    data object TabJobs : ItemTabProfile(
         title = "Trabajos",
         screen = { user, vmProposals, navController, vmQualifications, vmJobs, vmLoading, searchMapVM ->
             WorksCompletedProfile(
@@ -64,15 +64,15 @@ sealed class ItemTabProfile(
 
     companion object {
         val pagesUser: List<ItemTabProfile> = listOf(
-            tab_information,
-            tab_proposals
+            TabInformation,
+            TabProposals
         )
 
         val pagesWorker: List<ItemTabProfile> = listOf(
-            tab_information,
-            tab_proposals,
-            tab_qualificatios,
-            tab_jobs
+            TabInformation,
+            TabProposals,
+            TabQualifications,
+            TabJobs
         )
     }
 }

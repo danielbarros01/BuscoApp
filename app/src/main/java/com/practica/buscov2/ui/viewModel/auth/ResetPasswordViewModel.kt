@@ -41,7 +41,7 @@ class ResetPasswordViewModel @Inject constructor(
             isValidPassword(password1) && isValidRepeatedPassword(password1, password2)
     }
 
-    private fun isValidPassword(password: String): Boolean = password.length >= 6;
+    private fun isValidPassword(password: String): Boolean = password.length >= 6
 
     private fun isValidRepeatedPassword(password: String, repeatedPassword: String): Boolean =
         password == repeatedPassword
@@ -54,9 +54,7 @@ class ResetPasswordViewModel @Inject constructor(
                     error = ErrorBusco()
                 }
 
-                val response = repo.changePassword(token, password.value)
-
-                when (response) {
+                when (val response = repo.changePassword(token, password.value)) {
                     is Boolean -> {
                         if (response) {
                             withContext(Dispatchers.Main) {

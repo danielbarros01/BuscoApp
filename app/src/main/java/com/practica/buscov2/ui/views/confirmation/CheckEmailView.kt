@@ -47,6 +47,7 @@ import com.practica.buscov2.ui.theme.GrayText
 import com.practica.buscov2.ui.viewModel.LoadingViewModel
 import com.practica.buscov2.ui.viewModel.confirmation.CheckEmailViewModel
 import com.practica.buscov2.ui.viewModel.auth.TokenViewModel
+import java.util.Locale
 import java.util.concurrent.TimeUnit
 
 @Composable
@@ -185,7 +186,7 @@ fun CheckEmail(
 
             Space(size = 5.dp)
 
-            Text(text = if (remainingTime != null) FormatTime(remainingTime!!) else "00:00")
+            Text(text = if (remainingTime != null) formatTime(remainingTime!!) else "00:00")
 
             Space(size = 5.dp)
 
@@ -243,13 +244,13 @@ fun CheckEmail(
 
 
 @Composable
-fun FormatTime(timeMi: Long): String {
+fun formatTime(timeMi: Long): String {
     val totalSeconds = TimeUnit.MILLISECONDS.toSeconds(timeMi).toInt()
 
     val minutes = totalSeconds / 60
     val remainingSeconds = totalSeconds % 60
 
-    return String.format("%02d:%02d", minutes, remainingSeconds)
+    return String.format(Locale.getDefault(), "%02d:%02d", minutes, remainingSeconds)
 }
 
 @Composable

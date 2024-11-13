@@ -26,17 +26,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.google.gson.Gson
 import com.practica.buscov2.R
 import com.practica.buscov2.model.busco.User
 import com.practica.buscov2.navigation.RoutesBottom
@@ -44,9 +41,7 @@ import com.practica.buscov2.navigation.RoutesDrawer
 import com.practica.buscov2.ui.theme.GrayField
 import com.practica.buscov2.ui.theme.GrayText
 import com.practica.buscov2.ui.theme.OrangePrincipal
-import com.practica.buscov2.ui.viewModel.HomeViewModel
 import com.practica.buscov2.ui.viewModel.auth.GoogleLoginViewModel
-import com.practica.buscov2.ui.viewModel.auth.TokenViewModel
 import com.practica.buscov2.ui.viewModel.users.UserViewModel
 import kotlinx.coroutines.CoroutineScope
 
@@ -195,7 +190,7 @@ fun BottomNav(navHostController: NavHostController, routes: List<RoutesBottom>) 
                 .fillMaxHeight()
                 .padding(horizontal = 35.dp)
         ) {
-            val currentRoute = CurrentRoute(navHostController)
+            val currentRoute = currentRoute(navHostController)
 
             routes.forEach { item ->
                 NavigationBarItem(
@@ -232,7 +227,7 @@ fun BottomNav(navHostController: NavHostController, routes: List<RoutesBottom>) 
 }
 
 @Composable
-fun CurrentRoute(navHostController: NavHostController): String? {
+fun currentRoute(navHostController: NavHostController): String? {
     val current by navHostController.currentBackStackEntryAsState()
     return current?.destination?.route //ruta actual
 }

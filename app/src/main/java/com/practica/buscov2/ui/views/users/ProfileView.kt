@@ -18,8 +18,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -130,8 +132,8 @@ fun ProfileView(
                         fetchedUserProfile.latitude?.let { latitude ->
                             fetchedUserProfile.longitude?.let { longitude ->
                                 searchMapVM.getLocation(latitude, longitude) { address ->
-                                    address?.let {
-                                        searchMapVM.setAddress(it.formatted_address)
+                                    address?.let {results ->
+                                        searchMapVM.setAddress(results.formatted_address)
                                     }
                                 }
                             }
@@ -148,8 +150,8 @@ fun ProfileView(
                     user.latitude?.let { latitude ->
                         user.longitude?.let { longitude ->
                             searchMapVM.getLocation(latitude, longitude) { address ->
-                                address?.let {
-                                    searchMapVM.setAddress(it.formatted_address)
+                                address?.let {results ->
+                                    searchMapVM.setAddress(results.formatted_address)
                                 }
                             }
                         }
@@ -543,6 +545,7 @@ fun Information(mapVM: SearchMapViewModel, user: User) {
         modifier = Modifier
             .fillMaxSize()
             .padding(vertical = 15.dp)
+            .verticalScroll(rememberScrollState())
     ) {
         //Datos ubicacion
         ElementRowInformation(
@@ -585,7 +588,7 @@ fun ElementRowInformation(
         if (imageId != null) {
             Image(
                 painter = painterResource(id = imageId),
-                contentDescription = "Bandera",
+                contentDescription = "Icono",
                 modifier = Modifier.size(36.dp)
             )
         }
@@ -695,7 +698,10 @@ fun TopBarProfile(navController: NavHostController, user: User, userProfile: Use
                 ButtonWithIcon(
                     iconId = R.drawable.edit,
                     text = "Editar",
-                    modifier = Modifier.padding(horizontal = 15.dp)
+                    modifier = Modifier
+                        .padding(horizontal = 10.dp)
+                        .width(100.dp)
+                        .height(34.dp)
                 ) {
                     navController.navigate("EditProfile")
                 }

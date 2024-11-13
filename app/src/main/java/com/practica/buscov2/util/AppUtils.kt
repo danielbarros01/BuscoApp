@@ -8,7 +8,6 @@ import java.text.DecimalFormatSymbols
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
 import java.time.temporal.ChronoUnit
@@ -17,7 +16,8 @@ import java.util.Locale
 
 class AppUtils {
     companion object {
-        fun stringToLocalDateTime(dateString: String): LocalDateTime? {
+        @RequiresApi(Build.VERSION_CODES.O)
+        private fun stringToLocalDateTime(dateString: String): LocalDateTime? {
             try {
                 //Extrer el string hasta que empiece el punto
                 val dateWithoutMillis = dateString.substringBeforeLast(".")
@@ -37,6 +37,7 @@ class AppUtils {
             return dateOne.compareTo(dateTwo)
         }*/
 
+        @RequiresApi(Build.VERSION_CODES.O)
         fun expiredDate(dateString: String): Boolean {
             val date = stringToLocalDateTime(dateString)
             val dateNow = LocalDateTime.now()
@@ -73,6 +74,8 @@ class AppUtils {
             return try {
                 // Elimina los puntos existentes y convierte el valor a Long.
                 val number = value.replace(".", "").toLong()
+                //HAY UN PUNTO AL FINAL QUE NO VA
+
                 // Crea un formato decimal que usa puntos como separadores de miles.
                 val decimalFormat = DecimalFormat("#,###", DecimalFormatSymbols(Locale.GERMAN))
                 // Formatea el número y lo devuelve como String.
@@ -109,6 +112,7 @@ class AppUtils {
          * */
 
 
+        @RequiresApi(Build.VERSION_CODES.O)
         fun formatDateCard(inputDate: String): String {
             //Parseo de string a fecha
             val localDate = LocalDate.parse(inputDate.substring(0, 10))
@@ -118,6 +122,7 @@ class AppUtils {
             return localDate.format(formatter)
         }
 
+        @RequiresApi(Build.VERSION_CODES.O)
         fun daysAgo(dateString: String): Long {
             if (dateString.isEmpty()) {
                 return 0
@@ -129,6 +134,7 @@ class AppUtils {
             return ChronoUnit.DAYS.between(givenDate, currentDate)
         }
 
+        @RequiresApi(Build.VERSION_CODES.O)
         fun formatHours(dateString: String): String {
             return try {
                 val dateWithoutMillis = dateString.substringBeforeLast(".")

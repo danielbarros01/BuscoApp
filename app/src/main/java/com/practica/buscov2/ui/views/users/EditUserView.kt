@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -49,11 +48,9 @@ import com.practica.buscov2.ui.components.AlertShowPicture
 import com.practica.buscov2.ui.components.AlertSuccess
 import com.practica.buscov2.ui.components.ButtonBack
 import com.practica.buscov2.ui.components.ButtonPrincipal
-import com.practica.buscov2.ui.components.ButtonTransparent
 import com.practica.buscov2.ui.components.ClickableText
 import com.practica.buscov2.ui.components.CommonField
 import com.practica.buscov2.ui.components.InsertCirlceProfileEditImage
-import com.practica.buscov2.ui.components.LinkText
 import com.practica.buscov2.ui.components.LoaderMaxSize
 import com.practica.buscov2.ui.components.Space
 import com.practica.buscov2.ui.theme.GrayText
@@ -92,12 +89,12 @@ fun EditUserView(
         token?.let {
             vmUser.getMyProfile(it.token, {
                 navController.navigate("Login")
-            }) {
-                it.latitude?.let { latitude ->
-                    it.longitude?.let { longitude ->
+            }) {user ->
+                user.latitude?.let { latitude ->
+                    user.longitude?.let { longitude ->
                         searchMapVM.getLocation(latitude, longitude) { address ->
-                            address?.let {
-                                searchMapVM.setAddress(it.formatted_address)
+                            address?.let {results ->
+                                searchMapVM.setAddress(results.formatted_address)
                             }
                         }
 
@@ -248,7 +245,7 @@ fun EditUser(
     // Configure date picker limits
     LaunchedEffect(stateDataPicker.selectedDateMillis) {
         stateDataPicker.selectedDateMillis?.let { dateMillis ->
-            ConfigMinAndMaxDate(
+            configMinAndMaxDate(
                 viewModel = vmCompleteData,
                 dateMillis = dateMillis,
                 selectedDateMillis = selectedDateMillis,

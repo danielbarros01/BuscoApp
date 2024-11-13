@@ -54,7 +54,6 @@ import androidx.navigation.NavHostController
 import com.google.android.gms.maps.model.LatLng
 import com.practica.buscov2.R
 import com.practica.buscov2.data.dataStore.StoreUbication
-import com.practica.buscov2.model.busco.SimpleUbication
 import com.practica.buscov2.model.busco.User
 import com.practica.buscov2.model.busco.auth.LoginToken
 import com.practica.buscov2.navigation.RoutesBottom
@@ -336,7 +335,6 @@ fun TitleNewPublication() {
     )
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun DataProposal(
     vmProfession: ProfessionsViewModel,
@@ -353,7 +351,7 @@ fun DataProposal(
     val priceFrom: String by vmNewPublication.priceStart
     val priceTo: String by vmNewPublication.priceUntil
 
-    Box() {
+    Box {
         SearchField(vmProfession = vmProfession, vmNewPublication = vmNewPublication)
 
         Column(

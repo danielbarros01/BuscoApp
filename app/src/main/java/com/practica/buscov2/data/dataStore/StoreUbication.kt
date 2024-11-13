@@ -36,11 +36,4 @@ class StoreUbication(private val context: Context) {
                 }
             }
     }
-
-    suspend fun clearUbication() {
-        context.dataStore.edit { preferences ->
-            preferences.remove(UBICATION_LAT)
-            preferences.remove(UBICATION_LNG)
-        }
-    }
 }

@@ -1,11 +1,7 @@
 package com.practica.buscov2.ui.viewModel.proposals
 
-import android.content.Context
-import android.net.Uri
 import android.util.Log
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -13,11 +9,8 @@ import com.practica.buscov2.data.repository.busco.ProposalsRepository
 import com.practica.buscov2.model.busco.Proposal
 import com.practica.buscov2.model.busco.User
 import com.practica.buscov2.model.busco.auth.ErrorBusco
-import com.practica.buscov2.util.FilesUtils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -101,58 +94,6 @@ class ProposalViewModel @Inject constructor(
             try {
                 val response = withContext(Dispatchers.IO) {
                     repo.finalizeProposal(token, id)
-                }
-
-                when (response) {
-                    is Boolean -> {
-                        if (response) {
-                            onSuccess()
-                        }
-                    }
-
-                    is ErrorBusco -> {
-                        _error.value = response
-                        onError()
-                    }
-                }
-            } catch (e: Exception) {
-                Log.e("Error", e.message.toString())
-                _error.value = ErrorBusco(
-                    title = "Error",
-                    message = "Ha ocurrido un error inesperado, intentalo de nuevo más tarde"
-                )
-                onError()
-            }
-        }
-    }
-
-    fun editProposal(
-        context: Context,
-        uri: Uri,
-        token: String,
-        onError: () -> Unit,
-        onSuccess: () -> Unit
-    ) {
-        viewModelScope.launch {
-            try {
-                var uriModified: Uri? = uri
-
-                /**Esto es porque si tiene http, la imagen no se modifico
-                 * Es la que ya venia del servidor, por eso no hay que volver a enviarla y
-                 * el valor es nulo*/
-                if (uri.toString().contains("http")) {
-                    uriModified = null
-                }
-
-                val filePart =
-                    if (!uriModified?.scheme.isNullOrEmpty() && !uriModified?.path.isNullOrEmpty()) {
-                        FilesUtils.getFilePart(context, uri, "image")
-                    } else {
-                        null
-                    }
-
-                val response = withContext(Dispatchers.IO) {
-                    proposal.value?.let { repo.editProposal(it, filePart, token) }
                 }
 
                 when (response) {

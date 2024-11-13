@@ -7,7 +7,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.practica.buscov2.data.repository.busco.ProfessionsRepository
 import com.practica.buscov2.model.busco.Profession
-import com.practica.buscov2.model.busco.auth.ErrorBusco
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

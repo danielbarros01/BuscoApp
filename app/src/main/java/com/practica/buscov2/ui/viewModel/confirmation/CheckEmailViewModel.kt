@@ -44,7 +44,7 @@ class CheckEmailViewModel @Inject constructor(
 
     //crear la lista de dígitos y luego inicialízala con cuatro ceros (List(4) { 0 }).
     private val _digits = mutableStateListOf<Int?>().apply { addAll(List(4) { null }) }
-    val digits: List<Int?> get() = _digits
+    private val digits: List<Int?> get() = _digits
 
 
     // Obtener la representación en cadena de `digits`
@@ -78,11 +78,6 @@ class CheckEmailViewModel @Inject constructor(
         }.start()
     }
 
-    fun stopTimer() {
-        _timer.value?.cancel()
-        _timer.value = null
-    }
-
     fun validateCode(
         resend: Boolean = true,
         token: String = "",
@@ -93,10 +88,8 @@ class CheckEmailViewModel @Inject constructor(
     ) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                val response = repo.confirmCode(resend, token, code.toInt(), email)
-
                 //Si no se pudo confirmar la cuenta
-                when (response) {
+                when (val response = repo.confirmCode(resend, token, code.toInt(), email)) {
                     is Boolean -> {
                         if (response) { // si este Boolean es true:
                             withContext(Dispatchers.Main) {

@@ -1,6 +1,5 @@
 package com.practica.buscov2.ui.viewModel.proposals
 
-import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -16,13 +15,9 @@ import androidx.paging.cachedIn
 import com.practica.buscov2.data.pagination.ProposalsDataSource
 import com.practica.buscov2.data.repository.busco.ProposalsRepository
 import com.practica.buscov2.model.busco.auth.ErrorBusco
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 /*
 * _refreshTrigger: Un MutableStateFlow que actúa como disparador para la recarga.

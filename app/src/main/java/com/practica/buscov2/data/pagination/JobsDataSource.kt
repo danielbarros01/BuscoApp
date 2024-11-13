@@ -3,7 +3,6 @@ package com.practica.buscov2.data.pagination
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.practica.buscov2.data.repository.busco.JobsRepository
-import com.practica.buscov2.data.repository.busco.ProposalsRepository
 import com.practica.buscov2.model.busco.Proposal
 
 class JobsDataSource(
@@ -29,7 +28,7 @@ class JobsDataSource(
     }
 
     // Trae más datos cuando se requiere una nueva página
-    override suspend fun load(params: PagingSource.LoadParams<Int>): PagingSource.LoadResult<Int, Proposal> {
+    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Proposal> {
         return try {
             // Obtiene el número de la siguiente página o comienza con la página 1 si es nulo
             val nextPageNumber = params.key ?: 1
@@ -49,13 +48,13 @@ class JobsDataSource(
                 )
             }
             // Devuelve los resultados cargados en una página
-            PagingSource.LoadResult.Page(
+            LoadResult.Page(
                 data = response, // Datos de la respuesta
                 prevKey = null, //Sin pagina anterior
                 nextKey = if (response.isEmpty()) null else nextPageNumber + 1 // Determina la siguiente clave
             )
         } catch (e: Exception) {
-            PagingSource.LoadResult.Error(e)
+            LoadResult.Error(e)
         }
     }
 }

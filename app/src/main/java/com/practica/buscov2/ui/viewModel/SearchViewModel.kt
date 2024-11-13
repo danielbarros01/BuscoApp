@@ -9,15 +9,12 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
 import com.google.android.gms.maps.model.LatLng
-import com.practica.buscov2.data.pagination.JobsDataSource
 import com.practica.buscov2.data.pagination.ProposalsDataSource
 import com.practica.buscov2.data.pagination.SearchDataSource
 import com.practica.buscov2.data.repository.busco.ProfessionsRepository
 import com.practica.buscov2.data.repository.busco.ProposalsRepository
 import com.practica.buscov2.data.repository.busco.WorkersRepository
 import com.practica.buscov2.model.busco.ProfessionCategory
-import com.practica.buscov2.model.busco.SimpleUbication
-import com.practica.buscov2.model.busco.auth.ErrorBusco
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -25,7 +22,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.util.Locale.Category
 import javax.inject.Inject
 
 @HiltViewModel
@@ -45,15 +41,13 @@ class SearchViewModel @Inject constructor(
     var ubication: State<LatLng?> = _ubication
 
     private val _category = mutableStateOf<ProfessionCategory?>(null)
-    var category: State<ProfessionCategory?> = _category
+    private var category: State<ProfessionCategory?> = _category
 
     private val _stars = mutableStateOf<Int?>(null)
-    var stars: State<Int?> = _stars
+    private var stars: State<Int?> = _stars
 
     private val _categories = mutableStateOf<List<ProfessionCategory>>(emptyList())
     var categories: State<List<ProfessionCategory>> = _categories
-
-    private val _refreshTrigger = MutableStateFlow(0)
 
     private val _refreshTriggerWorkers = MutableStateFlow(0)
     private val _refreshTriggerProposals = MutableStateFlow(0)

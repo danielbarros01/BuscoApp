@@ -1,9 +1,5 @@
 package com.practica.buscov2.navigation
 
-import android.media.Image
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.ui.graphics.vector.ImageVector
 import com.practica.buscov2.R
 
 sealed class RoutesBottom(
@@ -12,9 +8,9 @@ sealed class RoutesBottom(
     val title: String,
     val route: String
 ) {
-    object Home : RoutesBottom(R.drawable.home, R.drawable.home_fill, "Inicio", "Home")
-    object New : RoutesBottom(R.drawable.add, R.drawable.add_fill, "Nueva Publicacion", "New")
-    object Chat : RoutesBottom(R.drawable.message, R.drawable.message_fill, "Chat", "Chat")
+    data object Home : RoutesBottom(R.drawable.home, R.drawable.home_fill, "Inicio", "Home")
+    data object New : RoutesBottom(R.drawable.add, R.drawable.add_fill, "Nueva Publicacion", "New")
+    data object Chat : RoutesBottom(R.drawable.message, R.drawable.message_fill, "Chat", "Chat")
 
     companion object {
         val allRoutes: List<RoutesBottom> = listOf(Home, New, Chat)

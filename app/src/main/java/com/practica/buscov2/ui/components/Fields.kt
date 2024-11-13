@@ -26,7 +26,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -64,7 +63,6 @@ fun CommonField(
     )
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun PasswordField(password: String, onTextFieldChanged: (String) -> Unit) {
     // Creating a variable to store toggle state
@@ -87,7 +85,7 @@ fun PasswordField(password: String, onTextFieldChanged: (String) -> Unit) {
         trailingIcon = {
             val icon =
                 if (passwordVisible) R.drawable.eyeview
-                else R.drawable.eyeblock;
+                else R.drawable.eyeblock
 
             val description = if (passwordVisible) "Ocultar contraseña" else "Mostrar contraseña"
 
@@ -95,7 +93,7 @@ fun PasswordField(password: String, onTextFieldChanged: (String) -> Unit) {
                 Icon(painter = painterResource(id = icon), contentDescription = description)
             }
         }
-    );
+    )
 }
 
 @Composable
@@ -129,7 +127,7 @@ fun DateField(
             }
         },
         enabled = false
-    );
+    )
 }
 
 @Composable
@@ -163,10 +161,10 @@ fun CommonFieldArea(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OptionsField(
+    modifier: Modifier? = Modifier,
     options: List<String>,
     text: String,
     enabled: Boolean = true,
-    modifier: Modifier? = Modifier,
     onChanged: (String) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }

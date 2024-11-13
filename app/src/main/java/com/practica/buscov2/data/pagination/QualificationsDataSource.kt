@@ -24,7 +24,7 @@ class QualificationsDataSource(
         }
     }
 
-    override suspend fun load(params: PagingSource.LoadParams<Int>): PagingSource.LoadResult<Int, Qualification> {
+    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Qualification> {
         return try {
             val nextPageNumber = params.key ?: 1
             val response = repo.getQualifications(
@@ -39,16 +39,16 @@ class QualificationsDataSource(
                 viewModel.updateAverageAndQuantity(response.average ?: 0f, response.quantity ?: 0)
                 viewModel.updateRatingFrequencies(response.ratingFrequencies)
 
-                PagingSource.LoadResult.Page(
+                LoadResult.Page(
                     data = response.qualifications, // Datos de la respuesta
                     prevKey = null, // Sin página anterior
                     nextKey = if (response.qualifications.isEmpty()) null else nextPageNumber + 1 // Determina la siguiente clave
                 )
             } else {
-                PagingSource.LoadResult.Error(Exception("Empty response"))
+                LoadResult.Error(Exception("Empty response"))
             }
         } catch (e: Exception) {
-            PagingSource.LoadResult.Error(e)
+            LoadResult.Error(e)
         }
     }
 }

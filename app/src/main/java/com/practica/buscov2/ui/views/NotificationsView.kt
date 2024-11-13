@@ -29,7 +29,6 @@ import com.practica.buscov2.ui.components.TopBar
 import com.practica.buscov2.ui.theme.GrayText
 import com.practica.buscov2.ui.viewModel.NotificationsViewModel
 import com.practica.buscov2.ui.viewModel.auth.GoogleLoginViewModel
-import com.practica.buscov2.ui.viewModel.auth.TokenViewModel
 import com.practica.buscov2.ui.viewModel.users.UserViewModel
 
 @Composable
@@ -87,7 +86,7 @@ fun NotificationsV(
             },
             topBar = {
                 TopBar(title = "Notificaciones", scope = scope, drawerState = drawerState)
-            }) { it ->
+            }) {
             Column(
                 modifier = modifier
                     .padding(it)

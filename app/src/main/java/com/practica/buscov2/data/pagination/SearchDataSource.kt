@@ -4,7 +4,6 @@ import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.google.android.gms.maps.model.LatLng
 import com.practica.buscov2.data.repository.busco.WorkersRepository
-import com.practica.buscov2.model.busco.User
 import com.practica.buscov2.model.busco.Worker
 
 class SearchDataSource(
@@ -28,7 +27,7 @@ class SearchDataSource(
         }
     }
 
-    override suspend fun load(params: PagingSource.LoadParams<Int>): PagingSource.LoadResult<Int, Worker> {
+    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Worker> {
         return try {
             val nextPageNumber = params.key ?: 1
             val response = repo.searchWorkers(
@@ -42,13 +41,13 @@ class SearchDataSource(
                 lng = ubication?.longitude
             )
 
-            PagingSource.LoadResult.Page(
+            LoadResult.Page(
                 data = response,
                 prevKey = null,
                 nextKey = if (response.isEmpty()) null else nextPageNumber + 1
             )
         } catch (e: Exception) {
-            PagingSource.LoadResult.Error(e)
+            LoadResult.Error(e)
         }
     }
 }

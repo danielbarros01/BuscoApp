@@ -3,10 +3,7 @@ package com.practica.buscov2.data.pagination
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.google.android.gms.maps.model.LatLng
-import com.practica.buscov2.data.repository.busco.ProposalsRepository
 import com.practica.buscov2.data.repository.busco.WorkersRepository
-import com.practica.buscov2.model.busco.Proposal
-import com.practica.buscov2.model.busco.User
 import com.practica.buscov2.model.busco.Worker
 
 class UsersDataSource (

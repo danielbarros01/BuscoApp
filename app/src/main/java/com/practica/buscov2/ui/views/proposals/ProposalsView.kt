@@ -1,18 +1,16 @@
 package com.practica.buscov2.ui.views.proposals
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
@@ -33,7 +31,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
-import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.practica.buscov2.model.busco.Proposal
@@ -42,7 +39,6 @@ import com.practica.buscov2.navigation.ItemTabProposal
 import com.practica.buscov2.navigation.RoutesBottom
 import com.practica.buscov2.ui.components.BottomNav
 import com.practica.buscov2.ui.components.CardProposal
-import com.practica.buscov2.ui.components.CardWorkerRecommendation
 import com.practica.buscov2.ui.components.ItemsInLazy
 import com.practica.buscov2.ui.components.LateralMenu
 import com.practica.buscov2.ui.components.LoaderMaxSize
@@ -58,7 +54,6 @@ import com.practica.buscov2.ui.viewModel.users.UserViewModel
 import com.practica.buscov2.ui.viewModel.proposals.ProposalsViewModel
 import com.practica.buscov2.ui.views.util.ActiveLoader.Companion.activeLoaderMax
 import com.practica.buscov2.util.AppUtils.Companion.formatDateCard
-import com.practica.buscov2.util.AppUtils.Companion.formatNumber
 import kotlinx.coroutines.launch
 
 @Composable
@@ -75,7 +70,7 @@ fun ProposalsView(
 
     //Ejecuto una unica vez
     LaunchedEffect(Unit) {
-        token?.let { it ->
+        token?.let {
             vmUser.getMyProfile(it.token, {
                 navController.navigate("Login")
             }) { user ->
@@ -175,6 +170,7 @@ fun ActiveProposals(
 }
 
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ShowProposals(proposalsPage: LazyPagingItems<Proposal>, navController: NavController) {
     ItemsInLazy(proposalsPage) { item ->

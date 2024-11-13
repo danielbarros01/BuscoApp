@@ -4,7 +4,6 @@ import android.util.Log
 import com.practica.buscov2.data.ApiBusco
 import com.practica.buscov2.model.busco.Profession
 import com.practica.buscov2.model.busco.ProfessionCategory
-import com.practica.buscov2.model.busco.Worker
 import javax.inject.Inject
 
 class ProfessionsRepository @Inject constructor(private val api: ApiBusco) {
@@ -52,20 +51,4 @@ class ProfessionsRepository @Inject constructor(private val api: ApiBusco) {
 
         return null
     }
-
-    suspend fun getWorker(id: Int): Worker? {
-        try {
-            val response = api.getWorker(id)
-
-            if(response.isSuccessful){
-                return response.body()
-            }
-
-            return null
-        } catch (e: Exception) {
-            Log.e("Error", e.message.toString())
-            return null;
-        }
-    }
-
 }

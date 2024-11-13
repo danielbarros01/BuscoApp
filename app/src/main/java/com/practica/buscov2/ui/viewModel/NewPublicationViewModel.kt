@@ -11,7 +11,6 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.maps.model.LatLng
-import com.practica.buscov2.data.repository.busco.ProfessionsRepository
 import com.practica.buscov2.data.repository.busco.ProposalsRepository
 import com.practica.buscov2.model.busco.Profession
 import com.practica.buscov2.model.busco.Proposal
@@ -86,21 +85,32 @@ class NewPublicationViewModel @Inject constructor(
         val maxLimit = 1000000
 
         // Intentar convertir 'from' a Double y manejar posibles excepciones
-       val fromValue = try {
-            from.toDoubleOrNull()
+        var fromValue = try {
+            from.replace(".", "").toIntOrNull()
         } catch (e: NumberFormatException) {
             null
-        } ?: 0.0
+        } ?: 0
 
         // Intentar convertir 'to' a Double y manejar posibles excepciones
-        val toValue = try {
-            to.toDoubleOrNull()
+        var toValue = try {
+            to.replace(".", "").toIntOrNull()
         } catch (e: NumberFormatException) {
             null
-        } ?: 0.0
+        } ?: 0
 
-        _priceStart.value = if (fromValue > maxLimit) maxLimit.toString() else from
-        _priceUntil.value = if (toValue > maxLimit) maxLimit.toString() else to
+        if (fromValue > maxLimit) {
+            _priceStart.value = maxLimit.toString()
+            fromValue = maxLimit
+        } else {
+            _priceStart.value = from
+        }
+
+        if (toValue > maxLimit) {
+            _priceUntil.value = maxLimit.toString()
+            toValue = maxLimit
+        } else {
+            _priceUntil.value = to
+        }
 
         proposal = proposal.copy(minBudget = fromValue, maxBudget = toValue)
 
@@ -114,7 +124,7 @@ class NewPublicationViewModel @Inject constructor(
     }
 
     fun setImage(uri: Uri?) {
-        if(uri == null) return
+        if (uri == null) return
 
         val fullImageUrl = "$ESQ_HOST${uri.path}"
         _image.value = Uri.parse(fullImageUrl)
@@ -164,7 +174,7 @@ class NewPublicationViewModel @Inject constructor(
 
                 when (response) {
                     is ResponseCreatedId -> {
-                       onSuccess(response.id)
+                        onSuccess(response.id)
                     }
 
                     is ErrorBusco -> {

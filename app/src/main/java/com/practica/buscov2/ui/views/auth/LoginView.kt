@@ -164,7 +164,7 @@ fun Login(
         Space(8.dp)
         PasswordField(password) { viewModel.onLoginChanged(email, it) }
         Space(4.dp)
-        ForgotPassword() {
+        ForgotPassword {
             navController.navigate("RecoverPassword")
         }
         Space(16.dp)

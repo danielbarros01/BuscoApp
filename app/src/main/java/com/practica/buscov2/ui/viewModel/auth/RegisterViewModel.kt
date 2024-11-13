@@ -66,9 +66,9 @@ class RegisterViewModel @Inject constructor(
     private fun isValidUsername(username: String): Boolean = username.length >= 4
 
     private fun isValidEmail(email: String): Boolean =
-        Patterns.EMAIL_ADDRESS.matcher(email).matches();
+        Patterns.EMAIL_ADDRESS.matcher(email).matches()
 
-    private fun isValidPassword(password: String): Boolean = password.length >= 6;
+    private fun isValidPassword(password: String): Boolean = password.length >= 6
 
     private fun isValidRepeatedPassword(password: String, repeatedPassword: String): Boolean =
         password == repeatedPassword

@@ -8,14 +8,11 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
 import com.practica.buscov2.data.pagination.JobsDataSource
-import com.practica.buscov2.data.pagination.ProposalsDataSource
 import com.practica.buscov2.data.repository.busco.JobsRepository
-import com.practica.buscov2.data.repository.busco.ProposalsRepository
 import com.practica.buscov2.model.busco.auth.ErrorBusco
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import javax.inject.Inject
 

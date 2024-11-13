@@ -14,7 +14,7 @@ sealed class ItemTabOnlyProposal(
     override var icon: Int? = null,
     var screen: @Composable (Proposal, Application?, User?, NavController?, SearchMapViewModel) -> Unit
 ) : TabItem {
-    object tab_description : ItemTabOnlyProposal(
+    data object TabDescription : ItemTabOnlyProposal(
         title = "Descripción",
         screen = { proposal, application, user, navController, searchMapVM ->
             ProposalDescription(
@@ -25,7 +25,7 @@ sealed class ItemTabOnlyProposal(
         }
     )
 
-    object tab_moreinfo : ItemTabOnlyProposal(
+    data object TabMoreInfo : ItemTabOnlyProposal(
         title = "Más info",
         screen = { proposal, application, user, navController, searchMapVM ->
             ProposalMoreInfo(
@@ -40,8 +40,8 @@ sealed class ItemTabOnlyProposal(
 
     companion object {
         val pagesProposal: List<ItemTabOnlyProposal> = listOf(
-            tab_description,
-            tab_moreinfo
+            TabDescription,
+            TabMoreInfo
         )
     }
 }

@@ -50,9 +50,9 @@ class LoginViewModel @Inject constructor(
     }
 
     private fun isValidEmail(email: String): Boolean =
-        Patterns.EMAIL_ADDRESS.matcher(email).matches();
+        Patterns.EMAIL_ADDRESS.matcher(email).matches()
 
-    private fun isValidPassword(password: String): Boolean = password.length >= 6;
+    private fun isValidPassword(password: String): Boolean = password.length >= 6
 
     fun login(onError: () -> Unit, onSuccess: (String) -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {

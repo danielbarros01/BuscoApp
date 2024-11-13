@@ -18,20 +18,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
-import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.practica.buscov2.model.busco.Proposal
 import com.practica.buscov2.model.busco.User
 import com.practica.buscov2.navigation.ItemTabJob
-import com.practica.buscov2.navigation.ItemTabProposal
 import com.practica.buscov2.navigation.RoutesBottom
 import com.practica.buscov2.ui.components.BottomNav
 import com.practica.buscov2.ui.components.CardJob
-import com.practica.buscov2.ui.components.CardProposal
 import com.practica.buscov2.ui.components.ItemsInLazy
 import com.practica.buscov2.ui.components.LateralMenu
 import com.practica.buscov2.ui.components.LoaderMaxSize
@@ -62,7 +58,7 @@ fun JobsView(
 
     //Ejecuto una unica vez
     LaunchedEffect(Unit) {
-        token?.let { it ->
+        token?.let {
             vmUser.getMyProfile(it.token, {
                 navController.navigate("Login")
             }) { user ->

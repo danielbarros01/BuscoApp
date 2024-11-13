@@ -69,8 +69,8 @@ dependencies {
     kapt("com.google.dagger:hilt-compiler:2.46.1")
 
     //Navigation
-    val nav_version = "2.6.0"
-    implementation("androidx.navigation:navigation-compose:$nav_version")
+    val navVersion = "2.6.0"
+    implementation("androidx.navigation:navigation-compose:$navVersion")
 
     // Retrofit
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
@@ -98,20 +98,20 @@ dependencies {
 
     //Camara
     // CameraX core library using the camera2 implementation
-    val camerax_version = "1.4.0-beta02"
-    implementation("androidx.camera:camera-camera2:${camerax_version}")
-    implementation("androidx.camera:camera-lifecycle:${camerax_version}")
-    implementation("androidx.camera:camera-view:${camerax_version}")
+    val cameraxVersion = "1.4.0-beta02"
+    implementation("androidx.camera:camera-camera2:${cameraxVersion}")
+    implementation("androidx.camera:camera-lifecycle:${cameraxVersion}")
+    implementation("androidx.camera:camera-view:${cameraxVersion}")
 
     //paging
-    val paging_version = "3.3.0"
-    implementation("androidx.paging:paging-runtime:$paging_version")
-    implementation("androidx.paging:paging-compose:$paging_version")
+    val pagingVersion = "3.3.0"
+    implementation("androidx.paging:paging-runtime:$pagingVersion")
+    implementation("androidx.paging:paging-compose:$pagingVersion")
 
     implementation("com.microsoft.signalr:signalr:8.0.7")
 
-    val work_version = "2.9.0"
-    implementation("androidx.work:work-runtime:$work_version")
+    val workVersion = "2.9.0"
+    implementation("androidx.work:work-runtime:$workVersion")
 
     //Maps
     implementation("com.google.maps.android:maps-compose:4.3.3")

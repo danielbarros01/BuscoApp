@@ -1,5 +1,7 @@
 package com.practica.buscov2.ui.components
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -7,8 +9,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,11 +17,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -30,7 +26,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -42,22 +37,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.zIndex
-import androidx.core.app.NotificationCompat
 import com.practica.buscov2.R
 import com.practica.buscov2.model.busco.Application
 import com.practica.buscov2.model.busco.Chat
 import com.practica.buscov2.model.busco.Notification
-import com.practica.buscov2.model.busco.Profession
 import com.practica.buscov2.model.busco.Proposal
 import com.practica.buscov2.model.busco.Qualification
 import com.practica.buscov2.model.busco.User
@@ -68,11 +58,11 @@ import com.practica.buscov2.ui.theme.GrayText
 import com.practica.buscov2.ui.theme.GreenBusco
 import com.practica.buscov2.ui.theme.OrangePrincipal
 import com.practica.buscov2.ui.theme.RedBusco
-import com.practica.buscov2.ui.theme.Rubik
 import com.practica.buscov2.ui.theme.YellowGold
 import com.practica.buscov2.ui.theme.YellowStar
 import com.practica.buscov2.util.AppUtils
 import com.practica.buscov2.util.AppUtils.Companion.daysAgo
+import com.practica.buscov2.util.AppUtils.Companion.formatNumber
 
 @Composable
 fun CardProposal(
@@ -80,7 +70,7 @@ fun CardProposal(
     title: String,
     price: String,
     date: String,
-    modifier: Modifier? = null,
+    modifier: Modifier? = Modifier,
     onClick: () -> Unit
 ) {
     val modifierDefault = Modifier
@@ -140,6 +130,7 @@ fun CardProposal(
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun CardProposalWithButton(
     proposal: Proposal,
@@ -176,6 +167,7 @@ fun CardProposalWithButton(
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun CardJob(
     proposal: Proposal,
@@ -307,7 +299,7 @@ fun CardWorkerRecommendation(
                     modifier = Modifier.size(100.dp),
                     onClick = onClick
                 )
-                Box() {
+                Box {
                     Text(
                         text = "$qualification% calificación",
                         fontSize = 15.sp,
@@ -443,7 +435,7 @@ fun CardProposalRecommendation(
                     )
                 }
                 Text(
-                    text = " $${proposal.minBudget} a $${proposal.maxBudget}",
+                    text = " $${formatNumber(proposal.minBudget.toString())} a $${formatNumber(proposal.maxBudget.toString())}",
                     color = Color.White,
                     textAlign = TextAlign.End,
                     modifier = Modifier
@@ -617,6 +609,7 @@ fun CardWorker(
 }
 
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun CardQualificationOfUser(user: User, qualification: Qualification) {
     Column(
@@ -683,6 +676,7 @@ fun CardJobCompleted(proposal: Proposal, onClick: () -> Unit = {}) {
 }
 
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun CardChatUser(chat: Chat, onClick: (Chat) -> Unit) {
     Box(
@@ -743,6 +737,7 @@ fun CardChatUser(chat: Chat, onClick: (Chat) -> Unit) {
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun CardNotification(notification: Notification, onClick: () -> Unit) {
     Column(

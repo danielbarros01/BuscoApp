@@ -9,18 +9,14 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
 import com.practica.buscov2.data.pagination.ApplicationsDataSource
-import com.practica.buscov2.data.pagination.ProposalsDataSource
 import com.practica.buscov2.data.repository.busco.ApplicationsRepository
-import com.practica.buscov2.data.repository.busco.ProposalsRepository
 import com.practica.buscov2.model.busco.Application
-import com.practica.buscov2.model.busco.Proposal
 import com.practica.buscov2.model.busco.Worker
 import com.practica.buscov2.model.busco.auth.ErrorBusco
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -40,9 +36,6 @@ class ApplicationsViewModel @Inject constructor(
 
     private val _token = MutableStateFlow<String?>(null)
     private val token = _token
-
-    private val _applicants = mutableStateOf<List<Application>>(emptyList())
-    val applicants: State<List<Application>> = _applicants
 
     private val _applicant = mutableStateOf<Application?>(null)
     val applicant: State<Application?> = _applicant

@@ -24,8 +24,7 @@ class SearchMapViewModel @Inject constructor() : ViewModel() {
     var lat by mutableDoubleStateOf(-31.37023520656901)
         private set
 
-    var long by mutableDoubleStateOf(-64.23292894961696)
-        private set
+    private var long by mutableDoubleStateOf(-64.23292894961696)
 
     private val _placeCoordinates = mutableStateOf(LatLng(lat, long))
     var placeCoordinates: State<LatLng> = _placeCoordinates
@@ -33,10 +32,9 @@ class SearchMapViewModel @Inject constructor() : ViewModel() {
     private val _address = mutableStateOf("")
     var address: State<String> = _address
 
-    var show by mutableStateOf(false)
-        private set
+    private var show by mutableStateOf(false)
 
-    private val _places = mutableStateOf<MapResult>(MapResult(results = listOf()))
+    private val _places = mutableStateOf(MapResult(results = listOf()))
     var places: State<MapResult> = _places
 
     fun getLocation(value: String) {

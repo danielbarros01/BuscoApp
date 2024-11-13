@@ -2,9 +2,6 @@ package com.practica.buscov2.ui.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.text.BasicText
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -15,14 +12,12 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.practica.buscov2.ui.theme.BlueLink
 import com.practica.buscov2.ui.theme.GrayText
-import com.practica.buscov2.ui.theme.OrangePrincipal
 
 @Composable
 fun Title(
@@ -73,6 +68,6 @@ fun LinkText(link: String) {
                     uriHandler.openUri(annotation.item)
                 }
         },
-        style = androidx.compose.ui.text.TextStyle(fontSize = 16.sp)
+        style = TextStyle(fontSize = 16.sp)
     )
 }

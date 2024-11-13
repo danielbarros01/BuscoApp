@@ -1,5 +1,7 @@
 package com.practica.buscov2.ui.views
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -28,6 +30,7 @@ import com.practica.buscov2.util.AppUtils
 
 //Decidira a donde debemos ir
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun StartView(
     vmToken: TokenViewModel,

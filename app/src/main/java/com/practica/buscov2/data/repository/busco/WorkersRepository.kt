@@ -1,11 +1,7 @@
 package com.practica.buscov2.data.repository.busco
 
 import android.util.Log
-import com.google.gson.Gson
 import com.practica.buscov2.data.ApiBusco
-import com.practica.buscov2.model.busco.Profession
-import com.practica.buscov2.model.busco.Proposal
-import com.practica.buscov2.model.busco.User
 import com.practica.buscov2.model.busco.Worker
 import com.practica.buscov2.model.busco.auth.ErrorBusco
 import com.practica.buscov2.util.ServerUtils.Companion.gsonError

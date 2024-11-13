@@ -1,6 +1,5 @@
 package com.practica.buscov2.ui.viewModel.chat
 
-import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -10,10 +9,8 @@ import com.microsoft.signalr.HubConnectionBuilder
 import com.practica.buscov2.data.dataStore.StoreToken
 import com.practica.buscov2.model.busco.Chat
 import com.practica.buscov2.model.busco.Message
-import com.practica.buscov2.model.busco.Notification
 import com.practica.buscov2.model.busco.User
 import com.practica.buscov2.model.busco.auth.LoginToken
-import com.practica.buscov2.notifications.NotificationWorker
 import com.practica.buscov2.util.Constants.Companion.BASE_URL_CHAT
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.core.Single
@@ -41,8 +38,8 @@ class ChatViewModel @Inject constructor(
     val messages = _messages
 
     // Configura el listener para el evento "Chats"
-    val chatListType = object : TypeToken<List<Chat>>() {}.type
-    val messageListType = object : TypeToken<List<Message>>() {}.type
+    private val chatListType = object : TypeToken<List<Chat>>() {}.type
+    private val messageListType = object : TypeToken<List<Message>>() {}.type
 
     init {
         observeToken()

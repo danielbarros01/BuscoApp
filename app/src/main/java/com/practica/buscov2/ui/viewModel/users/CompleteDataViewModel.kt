@@ -10,25 +10,17 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.maps.model.LatLng
 import com.practica.buscov2.data.repository.busco.UsersRepository
-import com.practica.buscov2.data.repository.others.GeorefRepository
 import com.practica.buscov2.model.busco.auth.ErrorBusco
 import com.practica.buscov2.model.busco.User
-import com.practica.buscov2.model.georef.Departamento
-import com.practica.buscov2.model.georef.Localidad
-import com.practica.buscov2.model.georef.Provincia
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel
 class CompleteDataViewModel @Inject constructor(
-    private val repo: UsersRepository,
-    private val repoGeoref: GeorefRepository
+    private val repo: UsersRepository
 ) : ViewModel() {
     var user by mutableStateOf(User())
         private set

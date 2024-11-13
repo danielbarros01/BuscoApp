@@ -106,7 +106,7 @@ fun RegisterWorker(
 
             Space(size = 8.dp)
 
-            Row() {
+            Row {
                 ButtonSquareSmall {
                     navController.navigate("Start")
                 }
@@ -212,7 +212,11 @@ fun WorkProfession(vmWorker: RegisterWorkerViewModel) {
 
     Column {
         Text(text = "Cúal es tu profesión?", color = GrayText)
-        OptionsField(professions.map { it.name }, professionSelected, true) {
+        OptionsField(
+            options = professions.map { it.name },
+            text = professionSelected,
+            enabled = true
+        ) {
             vmWorker.onProfessionChange(it)
         }
     }
@@ -225,7 +229,11 @@ fun WorkSector(vmWorker: RegisterWorkerViewModel) {
 
     Column {
         Text(text = "En que sector trabajas?", color = GrayText)
-        OptionsField(categories.map { it.name ?: "" }, categorySelected, true) {
+        OptionsField(
+            options = categories.map { it.name ?: "" },
+            text = categorySelected,
+            enabled = true
+        ) {
             vmWorker.onCategoryChange(it)
             vmWorker.fetchProfessions()
         }

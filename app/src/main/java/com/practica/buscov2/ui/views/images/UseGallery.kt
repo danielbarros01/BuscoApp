@@ -5,7 +5,6 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -15,7 +14,7 @@ import java.io.File
 import java.io.FileOutputStream
 
 
-@OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun SelectImageFromGallery(onGalleryClosed: () -> Unit, onImageSelected: (Uri) -> Unit) {
     val context = LocalContext.current
@@ -33,7 +32,7 @@ fun SelectImageFromGallery(onGalleryClosed: () -> Unit, onImageSelected: (Uri) -
                     val inputStream = context.contentResolver.openInputStream(imageUri)
                     val outputStream = FileOutputStream(file)
                     inputStream?.copyTo(outputStream)
-                }catch (e:Exception){
+                }catch (_:Exception){
 
                 }
 

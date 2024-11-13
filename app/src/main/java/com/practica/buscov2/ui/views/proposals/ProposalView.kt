@@ -92,6 +92,7 @@ import com.practica.buscov2.ui.viewModel.ubication.SearchMapViewModel
 import com.practica.buscov2.ui.viewModel.users.UserViewModel
 import com.practica.buscov2.ui.views.users.ElementRowInformation
 import com.practica.buscov2.util.AppUtils.Companion.convertToIsoDate
+import com.practica.buscov2.util.AppUtils.Companion.formatNumber
 
 @Composable
 fun ProposalView(
@@ -222,8 +223,8 @@ fun ProposalV(
                 it.latitude?.let { latitude ->
                     it.longitude?.let { longitude ->
                         searchMapVM.getLocation(latitude, longitude) { address ->
-                            address?.let {
-                                searchMapVM.setAddress(it.formatted_address)
+                            address?.let {results ->
+                                searchMapVM.setAddress(results.formatted_address)
                             }
                         }
                     }
@@ -266,8 +267,8 @@ fun ProposalV(
                 vmLoading.withLoading {
                     applicationsViewModel.applyToProposal(
                         proposalId,
-                        onError = {
-                            vmProposal.setError(it)
+                        onError = { error ->
+                            vmProposal.setError(error)
                             showError.value = true
                         },
                         onSuccess = {
@@ -490,7 +491,7 @@ fun PriceAndDate(proposal: Proposal) {
                 fontSize = 12.sp
             )
             Text(
-                text = " $${proposal.minBudget.toString()} a $${proposal.maxBudget.toString()}",
+                text = " $${formatNumber(proposal.minBudget.toString())} a $${formatNumber(proposal.maxBudget.toString())}",
                 fontSize = 14.sp, color = GrayField, fontWeight = FontWeight.Medium,
                 modifier = Modifier.offset(y = -(5).dp)
             )

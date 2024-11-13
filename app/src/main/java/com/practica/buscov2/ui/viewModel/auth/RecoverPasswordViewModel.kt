@@ -41,9 +41,7 @@ class RecoverPasswordViewModel @Inject constructor(
     fun sendCode(onError: () -> Unit, onSuccess: () -> Unit) {
         try {
             viewModelScope.launch(Dispatchers.IO) {
-                val response = repo.sendCode(email.value)
-
-                when (response) {
+                when (val response = repo.sendCode(email.value)) {
                     is Boolean -> {
                         if (response) {
                             withContext(Dispatchers.Main) {

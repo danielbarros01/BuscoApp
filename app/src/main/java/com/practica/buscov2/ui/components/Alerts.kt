@@ -39,22 +39,16 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.practica.buscov2.R
-import com.practica.buscov2.model.busco.Application
 import com.practica.buscov2.model.busco.ProfessionCategory
 import com.practica.buscov2.model.busco.Proposal
-import com.practica.buscov2.model.busco.SimpleUbication
 import com.practica.buscov2.model.busco.User
 import com.practica.buscov2.ui.theme.GrayText
 import com.practica.buscov2.ui.theme.GreenBusco
 import com.practica.buscov2.ui.theme.OrangePrincipal
 import com.practica.buscov2.ui.theme.RedBusco
-import com.practica.buscov2.ui.viewModel.users.CompleteDataViewModel
-import com.practica.buscov2.ui.views.users.PageTwo
-import java.util.Locale.Category
 
 @Composable
 fun AlertError(
@@ -442,53 +436,6 @@ fun AlertQualify(
             dismissButton = {
                 ButtonLine(text = "No, gracias") {
                     onDismiss()
-                }
-            })
-    }
-}
-
-@Composable
-fun AlertChangeUbication(
-    showDialog: MutableState<Boolean>,
-    vm: CompleteDataViewModel,
-    onDismiss: () -> Unit = { showDialog.value = false },
-    onChange: (String, String, String, String) -> Unit
-) {
-
-
-    if (showDialog.value) {
-        AlertDialog(
-            title = {
-            },
-            icon = {
-                Icon(
-                    painter = painterResource(id = R.drawable.location),
-                    contentDescription = "",
-                    tint = GreenBusco,
-                    modifier = Modifier.size(110.dp)
-                )
-            },
-            onDismissRequest = { onDismiss() },
-            confirmButton = {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 10.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Box(modifier = Modifier.weight(1f)) {
-                        ButtonLine(text = "Cancelar") {
-                            onDismiss()
-                        }
-                    }
-                    Space(size = 5.dp)
-                    Box(modifier = Modifier.weight(1f)) {
-                        ButtonPrincipal(text = "Cambiar", enabled = true, color = GreenBusco) {
-                            //onChange(country, province, department, city)
-                            showDialog.value = false
-                        }
-                    }
                 }
             })
     }

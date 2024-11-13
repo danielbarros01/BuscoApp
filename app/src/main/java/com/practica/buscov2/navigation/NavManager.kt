@@ -4,7 +4,6 @@ import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -12,7 +11,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.google.gson.Gson
-import com.practica.buscov2.model.busco.Notification
 import com.practica.buscov2.model.busco.User
 import com.practica.buscov2.ui.viewModel.confirmation.CheckEmailViewModel
 import com.practica.buscov2.ui.viewModel.users.CompleteDataViewModel
@@ -40,7 +38,6 @@ import com.practica.buscov2.ui.viewModel.ubication.MapViewModel
 import com.practica.buscov2.ui.viewModel.ubication.SearchMapViewModel
 import com.practica.buscov2.ui.views.ApplicationsView
 import com.practica.buscov2.ui.views.workers.BeWorkerView
-import com.practica.buscov2.ui.views.ChatView
 import com.practica.buscov2.ui.views.ConfigurationView
 import com.practica.buscov2.ui.views.users.EditUserView
 import com.practica.buscov2.ui.views.confirmation.CheckEmailView
@@ -60,7 +57,6 @@ import com.practica.buscov2.ui.views.StartView
 import com.practica.buscov2.ui.views.chat.ChatPrivateScreen
 import com.practica.buscov2.ui.views.chat.ChatScreen
 import com.practica.buscov2.ui.views.maps.MapViewUI
-import com.practica.buscov2.ui.views.proposals.ActiveProposals
 import com.practica.buscov2.ui.views.proposals.ActiveProposalsView
 import com.practica.buscov2.ui.views.proposals.ApplicantsView
 import com.practica.buscov2.ui.views.proposals.EditProposalView

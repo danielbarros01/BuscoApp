@@ -1,13 +1,9 @@
 package com.practica.buscov2.data.repository.busco
 
 import android.util.Log
-import com.google.android.gms.maps.model.LatLng
 import com.practica.buscov2.data.ApiBusco
 import com.practica.buscov2.model.busco.Proposal
-import com.practica.buscov2.model.busco.User
-import com.practica.buscov2.model.busco.Worker
 import com.practica.buscov2.model.busco.auth.ErrorBusco
-import com.practica.buscov2.model.maps.Geolocation
 import com.practica.buscov2.util.ServerUtils
 import kotlinx.coroutines.delay
 import okhttp3.MediaType.Companion.toMediaTypeOrNull

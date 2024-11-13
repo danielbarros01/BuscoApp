@@ -1,6 +1,7 @@
 package com.practica.buscov2.ui.views
 
-import android.graphics.drawable.Icon
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -10,9 +11,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -41,36 +39,30 @@ import com.google.android.gms.maps.model.LatLng
 import com.practica.buscov2.R
 import com.practica.buscov2.data.dataStore.StoreUbication
 import com.practica.buscov2.model.busco.Qualification
-import com.practica.buscov2.model.busco.SimpleUbication
 import com.practica.buscov2.model.busco.User
 import com.practica.buscov2.navigation.RoutesBottom
-import com.practica.buscov2.ui.components.AlertChangeUbication
 import com.practica.buscov2.ui.components.AlertFilters
 import com.practica.buscov2.ui.components.BottomNav
 import com.practica.buscov2.ui.components.ButtonUbication
-import com.practica.buscov2.ui.components.CardJob
 import com.practica.buscov2.ui.components.CardProposal
 import com.practica.buscov2.ui.components.CardWorker
 import com.practica.buscov2.ui.components.ItemsInLazy
 import com.practica.buscov2.ui.components.LateralMenu
 import com.practica.buscov2.ui.components.LoaderMaxSize
 import com.practica.buscov2.ui.components.MenuNavigation
-import com.practica.buscov2.ui.components.Space
 import com.practica.buscov2.ui.components.TopBar
-import com.practica.buscov2.ui.theme.GrayText
 import com.practica.buscov2.ui.theme.OrangePrincipal
 import com.practica.buscov2.ui.viewModel.LoadingViewModel
 import com.practica.buscov2.ui.viewModel.SearchViewModel
 import com.practica.buscov2.ui.viewModel.auth.GoogleLoginViewModel
 import com.practica.buscov2.ui.viewModel.auth.TokenViewModel
-import com.practica.buscov2.ui.viewModel.proposals.ApplicationsViewModel
 import com.practica.buscov2.ui.viewModel.ubication.MapViewModel
 import com.practica.buscov2.ui.viewModel.ubication.SearchMapViewModel
 import com.practica.buscov2.ui.viewModel.users.CompleteDataViewModel
 import com.practica.buscov2.ui.viewModel.users.UserViewModel
 import com.practica.buscov2.ui.views.maps.MapViewUI
-import com.practica.buscov2.ui.views.proposals.NewPublication
 import com.practica.buscov2.util.AppUtils
+import com.practica.buscov2.util.AppUtils.Companion.formatNumber
 import kotlinx.coroutines.launch
 
 @Composable
@@ -299,6 +291,7 @@ fun SearchWorkers(vmSearch: SearchViewModel, navController: NavController) {
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun SearchProposals(vmSearch: SearchViewModel, navController: NavController) {
     val workersPage = vmSearch.proposalsPage.collectAsLazyPagingItems()
@@ -307,7 +300,7 @@ fun SearchProposals(vmSearch: SearchViewModel, navController: NavController) {
         CardProposal(
             image = it.image ?: "",
             title = it.title ?: "",
-            price = "$${it.minBudget.toString()} a $${it.maxBudget.toString()}",
+            price = "$${formatNumber(it.minBudget.toString())} a $${formatNumber(it.maxBudget.toString())}",
             date = AppUtils.formatDateCard("${it.date}"),
         ) {
            navController.navigate("Proposal/${it.id}")

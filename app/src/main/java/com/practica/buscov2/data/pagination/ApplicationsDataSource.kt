@@ -4,7 +4,6 @@ import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.practica.buscov2.data.repository.busco.ApplicationsRepository
 import com.practica.buscov2.model.busco.Application
-import com.practica.buscov2.model.busco.User
 
 class ApplicationsDataSource(
     private val repo: ApplicationsRepository,
@@ -15,7 +14,7 @@ class ApplicationsDataSource(
 ) : PagingSource<Int, Application>() {
     val token = tokenP
     val id = proposalId
-    val myApplications = myApplicationsP
+    private val myApplications = myApplicationsP
     val status = statusP
 
     override fun getRefreshKey(state: PagingState<Int, Application>): Int? {
