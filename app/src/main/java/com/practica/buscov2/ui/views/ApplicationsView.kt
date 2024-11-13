@@ -46,6 +46,7 @@ import com.practica.buscov2.ui.viewModel.users.UserViewModel
 import com.practica.buscov2.ui.views.util.ActiveLoader.Companion.activeLoaderMax
 import com.practica.buscov2.util.AppUtils
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ApplicationsView(
     vmUser: UserViewModel,
@@ -87,6 +88,7 @@ fun ApplicationsView(
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ApplicationsV(
     modifier: Modifier,
@@ -163,6 +165,7 @@ fun ShowApplications(applicationsPage: LazyPagingItems<Application>, navControll
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 private fun TabsPages(
     vm: ApplicationsViewModel,

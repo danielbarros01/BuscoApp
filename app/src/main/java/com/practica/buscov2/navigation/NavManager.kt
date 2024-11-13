@@ -459,7 +459,6 @@ fun NavManager(context: Context) {
         ) {
             val typeSearch = it.arguments?.getString("typeSearch") ?: "workers"
             val userViewModel: UserViewModel = hiltViewModel()
-            val completeDataViewModel: CompleteDataViewModel = hiltViewModel()
             val loadingViewModel: LoadingViewModel = hiltViewModel()
             val searchMapViewModel: SearchMapViewModel = hiltViewModel()
             val mapVM: MapViewModel = hiltViewModel()
@@ -470,7 +469,6 @@ fun NavManager(context: Context) {
                 vmGoogle = loginGoogleViewModel,
                 vmToken = tokenViewModel,
                 vmSearch = searchViewModel,
-                completeDataViewModel,
                 loadingViewModel,
                 searchMapViewModel,
                 mapVM,

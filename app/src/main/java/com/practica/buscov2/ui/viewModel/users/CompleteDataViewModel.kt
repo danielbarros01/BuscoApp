@@ -44,11 +44,6 @@ class CompleteDataViewModel @Inject constructor(
     private val _ubication = mutableStateOf<LatLng?>(null)
     var ubication: State<LatLng?> = _ubication
 
-    fun onDateChangedInitializedData(userP: User) {
-        viewModelScope.launch {
-        }
-    }
-
     //cambiar los valores de ubicacion
     fun changeUbication(lat:Double, lng:Double) {
         user = user.copy(

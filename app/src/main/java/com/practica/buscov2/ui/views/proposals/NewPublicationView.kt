@@ -261,7 +261,7 @@ fun NewPublication(
     LateralMenu(
         drawerState = drawerState,
         drawerContent = { list -> MenuNavigation(vmUser, vmGoogle, user, navController, list) }
-    ) { scope ->
+    ) {
         Scaffold(modifier = modifier
             .fillMaxSize(),
             bottomBar = {
@@ -296,8 +296,6 @@ fun NewPublication(
                 DataProposal(
                     vmProfession,
                     vmNewPublication,
-                    token,
-                    showError,
                     openAlertSelectImage,
                     newUriPicture
                 ) {
@@ -339,8 +337,6 @@ fun TitleNewPublication() {
 fun DataProposal(
     vmProfession: ProfessionsViewModel,
     vmNewPublication: NewPublicationViewModel,
-    token: LoginToken?,
-    showError: MutableState<Boolean>,
     openAlertSelectImage: MutableState<Boolean>,
     newUriPicture: MutableState<Uri>,
     bottomPart: @Composable () -> Unit

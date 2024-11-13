@@ -120,7 +120,6 @@ fun EditProposalView(
                 token,
                 vmProfession,
                 vmNewPublication,
-                vmProposal,
                 vmLoading,
                 searchMapVM,
                 mapVM,
@@ -139,7 +138,6 @@ fun EditPublication(
     token: LoginToken?,
     vmProfession: ProfessionsViewModel,
     vmNewPublication: NewPublicationViewModel,
-    vmProposal: ProposalViewModel,
     vmLoading: LoadingViewModel,
     searchMapVM: SearchMapViewModel,
     mapVM: MapViewModel,
@@ -252,7 +250,7 @@ fun EditPublication(
     LateralMenu(
         drawerState = drawerState,
         drawerContent = { list -> MenuNavigation(vmUser, vmGoogle, user, navController, list) }
-    ) { scope ->
+    ) {
         Scaffold(modifier = modifier
             .fillMaxSize(),
             bottomBar = {
@@ -287,8 +285,6 @@ fun EditPublication(
                 DataProposal(
                     vmProfession,
                     vmNewPublication,
-                    token,
-                    showError,
                     openAlertSelectImage,
                     newUriPicture
                 ) {

@@ -106,9 +106,7 @@ fun HomeView(
         token?.let {
             vmUser.getMyProfile(it.token, {
                 navController.navigate("Login")
-            }) { user ->
-                vmCompleteData.onDateChangedInitializedData(user)
-            }
+            }) {}
             homeVm.setToken(it.token)
             homeVm.refreshWorkers()
         }

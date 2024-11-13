@@ -17,11 +17,7 @@ sealed class ItemTabOnlyProposal(
     data object TabDescription : ItemTabOnlyProposal(
         title = "Descripción",
         screen = { proposal, application, user, navController, searchMapVM ->
-            ProposalDescription(
-                proposal,
-                user,
-                navController
-            )
+            ProposalDescription(proposal)
         }
     )
 

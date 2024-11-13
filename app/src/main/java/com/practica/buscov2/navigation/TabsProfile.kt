@@ -1,5 +1,7 @@
 package com.practica.buscov2.navigation
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavController
 import com.practica.buscov2.R
@@ -29,6 +31,7 @@ sealed class ItemTabProfile(
         }
     )
 
+    @RequiresApi(Build.VERSION_CODES.O)
     data object TabProposals : ItemTabProfile(
         title = "Propuestas",
         icon = R.drawable.hand,
@@ -41,6 +44,7 @@ sealed class ItemTabProfile(
         }
     )
 
+    @RequiresApi(Build.VERSION_CODES.O)
     data object TabQualifications : ItemTabProfile(
         title = "Calificaciones",
         screen = { user, vmProposals, navController, vmQualifications, vmJobs, vmLoading, searchMapVM ->
@@ -63,11 +67,13 @@ sealed class ItemTabProfile(
     )
 
     companion object {
+        @RequiresApi(Build.VERSION_CODES.O)
         val pagesUser: List<ItemTabProfile> = listOf(
             TabInformation,
             TabProposals
         )
 
+        @RequiresApi(Build.VERSION_CODES.O)
         val pagesWorker: List<ItemTabProfile> = listOf(
             TabInformation,
             TabProposals,

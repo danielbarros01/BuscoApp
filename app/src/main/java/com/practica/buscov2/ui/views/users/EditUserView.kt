@@ -150,8 +150,6 @@ private fun initializeUserData(
         user.birthdate ?: ""
     )
 
-    vmCompleteData.onDateChangedInitializedData(user)
-
     user.worker?.let {
         vmWorker.onCategoryChangeForId(
             it.professions?.first()?.categoryId ?: 1
@@ -191,7 +189,6 @@ fun EditUser(
     val context = LocalContext.current
     // State variables
     val isLoading by vmLoading.isLoading
-    val buttonEnabled by vmWorker.buttonEnabled
     val error = vmWorker.error
     val errorData = vmCompleteData.error
     val scope = rememberCoroutineScope()

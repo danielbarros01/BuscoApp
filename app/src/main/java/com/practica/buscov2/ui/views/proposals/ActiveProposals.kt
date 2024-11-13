@@ -14,14 +14,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.practica.buscov2.model.busco.Notification
 import com.practica.buscov2.model.busco.User
 import com.practica.buscov2.navigation.RoutesBottom
-import com.practica.buscov2.notifications.NotificationService
 import com.practica.buscov2.ui.components.BottomNav
 import com.practica.buscov2.ui.components.CardProposalWithButton
 import com.practica.buscov2.ui.components.ItemsInLazy

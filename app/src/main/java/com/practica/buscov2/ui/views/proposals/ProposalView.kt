@@ -504,7 +504,7 @@ fun PriceAndDate(proposal: Proposal) {
 }
 
 @Composable
-fun ProposalDescription(proposal: Proposal, user: User?, navController: NavController?) {
+fun ProposalDescription(proposal: Proposal) {
     Column(
         modifier = Modifier
             .fillMaxSize()

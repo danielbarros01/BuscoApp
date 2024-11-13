@@ -58,13 +58,13 @@ import com.practica.buscov2.ui.viewModel.auth.GoogleLoginViewModel
 import com.practica.buscov2.ui.viewModel.auth.TokenViewModel
 import com.practica.buscov2.ui.viewModel.ubication.MapViewModel
 import com.practica.buscov2.ui.viewModel.ubication.SearchMapViewModel
-import com.practica.buscov2.ui.viewModel.users.CompleteDataViewModel
 import com.practica.buscov2.ui.viewModel.users.UserViewModel
 import com.practica.buscov2.ui.views.maps.MapViewUI
 import com.practica.buscov2.util.AppUtils
 import com.practica.buscov2.util.AppUtils.Companion.formatNumber
 import kotlinx.coroutines.launch
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun SearchView(
     typeSearch: String, // workers or proposals
@@ -72,7 +72,6 @@ fun SearchView(
     vmGoogle: GoogleLoginViewModel,
     vmToken: TokenViewModel,
     vmSearch: SearchViewModel,
-    vmCompleteData: CompleteDataViewModel,
     vmLoading: LoadingViewModel,
     searchMapVM: SearchMapViewModel,
     mapVM: MapViewModel,
@@ -102,7 +101,6 @@ fun SearchView(
                 vmGoogle,
                 user!!,
                 vmSearch,
-                vmCompleteData,
                 vmLoading,
                 searchMapVM,
                 mapVM,
@@ -112,6 +110,7 @@ fun SearchView(
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun SearchV(
     modifier: Modifier,
@@ -120,7 +119,6 @@ fun SearchV(
     vmGoogle: GoogleLoginViewModel,
     user: User,
     vmSearch: SearchViewModel,
-    vmCompleteData: CompleteDataViewModel,
     vmLoading:LoadingViewModel,
     searchMapVM: SearchMapViewModel,
     mapVM: MapViewModel,
@@ -211,7 +209,7 @@ fun SearchV(
     LateralMenu(
         drawerState = drawerState,
         drawerContent = { list -> MenuNavigation(vmUser, vmGoogle, user, navController, list) }
-    ) { scope ->
+    ) {
         Scaffold(modifier = modifier
             .fillMaxSize(),
             bottomBar = {

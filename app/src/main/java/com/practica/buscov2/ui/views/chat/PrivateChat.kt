@@ -56,6 +56,7 @@ import com.practica.buscov2.ui.viewModel.users.UserViewModel
 import com.practica.buscov2.util.AppUtils.Companion.formatHours
 import kotlinx.coroutines.launch
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ChatPrivateScreen(
     toUserId: Int,
@@ -98,6 +99,7 @@ fun ChatPrivateScreen(
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatP(

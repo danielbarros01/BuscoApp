@@ -1,5 +1,7 @@
 package com.practica.buscov2.ui.views
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -31,6 +33,7 @@ import com.practica.buscov2.ui.viewModel.NotificationsViewModel
 import com.practica.buscov2.ui.viewModel.auth.GoogleLoginViewModel
 import com.practica.buscov2.ui.viewModel.users.UserViewModel
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun NotificationsView(
     vmNotifications: NotificationsViewModel,
@@ -39,7 +42,6 @@ fun NotificationsView(
     navController: NavHostController
 ) {
     val user by vmUser.user.collectAsState()
-    val token by vmNotifications.token.collectAsState()
 
     //Ejecuto una unica vez
     LaunchedEffect(Unit) {
@@ -64,6 +66,7 @@ fun NotificationsView(
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun NotificationsV(
     modifier: Modifier,

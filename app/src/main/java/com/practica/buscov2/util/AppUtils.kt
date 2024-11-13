@@ -53,7 +53,7 @@ class AppUtils {
             val outputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
 
             // Convierte la cadena de fecha del formato de entrada a un objeto Date
-            val date: Date = inputFormat.parse(dateString)
+            val date: Date? = inputFormat.parse(dateString)
 
             // Convierte el objeto Date al formato de salida y devuelve la cadena resultante
             return outputFormat.format(date)

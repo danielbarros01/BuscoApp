@@ -1,5 +1,7 @@
 package com.practica.buscov2.ui.views.chat
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -27,6 +29,7 @@ import com.practica.buscov2.ui.viewModel.auth.TokenViewModel
 import com.practica.buscov2.ui.viewModel.chat.ChatViewModel
 import com.practica.buscov2.ui.viewModel.users.UserViewModel
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ChatScreen(
     viewModel: ChatViewModel,
@@ -61,6 +64,7 @@ fun ChatScreen(
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ChatPrincipal(
     modifier: Modifier,

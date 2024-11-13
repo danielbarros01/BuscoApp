@@ -1,6 +1,8 @@
 package com.practica.buscov2.ui.views.users
 
 import android.annotation.SuppressLint
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -96,6 +98,7 @@ import com.practica.buscov2.ui.views.proposals.ShowProposals
 import com.practica.buscov2.ui.views.util.ActiveLoader.Companion.activeLoaderMax
 import kotlinx.coroutines.launch
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ProfileView(
     id: Int,
@@ -185,6 +188,7 @@ fun ProfileView(
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ProfileV(
     modifier: Modifier,
@@ -210,7 +214,7 @@ fun ProfileV(
     LateralMenu(
         drawerState = drawerState,
         drawerContent = { list -> MenuNavigation(vmUser, vmGoogle, user, navController, list) }
-    ) { scope ->
+    ) {
         //Mostrar foto en pantalla completa
         if (showPhotoFullScreen) {
             PhotoFullScreen(userProfile) { showPhotoFullScreen = it }
@@ -297,6 +301,7 @@ fun ProfileV(
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 private fun TabsPages(
     user: User,
@@ -430,6 +435,7 @@ fun ShowJobs(jobsPage: LazyPagingItems<Proposal>, navController: NavController) 
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun Qualifications(vmQualifications: QualificationsViewModel, vmLoading: LoadingViewModel) {
     val qualificationsPage = vmQualifications.qualificationsPage.collectAsLazyPagingItems()
@@ -438,6 +444,7 @@ fun Qualifications(vmQualifications: QualificationsViewModel, vmLoading: Loading
     ShowQualifications(qualificationsPage, vmQualifications)
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun ShowQualifications(
@@ -494,7 +501,6 @@ fun ShowQualifications(
         //CARD
         CardQualificationOfUser(qualification.user ?: User(), qualification)
         Space(size = 10.dp)
-
     }
 }
 
@@ -614,6 +620,7 @@ fun ElementRowInformation(
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun Proposals(
     vmProposals: ProposalsViewModel,

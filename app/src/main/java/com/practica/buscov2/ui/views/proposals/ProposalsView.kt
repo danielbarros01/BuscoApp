@@ -56,6 +56,7 @@ import com.practica.buscov2.ui.views.util.ActiveLoader.Companion.activeLoaderMax
 import com.practica.buscov2.util.AppUtils.Companion.formatDateCard
 import kotlinx.coroutines.launch
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ProposalsView(
     vmUser: UserViewModel,
@@ -97,6 +98,7 @@ fun ProposalsView(
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ProposalsV(
     modifier: Modifier,
@@ -137,6 +139,7 @@ fun ProposalsV(
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ExpiredProposals(
     vmProposals: ProposalsViewModel,
@@ -153,6 +156,7 @@ fun ExpiredProposals(
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ActiveProposals(
     vmProposals: ProposalsViewModel,
@@ -193,6 +197,7 @@ fun NoProposals() {
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 private fun TabsPages(
     vmProposals: ProposalsViewModel,

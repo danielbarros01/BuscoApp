@@ -1,5 +1,7 @@
 package com.practica.buscov2.ui.views
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -43,6 +45,7 @@ import com.practica.buscov2.ui.viewModel.proposals.ProposalsViewModel
 import com.practica.buscov2.ui.viewModel.users.UserViewModel
 import com.practica.buscov2.ui.views.util.ActiveLoader.Companion.activeLoaderMax
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun JobsView(
     vmUser: UserViewModel,
@@ -79,7 +82,6 @@ fun JobsView(
                 Modifier.align(Alignment.Center),
                 vmUser,
                 vmGoogle,
-                vmProposals,
                 vmJobs,
                 user!!,
                 vmLoading,
@@ -89,12 +91,12 @@ fun JobsView(
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun JobsV(
     modifier: Modifier,
     vmUser: UserViewModel,
     vmGoogle: GoogleLoginViewModel,
-    vmProposals: ProposalsViewModel,
     vmJobs: JobsViewModel,
     user: User,
     vmLoading: LoadingViewModel,
@@ -132,6 +134,7 @@ fun JobsV(
 }
 
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun Jobs(vmJobs: JobsViewModel, vmLoading: LoadingViewModel, navController: NavController) {
     val jobsPage = vmJobs.jobsPage.collectAsLazyPagingItems()
@@ -160,6 +163,7 @@ fun FinishedJobs(vmJobs: JobsViewModel, navController: NavController) {
     }
 }*/
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 private fun ShowJobs(jobsPage: LazyPagingItems<Proposal>, navController: NavController) {
     ItemsInLazy(jobsPage) { proposal ->
@@ -182,6 +186,7 @@ private fun ShowJobs(jobsPage: LazyPagingItems<Proposal>, navController: NavCont
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 private fun TabsPages(
     vm: JobsViewModel,
