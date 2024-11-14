@@ -29,7 +29,7 @@ class CheckEmailViewModel @Inject constructor(
     private val repo: ConfirmationCodeRepository,
     private val storeToken: StoreToken
 ) : ViewModel() {
-    private var waitingTime = mutableLongStateOf(10) //120''
+    private var waitingTime = mutableLongStateOf(120) //120''
     var waitingTimeMillis: Long = waitingTime.longValue * 1000
 
     private val _timer: MutableStateFlow<CountDownTimer?> = MutableStateFlow(null)

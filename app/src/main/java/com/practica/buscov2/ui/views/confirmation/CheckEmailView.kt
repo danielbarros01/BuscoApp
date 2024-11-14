@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -25,8 +26,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.focus.FocusManager
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
@@ -106,6 +114,13 @@ fun CheckEmail(
         mutableStateOf(false)
     }
 
+    val focusRequester1 = remember { FocusRequester() }
+    val focusRequester2 = remember { FocusRequester() }
+    val focusRequester3 = remember { FocusRequester() }
+    val focusRequester4 = remember { FocusRequester() }
+    val focusManager = LocalFocusManager.current
+    val keyboardController = LocalSoftwareKeyboardController.current
+
     LaunchedEffect(Unit) {
         vm.startTimer(vm.waitingTimeMillis)
     }
@@ -126,6 +141,10 @@ fun CheckEmail(
         navController.navigate("Home")
     }
 
+    LaunchedEffect(focusRequester1) {
+        focusRequester1.requestFocus()
+    }
+
     Column(modifier = modifier.padding(15.dp)) {
         InsertImage(
             R.drawable.emailverification,
@@ -141,42 +160,79 @@ fun CheckEmail(
         Text(text = "Introduce los 4 digitos que enviamos a ${user.email}")
         Space(size = 15.dp)
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
-            BoxNumber(digit1) {
-                digit1 = it
-                vm.addDigit(
-                    n1 = if (it.isNotEmpty()) it.toInt() else null,
-                    n2 = if (digit2.isNotEmpty()) digit2.toInt() else null,
-                    n3 = if (digit3.isNotEmpty()) digit3.toInt() else null,
-                    n4 = if (digit4.isNotEmpty()) digit4.toInt() else null
-                )
-            }
-            BoxNumber(digit2) {
-                digit2 = it
-                vm.addDigit(
-                    n1 = if (digit1.isNotEmpty()) digit1.toInt() else null,
-                    n2 = if (it.isNotEmpty()) it.toInt() else null,
-                    n3 = if (digit3.isNotEmpty()) digit3.toInt() else null,
-                    n4 = if (digit4.isNotEmpty()) digit4.toInt() else null
-                )
-            }
-            BoxNumber(digit3) {
-                digit3 = it
-                vm.addDigit(
-                    n1 = if (digit1.isNotEmpty()) digit1.toInt() else null,
-                    n2 = if (digit2.isNotEmpty()) digit2.toInt() else null,
-                    n3 = if (it.isNotEmpty()) it.toInt() else null,
-                    n4 = if (digit4.isNotEmpty()) digit4.toInt() else null
-                )
-            }
-            BoxNumber(digit4) {
-                digit4 = it
-                vm.addDigit(
-                    n1 = if (digit1.isNotEmpty()) digit1.toInt() else null,
-                    n2 = if (digit2.isNotEmpty()) digit2.toInt() else null,
-                    n3 = if (digit3.isNotEmpty()) digit3.toInt() else null,
-                    n4 = if (it.isNotEmpty()) it.toInt() else null
-                )
-            }
+            BoxNumber(
+                modifier = Modifier.focusRequester(focusRequester1),
+                number = digit1,
+                onChange = {
+                    digit1 = it
+                    if (digit1.isNotEmpty() && digit2.isEmpty())
+                        focusManager.moveFocus(FocusDirection.Next)
+
+                    vm.addDigit(
+                        n1 = if (it.isNotEmpty()) it.toInt() else null,
+                        n2 = if (digit2.isNotEmpty()) digit2.toInt() else null,
+                        n3 = if (digit3.isNotEmpty()) digit3.toInt() else null,
+                        n4 = if (digit4.isNotEmpty()) digit4.toInt() else null
+                    )
+
+                    if (digit1.isNotEmpty() && digit2.isNotEmpty() && digit3.isNotEmpty() && digit4.isNotEmpty())
+                        keyboardController?.hide()
+                }
+            )
+            BoxNumber(
+                modifier = Modifier.focusRequester(focusRequester2),
+                number = digit2,
+                onChange = {
+                    digit2 = it
+                    if (digit2.isNotEmpty() && digit3.isEmpty())
+                        focusManager.moveFocus(FocusDirection.Next)
+
+                    vm.addDigit(
+                        n1 = if (digit1.isNotEmpty()) digit1.toInt() else null,
+                        n2 = if (it.isNotEmpty()) it.toInt() else null,
+                        n3 = if (digit3.isNotEmpty()) digit3.toInt() else null,
+                        n4 = if (digit4.isNotEmpty()) digit4.toInt() else null
+                    )
+
+                    if (digit1.isNotEmpty() && digit2.isNotEmpty() && digit3.isNotEmpty() && digit4.isNotEmpty())
+                        keyboardController?.hide()
+                }
+            )
+            BoxNumber(
+                modifier = Modifier.focusRequester(focusRequester3),
+                number = digit3,
+                onChange = {
+                    digit3 = it
+                    if (digit3.isNotEmpty() && digit4.isEmpty()) {
+                        focusManager.moveFocus(FocusDirection.Next)
+                    }
+                    vm.addDigit(
+                        n1 = if (digit1.isNotEmpty()) digit1.toInt() else null,
+                        n2 = if (digit2.isNotEmpty()) digit2.toInt() else null,
+                        n3 = if (it.isNotEmpty()) it.toInt() else null,
+                        n4 = if (digit4.isNotEmpty()) digit4.toInt() else null
+                    )
+
+                    if (digit1.isNotEmpty() && digit2.isNotEmpty() && digit3.isNotEmpty() && digit4.isNotEmpty())
+                        keyboardController?.hide()
+                }
+            )
+            BoxNumber(
+                modifier = Modifier.focusRequester(focusRequester4),
+                number = digit4,
+                onChange = {
+                    digit4 = it
+                    vm.addDigit(
+                        n1 = if (digit1.isNotEmpty()) digit1.toInt() else null,
+                        n2 = if (digit2.isNotEmpty()) digit2.toInt() else null,
+                        n3 = if (digit3.isNotEmpty()) digit3.toInt() else null,
+                        n4 = if (it.isNotEmpty()) it.toInt() else null
+                    )
+                    if (digit1.isNotEmpty() && digit2.isNotEmpty() && digit3.isNotEmpty() && digit4.isNotEmpty())
+                        keyboardController?.hide()
+                }
+            )
+
         }
         Space(size = 10.dp)
         Column(
@@ -192,16 +248,24 @@ fun CheckEmail(
 
             ButtonTransparent(text = "Reenviar código", enabled = enabledSendCode) {
                 vmLoading.withLoading {
+                    vm.startTimer(vm.waitingTimeMillis)
+                    enabledSendCode = false
+
+
+                    digit1 = ""
+                    digit2 = ""
+                    digit3 = ""
+                    digit4 = ""
+                    focusRequester1.requestFocus()
+                    vm.addDigit(null, null, null, null)
+
                     vm.resendCode(
                         resend,
                         token = token?.token,
                         email = user.email ?: "",
                         onError = {
                             showError.value = true
-                        }) {
-                        vm.startTimer(vm.waitingTimeMillis)
-                        enabledSendCode = false
-                    }
+                        }) {}
                 }
             }
             Space(size = 5.dp)
@@ -254,7 +318,12 @@ fun formatTime(timeMi: Long): String {
 }
 
 @Composable
-private fun BoxNumber(number: String = "", onChange: (String) -> Unit) {
+private fun BoxNumber(
+    modifier: Modifier = Modifier,
+    number: String = "",
+    keyboardActions: KeyboardActions = KeyboardActions.Default,
+    onChange: (String) -> Unit
+) {
     Box(
         modifier = Modifier
             .border(
@@ -266,7 +335,7 @@ private fun BoxNumber(number: String = "", onChange: (String) -> Unit) {
         contentAlignment = Alignment.Center
     ) {
         TextField(
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxSize()
                 .padding(bottom = 4.dp),
             value = number,
@@ -275,7 +344,10 @@ private fun BoxNumber(number: String = "", onChange: (String) -> Unit) {
                     onChange(it)
                 }
             },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Number,
+                imeAction = ImeAction.Done
+            ),
             colors = TextFieldDefaults.colors(
                 focusedContainerColor = Color.Transparent,
                 unfocusedContainerColor = Color.Transparent,
@@ -283,7 +355,8 @@ private fun BoxNumber(number: String = "", onChange: (String) -> Unit) {
                 unfocusedIndicatorColor = Color.Transparent
             ),
             textStyle = TextStyle(color = GrayText, fontSize = 36.sp, textAlign = TextAlign.Center),
-            singleLine = true,
+            keyboardActions = keyboardActions,
+            singleLine = true
         )
     }
 }
