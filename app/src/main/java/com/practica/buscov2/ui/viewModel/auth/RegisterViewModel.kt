@@ -7,6 +7,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.text.toLowerCase
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
@@ -22,6 +23,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel
@@ -55,12 +57,39 @@ class RegisterViewModel @Inject constructor(
         repeatedPassword: String
     ) {
         _username.value = username
-        _email.value = email
+        _email.value = email.lowercase()
         _password.value = password
         _repeatedPassword.value = repeatedPassword
         _buttonEnabled.value =
             isValidUsername(username) && isValidEmail(email) &&
                     isValidPassword(password) && isValidRepeatedPassword(password, repeatedPassword)
+    }
+
+    fun setUsername(username: String, onError: () -> Unit) {
+        if (username.contains(" ")) {
+            error = error.copy(
+                code = 0,
+                title = "Nombre de usuario inválido",
+                message = "El nombre de usuario no puede contener espacios en blanco"
+            )
+            return onError()
+        }else if (username.length > 18){
+            error = error.copy(
+                code = 0,
+                title = "Nombre de usuario inválido",
+                message = "El nombre de usuario no puede tener más de 18 caracteres"
+            )
+            return onError()
+        }else if (!username.matches("^[a-zA-Z0-9._]*$".toRegex())){
+            error = error.copy(
+                code = 0,
+                title = "Nombre de usuario inválido",
+                message = "El nombre de usuario no debe contener caracteres especiales"
+            )
+            return onError()
+        }
+
+        _username.value = username.lowercase()
     }
 
     private fun isValidUsername(username: String): Boolean = username.length >= 4

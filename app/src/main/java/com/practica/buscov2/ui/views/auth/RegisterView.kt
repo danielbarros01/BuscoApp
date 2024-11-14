@@ -103,7 +103,8 @@ fun Register(
                 username,
                 "Ingrese un nombre de usuario"
             ) {
-                viewModel.onRegisterChanged(it, email, password, repeatedPassword)
+                //viewModel.onRegisterChanged(it, email, password, repeatedPassword)
+                viewModel.setUsername(it, onError = { showError.value = true })
             }
             Space(10.dp)
             CommonField(
