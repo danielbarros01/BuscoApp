@@ -140,7 +140,6 @@ fun CompleteData(
 
     //----------
     Scaffold(
-        // Barra inferior
         bottomBar = {
             BottomBarPart(
                 currentPage,
@@ -153,7 +152,6 @@ fun CompleteData(
             )
         },
 
-        // Contenido principal
         content = {
             AlertError(showDialog = showError, error.value.title, error.value.message)
             if (isLoading) {
@@ -188,12 +186,9 @@ fun CompleteData(
 
                 TitleAndName(username)
 
-                //Si es pagina 1
                 if (currentPage.intValue == 0) {
                     PageOne(viewModel, stateDataPicker, showError, enabledButtonDate)
-                    //PageTwo(vm = viewModel, vmSearch = vmSearch)
                 } else if (currentPage.intValue == 1) {
-                    //Segunda pagina
                     PageTwo(vm = viewModel, vmSearch = vmSearch)
                 }
             }
@@ -274,14 +269,18 @@ fun PageOne(
         Column {
             Text(text = "Nombre", color = GrayText)
             CommonField(name, "Nombre") {
-                viewModel.onDateChanged(it, lastname, dateOfBirth)
+                viewModel.setName(it) {
+                    showError.value = true
+                }
             }
         }
         Space(8.dp)
         Column {
             Text(text = "Apellido", color = GrayText)
             CommonField(lastname, "Apellido") {
-                viewModel.onDateChanged(name, it, dateOfBirth)
+                viewModel.setLastname(it) {
+                    showError.value = true
+                }
             }
         }
 
@@ -299,8 +298,6 @@ fun PageOne(
             }
         }
 
-
-        //Mostrar seleccionador de fecha
         if (showDatePicker.value) {
             ShowDatePicker(
                 stateDataPicker,
@@ -465,13 +462,11 @@ private fun BottomBarPart(
             //Guardar los datos
             token?.let {
                 vmLoading.withLoading {
-                    viewModel.saveCompleteData(it.token, user, {
-                        //En caso de error
+                    viewModel.saveCompleteData(it.token, user, onError = {
                         showError.value = true
-                    }) {
-                        //En caso de exito navegar al home
+                    }, onSuccess = {
                         navController.navigate("BeWorker")
-                    }
+                    })
                 }
             }
         }

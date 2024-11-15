@@ -6,6 +6,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.text.capitalize
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.maps.model.LatLng
@@ -45,7 +46,7 @@ class CompleteDataViewModel @Inject constructor(
     var ubication: State<LatLng?> = _ubication
 
     //cambiar los valores de ubicacion
-    fun changeUbication(lat:Double, lng:Double) {
+    fun changeUbication(lat: Double, lng: Double) {
         user = user.copy(
             latitude = lat,
             longitude = lng
@@ -74,6 +75,52 @@ class CompleteDataViewModel @Inject constructor(
         )
     }
 
+    fun setName(value: String, onError: () -> Unit) {
+        val fullName = validateName(value, "nombres") ?: return onError()
+
+        _name.value = fullName
+        user = user.copy(
+            name = fullName
+        )
+
+        _buttonNextEnable.value =
+            isValidName(fullName) && isValidLastName(lastname.value)
+                    && isValidDateOfBirth(dateOfBirth.value)
+    }
+
+    fun setLastname(value: String, onError: () -> Unit) {
+        val lastname = validateName(value, "apellidos") ?: return onError()
+
+        _lastname.value = lastname
+        user = user.copy(lastname = lastname)
+
+        _buttonNextEnable.value =
+            isValidName(name.value) && isValidLastName(lastname)
+                    && isValidDateOfBirth(dateOfBirth.value)
+    }
+
+    private fun validateName(name: String, errorForField: String): String? {
+        val words = name.trim().split("\\s+".toRegex())
+
+        if (words.size > 2) {
+            setError(ErrorBusco(message = "No se permiten más de dos $errorForField"))
+            return null
+        }
+
+        if (name.length > 20) {
+            setError(ErrorBusco(message = "No se permiten más de 20 caracteres"))
+            return null
+        }
+
+
+        val lowercaseName = name.lowercase()
+        val nameParts = lowercaseName.split("\\s+".toRegex())
+        val capitalizedWords = nameParts.map { it.capitalize() }
+        val fullName = capitalizedWords.joinToString(" ")
+        val spaceCount = fullName.count { it == ' ' }
+        return if (spaceCount == 2) fullName.trim() else fullName
+    }
+
     fun setDateOfBirth(dateOfBirth: String) {
         _dateOfBirth.value = dateOfBirth
         _buttonNextEnable.value =
@@ -93,7 +140,12 @@ class CompleteDataViewModel @Inject constructor(
     private fun isValidLastName(lastname: String): Boolean = lastname.length > 3
     private fun isValidDateOfBirth(date: String): Boolean = date.isNotEmpty()
 
-    fun saveCompleteData(token: String, userP: User? = user, onError: () -> Unit, onSuccess: () -> Unit) {
+    fun saveCompleteData(
+        token: String,
+        userP: User? = user,
+        onError: () -> Unit,
+        onSuccess: () -> Unit
+    ) {
         try {
             viewModelScope.launch(Dispatchers.IO) {
                 // Activo el loading
