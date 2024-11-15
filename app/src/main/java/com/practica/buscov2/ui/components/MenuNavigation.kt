@@ -150,12 +150,14 @@ fun ItemProfileNavigation(user: User, onClick: () -> Unit) {
             Text(
                 text = "${user.name} ${user.lastname}",
                 fontSize = 20.sp,
-                fontWeight = FontWeight.SemiBold
+                fontWeight = FontWeight.SemiBold,
+                maxLines = 1
             )
             Text(
                 text = "${user.email}",
                 fontSize = 12.sp,
-                color = GrayField
+                color = GrayField,
+                maxLines = 1
             )
         }
     }
