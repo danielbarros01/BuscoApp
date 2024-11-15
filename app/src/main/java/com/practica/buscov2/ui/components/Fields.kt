@@ -147,7 +147,7 @@ fun CommonFieldArea(
             .height(104.dp)
             .verticalScroll(scrollState),
         placeholder = { Text(text = placeholder, color = GrayPlaceholder) },
-        maxLines = 3,
+        maxLines = 4,
         colors = OutlinedTextFieldDefaults.colors(
             unfocusedTextColor = GrayText,
             focusedTextColor = Color.Black

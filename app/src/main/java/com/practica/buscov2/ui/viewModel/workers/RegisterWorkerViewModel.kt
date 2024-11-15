@@ -128,7 +128,7 @@ class RegisterWorkerViewModel @Inject constructor(
 
     private fun addHttpsToWeb(worker: Worker) {
         if (worker.webPage != null) {
-            if(!worker.webPage!!.startsWith("http://") && !worker.webPage!!.startsWith("https://")) {
+            if (!worker.webPage!!.startsWith("http://") && !worker.webPage!!.startsWith("https://")) {
                 worker.webPage = "https://${worker.webPage}"
             }
         }
@@ -139,6 +139,7 @@ class RegisterWorkerViewModel @Inject constructor(
             try {
                 val response = withContext(Dispatchers.IO) {
                     worker.let {
+                        addHttpsToWeb(it)
                         workersRepository.createWorker(token, it)
                     }
                 }
@@ -207,6 +208,7 @@ class RegisterWorkerViewModel @Inject constructor(
     private fun isValidCategoryForId(categoryId: Int): Boolean {
         return categories.value.map { it.id }.contains(categoryId)
     }
+
     private fun returnCategoryForId(categoryId: Int): List<ProfessionCategory> {
         return categories.value.filter { it.id == categoryId }
     }
@@ -242,11 +244,15 @@ class RegisterWorkerViewModel @Inject constructor(
         _buttonEnabled.value = enabledButton()
     }
 
-    fun onYearsChange(years: String) {
-        _yearsExperience.value = years
-        worker = worker.copy(yearsExperience = years.toIntOrNull())
+    fun onYearsChange(value: String) {
+        val years = value.toIntOrNull()
 
-        _buttonEnabled.value = enabledButton()
+        if (years != null || value.isEmpty()) {
+            _yearsExperience.value = if (value.isEmpty()) value else years.toString()
+
+            worker = worker.copy(yearsExperience = years)
+            _buttonEnabled.value = enabledButton()
+        }
     }
 
     fun onTitleChange(title: String) {
