@@ -18,7 +18,8 @@ sealed class RoutesConfiguration(
     data class ChangePassword(val userJson: String) : RoutesConfiguration(
         R.drawable.privacy,
         "Cambiar contraseña",
-        "CheckEmailView/$userJson/recover-password"
+        "RecoverPassword"
+        //"CheckEmailView/$userJson/recover-password"
     )
 
     companion object {

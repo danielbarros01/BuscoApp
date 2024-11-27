@@ -19,7 +19,10 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -52,33 +55,48 @@ class SearchViewModel @Inject constructor(
     private val _refreshTriggerWorkers = MutableStateFlow(0)
     private val _refreshTriggerProposals = MutableStateFlow(0)
 
+    private val _totalRecords = MutableStateFlow(0)
+    val totalRecords: StateFlow<Int> = _totalRecords.asStateFlow()
+
     @OptIn(ExperimentalCoroutinesApi::class)
     val workersPage = _refreshTriggerWorkers.flatMapLatest {
-        Pager(PagingConfig(pageSize = 6)) {
-            SearchDataSource(
-                repo = repoWorkers,
-                tokenP = token.value!!,
-                queryP = query.value,
-                categoryIdP = category.value?.id,
-                qualificationStarsP = stars.value,
-                ubicationP = ubication.value
-            )
-        }.flow.cachedIn(viewModelScope)
+        val dataSource = SearchDataSource(
+            repo = repoWorkers,
+            tokenP = token.value!!,
+            queryP = query.value,
+            categoryIdP = category.value?.id,
+            qualificationStarsP = stars.value,
+            ubicationP = ubication.value
+        )
+
+        viewModelScope.launch {
+            dataSource.totalRecordsFlow.collect { total ->
+                _totalRecords.value = total
+            }
+        }
+
+        Pager(PagingConfig(pageSize = 6)) { dataSource }.flow.cachedIn(viewModelScope)
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val proposalsPage = _refreshTriggerProposals.flatMapLatest {
-        Pager(PagingConfig(pageSize = 6)) {
-            ProposalsDataSource(
-                function = "search",
-                repo = repoProposals,
-                tokenP = token.value!!,
-                queryP = query.value,
-                categoryIdP = category.value?.id,
-                status = null,
-                ubicationP = ubication.value
-            )
-        }.flow.cachedIn(viewModelScope)
+        val dataSource = ProposalsDataSource(
+            function = "search",
+            repo = repoProposals,
+            tokenP = token.value!!,
+            queryP = query.value,
+            categoryIdP = category.value?.id,
+            status = null,
+            ubicationP = ubication.value
+        )
+
+        viewModelScope.launch {
+            dataSource.totalRecordsFlow.collect { total ->
+                _totalRecords.value = total
+            }
+        }
+
+        Pager(PagingConfig(pageSize = 6)) { dataSource }.flow.cachedIn(viewModelScope)
     }
 
     fun refreshWorkers() {
@@ -105,7 +123,7 @@ class SearchViewModel @Inject constructor(
         _category.value = newCategory
     }
 
-    fun setStars(value:Int?){
+    fun setStars(value: Int?) {
         _stars.value = value
     }
 
@@ -113,7 +131,7 @@ class SearchViewModel @Inject constructor(
         fetchCategories()
     }
 
-    fun resetValues(){
+    fun resetValues() {
         _stars.value = null
         _category.value = null
     }

@@ -99,12 +99,12 @@ class ChatViewModel @Inject constructor(
 
             if(chatIndex != -1){
                 // Actualizar el último mensaje del chat y moverlo al principio
-                val chat = updatedChats.removeAt(chatIndex).copy(lastMessage = message) //Elimina el chat de su posición actual en la lista y lo devuelve.
+                val chat = updatedChats.removeAt(chatIndex).copy(lastMessage = message, user = User(id = message.userIdSender, username = message.userSender?.username)) //Elimina el chat de su posición actual en la lista y lo devuelve.
                 updatedChats.add(0,chat) // Agrega el chat actualizado al principio de la lista.
             }else{
                 // Si el chat no existe, agregarlo al principio
                 val newChat = Chat(
-                    user = User(id = message.userIdSender),
+                    user = User(id = message.userIdSender, username = message.userSender?.username),
                     lastMessage = message
                 )
                 updatedChats.add(0, newChat)

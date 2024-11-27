@@ -3,6 +3,7 @@ package com.practica.buscov2.di
 import android.content.Context
 import com.practica.buscov2.data.ApiBusco
 import com.practica.buscov2.data.dataStore.StoreToken
+import com.practica.buscov2.data.dataStore.StoreUbication
 import com.practica.buscov2.util.Constants.Companion.BASE_URL
 import dagger.Module
 import dagger.Provides
@@ -38,5 +39,11 @@ object AppModule {
     @Provides
     fun provideStoreToken(@ApplicationContext context: Context): StoreToken {
         return StoreToken(context)
+    }
+
+    @Singleton
+    @Provides
+    fun provideStoreUbication(@ApplicationContext context: Context): StoreUbication {
+        return StoreUbication(context)
     }
 }

@@ -10,5 +10,6 @@ data class Worker(
     val professions: List<Profession>? = null,
 
     val user:User? = null,
-    val averageQualification: Float? = null
+    val averageQualification: Float? = null,
+    val numberOfQualifications: Int? = null
 )

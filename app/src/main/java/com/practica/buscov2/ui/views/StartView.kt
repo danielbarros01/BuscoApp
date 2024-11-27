@@ -24,6 +24,7 @@ import com.practica.buscov2.ui.components.InsertImage
 import com.practica.buscov2.ui.components.Space
 import com.practica.buscov2.ui.theme.GrayPlaceholder
 import com.practica.buscov2.ui.theme.OrangePrincipal
+import com.practica.buscov2.ui.viewModel.StartViewModel
 import com.practica.buscov2.ui.viewModel.auth.TokenViewModel
 import com.practica.buscov2.ui.viewModel.users.UserViewModel
 import com.practica.buscov2.util.AppUtils
@@ -33,6 +34,7 @@ import com.practica.buscov2.util.AppUtils
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun StartView(
+    vmStart: StartViewModel,
     vmToken: TokenViewModel,
     vmUser: UserViewModel,
     navController: NavController
@@ -40,37 +42,43 @@ fun StartView(
     val token by vmToken.token.collectAsState()
 
     LaunchedEffect(Unit) {
-        if (token != null) {
-            //verificar que el token no este vencido
-            if (AppUtils.expiredDate(token!!.expiration)) { //!! en vez de let ya que anteriormente verificamos que token no sea null
-                vmToken.deleteToken()
-                navController.navigate("Login")
-            } else {
-                //Verificar que este confirmado el usuario
-                vmUser.getMyProfile(token!!.token, {
-                    //En caso de error(ej.No existe usuario) ir al Login
-                    navController.navigate("Login")
-                }) { currentUser ->
-                    //En caso de obtener el usuario
-                    //Si esta confirmado
-                    if (currentUser.confirmed == true) {
-                        //Si los datos estan completados, ir a Home, si no, a completar los datos
-                        if (currentUser.name != null && currentUser.lastname != null) {
-                            navController.navigate("Home")
-                            //navController.navigate("Map/${32.726081873071266}/${-117.15301096027939}")
-                        } else {
-                            navController.navigate("CompleteData/${currentUser.username}")
+        vmStart.checkHealth {
+            if (it) {
+                if (token != null) {
+                    //verificar que el token no este vencido
+                    if (AppUtils.expiredDate(token!!.expiration)) { //!! en vez de let ya que anteriormente verificamos que token no sea null
+                        vmToken.deleteToken()
+                        navController.navigate("Login")
+                    } else {
+                        //Verificar que este confirmado el usuario
+                        vmUser.getMyProfile(token!!.token, {
+                            //En caso de error(ej.No existe usuario) ir al Login
+                            navController.navigate("Login")
+                        }) { currentUser ->
+                            //En caso de obtener el usuario
+                            //Si esta confirmado
+                            if (currentUser.confirmed == true) {
+                                //Si los datos estan completados, ir a Home, si no, a completar los datos
+                                if (currentUser.name != null && currentUser.lastname != null) {
+                                    navController.navigate("Home")
+                                    //navController.navigate("Map/${32.726081873071266}/${-117.15301096027939}")
+                                } else {
+                                    navController.navigate("CompleteData/${currentUser.username}")
+                                }
+                            }
+                            //Si no esta confirmado
+                            else {
+                                val userJson = Gson().toJson(currentUser)
+                                navController.navigate("CheckEmailView/${userJson}/check-email")
+                            }
                         }
                     }
-                    //Si no esta confirmado
-                    else {
-                        val userJson = Gson().toJson(currentUser)
-                        navController.navigate("CheckEmailView/${userJson}/check-email")
-                    }
+                } else {
+                    navController.navigate("Login")
                 }
+            } else {
+                navController.navigate("NoConnection")
             }
-        } else {
-            navController.navigate("Login")
         }
     }
 

@@ -2,6 +2,7 @@ package com.practica.buscov2.data.repository.busco
 
 import android.util.Log
 import com.practica.buscov2.data.ApiBusco
+import com.practica.buscov2.model.busco.ResultList
 import com.practica.buscov2.model.busco.Worker
 import com.practica.buscov2.model.busco.auth.ErrorBusco
 import com.practica.buscov2.util.ServerUtils.Companion.gsonError
@@ -47,7 +48,7 @@ class WorkersRepository @Inject constructor(private val api: ApiBusco) {
         lng: Double? = null
     ): List<Worker> {
         delay(2000) //para demostracion
-        val response = api.getRecommendedWorkers("Bearer $token", page, pageSize,lat, lng)
+        val response = api.getRecommendedWorkers("Bearer $token", page, pageSize, lat, lng)
         return response.body() ?: emptyList()
     }
 
@@ -63,10 +64,8 @@ class WorkersRepository @Inject constructor(private val api: ApiBusco) {
         pageSize: Int? = null,
         lat: Double? = null,
         lng: Double? = null
-    ): List<Worker> {
+    ): ResultList<Worker> {
         try {
-            delay(1000)
-
             val response = api.searchWorkers(
                 token = "Bearer $token",
                 query = query,
@@ -80,9 +79,12 @@ class WorkersRepository @Inject constructor(private val api: ApiBusco) {
                 lat, lng
             )
 
-            return response.body() ?: emptyList()
+            val customHeaderValue = response.headers()["NumberOfRecords"]
+            val numberOfRecords = customHeaderValue?.toIntOrNull() ?: 0
+
+            return ResultList(numberOfRecords, response.body() ?: emptyList())
         } catch (e: Exception) {
-            return emptyList()
+            return ResultList(0, emptyList())
         }
     }
 

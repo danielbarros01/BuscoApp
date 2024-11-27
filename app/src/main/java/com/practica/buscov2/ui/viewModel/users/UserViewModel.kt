@@ -5,6 +5,7 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.practica.buscov2.data.dataStore.StoreToken
+import com.practica.buscov2.data.dataStore.StoreUbication
 import com.practica.buscov2.data.repository.busco.UsersRepository
 import com.practica.buscov2.model.busco.auth.ErrorBusco
 import com.practica.buscov2.model.busco.User
@@ -16,12 +17,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import okio.IOException
 import javax.inject.Inject
 
 @HiltViewModel
 class UserViewModel @Inject constructor(
     private val repo: UsersRepository,
-    private val storeToken: StoreToken
+    private val storeToken: StoreToken,
+    private val storeUbication: StoreUbication
 ) : ViewModel() {
     private val _user = MutableStateFlow<User?>(null)
     val user: StateFlow<User?> = _user
@@ -33,29 +36,41 @@ class UserViewModel @Inject constructor(
     fun logout(onSuccesss: () -> Unit) {
         viewModelScope.launch {
             storeToken.clearToken()
+            storeUbication.clearUbication()
+
             onSuccesss()
         }
     }
 
     fun getMyProfile(token: String, onError: (ErrorBusco) -> Unit, onSuccess: (User) -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
-            val result = repo.getMyProfile(token)
+            try {
+                val result = repo.getMyProfile(token)
 
-            withContext(Dispatchers.Main) {
-                when (result) {
-                    //Si tenemos un usuario
-                    is UserResult.Success -> {
-                        _user.value = result.user
-                        onSuccess(result.user)
-                    }
+                withContext(Dispatchers.Main) {
+                    when (result) {
+                        //Si tenemos un usuario
+                        is UserResult.Success -> {
+                            _user.value = result.user
+                            onSuccess(result.user)
+                        }
 
-                    //Si tenemos un error
-                    is UserResult.Error -> {
-                        val error =
-                            ErrorBusco(title = result.error.title, message = result.error.message)
-                        onError(error)
+                        //Si tenemos un error
+                        is UserResult.Error -> {
+                            val error =
+                                ErrorBusco(title = result.error.title, message = result.error.message)
+                            onError(error)
+                        }
                     }
                 }
+            }catch (e:IOException){
+                val error =
+                    ErrorBusco(title = "Sin conexión", message = "Error de conexión")
+                onError(error)
+            }catch (e:Exception){
+                val error =
+                    ErrorBusco(title = "", message = e.message ?: "Ha ocurrido un error al obtener el perfil")
+                onError(error)
             }
         }
     }

@@ -156,5 +156,11 @@ class AppUtils {
                 "Fecha inválida"
             }
         }
+
+        fun starsToPercentage(value:Int):Int{
+            //MIN 0
+            //MAX 5
+            return value * 20;
+        }
     }
 }

@@ -61,7 +61,11 @@ class NotificationsViewModel @Inject constructor(
         }
 
     fun sendNotification(notification: Notification) {
-        hubConnection?.send("SendNotification", notification)
+        try {
+            hubConnectionChat?.send("SendProposal", notification)
+        } catch (e: Exception) {
+            Log.d("Error", e.message.toString())
+        }
     }
 
     private fun observeToken() {
@@ -84,19 +88,29 @@ class NotificationsViewModel @Inject constructor(
             .withAccessTokenProvider(Single.defer { Single.just(token) })
             .build()
 
-        hubConnection?.on("ReceiveNotification", { notification: Notification ->
-            NotificationWorker.releaseNotification(_context.value!!, notification)
+        hubConnectionChat?.on("ReceiveNotification", { notification: Notification ->
+            NotificationWorker.releaseNotification(_context.value!!, Notification(
+                userReceiveId = notification.userReceiveId,
+                userSenderId = notification.userSenderId,
+                text = notification.text,
+                dateAndTime = notification.dateAndTime,
+                title = notification.userSender?.username ?: "Nueva notificación",
+                notificationType = "MESSAGE"
+            ))
+            Log.d("context", _context.value.toString())
         }, Notification::class.java)
 
         hubConnectionChat?.on("ReceiveMessageNotification", { message: Message ->
-            NotificationWorker.releaseNotification(_context.value!!, Notification(
-                userReceiveId = message.userIdReceiver,
-                userSenderId = message.userIdSender,
-                text = message.text,
-                dateAndTime = message.dateAndTime,
-                title = message.userSender?.username ?: "Usuario ${message.userIdSender}",
-                notificationType = "MESSAGE"
-            ))
+            NotificationWorker.releaseNotification(
+                _context.value!!, Notification(
+                    userReceiveId = message.userIdReceiver,
+                    userSenderId = message.userIdSender,
+                    text = message.text,
+                    dateAndTime = message.dateAndTime,
+                    title = message.userSender?.username ?: "Usuario ${message.userIdSender}",
+                    notificationType = "MESSAGE"
+                )
+            )
         }, Message::class.java)
 
         hubConnection?.start()?.blockingAwait()

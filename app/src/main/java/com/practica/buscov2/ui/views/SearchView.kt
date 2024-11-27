@@ -60,6 +60,7 @@ import com.practica.buscov2.ui.viewModel.ubication.MapViewModel
 import com.practica.buscov2.ui.viewModel.ubication.SearchMapViewModel
 import com.practica.buscov2.ui.viewModel.users.UserViewModel
 import com.practica.buscov2.ui.views.maps.MapViewUI
+import com.practica.buscov2.ui.views.util.ActiveLoader
 import com.practica.buscov2.util.AppUtils
 import com.practica.buscov2.util.AppUtils.Companion.formatNumber
 import kotlinx.coroutines.launch
@@ -146,6 +147,8 @@ fun SearchV(
     val coordinates = searchMapVM.placeCoordinates.value
     var setUbicationStart by remember { mutableStateOf(false) }
 
+    val totalRecords by vmSearch.totalRecords.collectAsState()
+
     LaunchedEffect(ubication.value) {
         val location = ubication.value ?: LatLng(user.latitude!!, user.longitude!!)
 
@@ -203,7 +206,11 @@ fun SearchV(
         vmSearch.setStars(stars)
         vmSearch.setCategory(category)
 
-        vmSearch.refreshWorkers()
+        if( search == "workers"){
+            vmSearch.refreshWorkers()
+        }else{
+            vmSearch.refreshProposals()
+        }
     }
 
     LateralMenu(
@@ -237,7 +244,7 @@ fun SearchV(
                             .fillMaxWidth()
                             .padding(horizontal = 15.dp)
                     ) {
-                        Text(text = "", color = OrangePrincipal)
+                        Text(text = "$totalRecords resultados", color = OrangePrincipal)
                         Row(modifier = Modifier, verticalAlignment = Alignment.CenterVertically) {
                             Text(text = "Filtrar", color = OrangePrincipal)
                             IconButton(onClick = {
@@ -262,9 +269,9 @@ fun SearchV(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 if (search == "workers") {
-                    SearchWorkers(vmSearch, navController)
+                    SearchWorkers(vmSearch, vmLoading,navController)
                 } else {
-                    SearchProposals(vmSearch, navController)
+                    SearchProposals(vmSearch,vmLoading, navController)
                 }
             }
         }
@@ -272,8 +279,15 @@ fun SearchV(
 }
 
 @Composable
-fun SearchWorkers(vmSearch: SearchViewModel, navController: NavController) {
+fun SearchWorkers(vmSearch: SearchViewModel,vmLoading: LoadingViewModel, navController: NavController) {
     val workersPage = vmSearch.workersPage.collectAsLazyPagingItems()
+    ActiveLoader.activeLoaderMax(workersPage, vmLoading)
+
+    if(workersPage.itemCount == 0){
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text(text = "No se encontraron trabajadores")
+        }
+    }
 
     ItemsInLazy(workersPage, secondViewHeader = {}) { worker ->
         CardWorker(
@@ -281,7 +295,7 @@ fun SearchWorkers(vmSearch: SearchViewModel, navController: NavController) {
                 .height(150.dp)
                 .padding(vertical = 10.dp),
             worker = worker,
-            rating = Qualification(worker.averageQualification),
+            rating = Qualification(worker.averageQualification, worker.numberOfQualifications),
             onClick = {
                 navController.navigate("Profile/${worker.userId}")
             }
@@ -291,10 +305,17 @@ fun SearchWorkers(vmSearch: SearchViewModel, navController: NavController) {
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun SearchProposals(vmSearch: SearchViewModel, navController: NavController) {
-    val workersPage = vmSearch.proposalsPage.collectAsLazyPagingItems()
+fun SearchProposals(vmSearch: SearchViewModel,vmLoading: LoadingViewModel, navController: NavController) {
+    val proposalsPage = vmSearch.proposalsPage.collectAsLazyPagingItems()
+    ActiveLoader.activeLoaderMax(proposalsPage, vmLoading)
 
-    ItemsInLazy(workersPage, secondViewHeader = {}) {
+    if(proposalsPage.itemCount == 0){
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text(text = "Sin resultados")
+        }
+    }
+
+    ItemsInLazy(proposalsPage, secondViewHeader = {}) {
         CardProposal(
             image = it.image ?: "",
             title = it.title ?: "",

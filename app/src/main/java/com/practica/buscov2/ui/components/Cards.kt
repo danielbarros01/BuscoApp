@@ -63,6 +63,7 @@ import com.practica.buscov2.ui.theme.YellowStar
 import com.practica.buscov2.util.AppUtils
 import com.practica.buscov2.util.AppUtils.Companion.daysAgo
 import com.practica.buscov2.util.AppUtils.Companion.formatNumber
+import com.practica.buscov2.util.AppUtils.Companion.starsToPercentage
 
 @Composable
 fun CardProposal(
@@ -301,7 +302,7 @@ fun CardWorkerRecommendation(
                 )
                 Box {
                     Text(
-                        text = "$qualification% calificación",
+                        text = "${starsToPercentage(qualification)}% calificación",
                         fontSize = 15.sp,
                         style = TextStyle.Default.copy(
                             color = Color.White,
@@ -310,7 +311,9 @@ fun CardWorkerRecommendation(
                     )
 
                     Text(
-                        text = "$qualification% calificación", fontSize = 15.sp, color = YellowGold,
+                        text = "${starsToPercentage(qualification)}% calificación",
+                        fontSize = 15.sp,
+                        color = YellowGold,
                         style = TextStyle.Default.copy(
                             drawStyle = Stroke(width = 3f, join = StrokeJoin.Round),
                             fontWeight = FontWeight.Bold
@@ -341,7 +344,10 @@ fun CardWorkerRecommendation(
                         maxLines = 3,
                         overflow = TextOverflow.Ellipsis
                     )
-                    Text(text = "${worker.user?.name} ${worker.user?.lastname}", color = Color.White)
+                    Text(
+                        text = "${worker.user?.name} ${worker.user?.lastname}",
+                        color = Color.White
+                    )
                 }
                 Text(
                     text = "${worker.yearsExperience} años de experiencia",
@@ -435,7 +441,11 @@ fun CardProposalRecommendation(
                     )
                 }
                 Text(
-                    text = " $${formatNumber(proposal.minBudget.toString())} a $${formatNumber(proposal.maxBudget.toString())}",
+                    text = " $${formatNumber(proposal.minBudget.toString())} a $${
+                        formatNumber(
+                            proposal.maxBudget.toString()
+                        )
+                    }",
                     color = Color.White,
                     textAlign = TextAlign.End,
                     modifier = Modifier
@@ -637,7 +647,9 @@ fun CardQualificationOfUser(user: User, qualification: Qualification) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Hace ${daysAgo(qualification.date ?: "")} dias",
+                text = if (daysAgo(qualification.date!!) < 1) {
+                    "Hoy"
+                } else "Hace ${daysAgo(qualification.date)} días",
                 color = GrayText,
                 fontSize = 16.sp
             )
@@ -715,7 +727,9 @@ fun CardChatUser(chat: Chat, onClick: (Chat) -> Unit) {
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = "${chat.user?.name} ${chat.user?.lastname}",
+                    text = (if (!chat.user?.name.isNullOrEmpty()) {
+                        "${chat.user?.name} ${chat.user?.lastname}"
+                    } else chat.user?.username).toString(),
                     fontSize = 20.sp,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -744,8 +758,8 @@ fun CardNotification(notification: Notification, onClick: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .height(100.dp)
-            .clickable { onClick()},
-        horizontalAlignment =Alignment.CenterHorizontally,
+            .clickable { onClick() },
+        horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         Row(

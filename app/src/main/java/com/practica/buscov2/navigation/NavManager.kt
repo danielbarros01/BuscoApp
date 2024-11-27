@@ -22,6 +22,7 @@ import com.practica.buscov2.ui.viewModel.NewPublicationViewModel
 import com.practica.buscov2.ui.viewModel.NotificationsViewModel
 import com.practica.buscov2.ui.viewModel.QualificationsViewModel
 import com.practica.buscov2.ui.viewModel.SearchViewModel
+import com.practica.buscov2.ui.viewModel.StartViewModel
 import com.practica.buscov2.ui.viewModel.auth.LoginViewModel
 import com.practica.buscov2.ui.viewModel.auth.RecoverPasswordViewModel
 import com.practica.buscov2.ui.viewModel.auth.RegisterViewModel
@@ -62,6 +63,8 @@ import com.practica.buscov2.ui.views.proposals.ApplicantsView
 import com.practica.buscov2.ui.views.proposals.EditProposalView
 import com.practica.buscov2.ui.views.proposals.ProposalView
 import com.practica.buscov2.ui.views.proposals.ProposalsView
+import com.practica.buscov2.ui.views.util.NoConnection
+import com.practica.buscov2.ui.views.util.NoConnectionView
 import com.practica.buscov2.ui.views.workers.RegisterWorkerView
 
 
@@ -78,7 +81,13 @@ fun NavManager(context: Context) {
     NavHost(navController = navController, startDestination = "Start") {
         composable("Start") {
             val userViewModel: UserViewModel = hiltViewModel()
-            StartView(tokenViewModel, userViewModel, navController)
+            val startViewModel: StartViewModel = hiltViewModel()
+            
+            StartView(startViewModel, tokenViewModel, userViewModel, navController)
+        }
+
+        composable("NoConnection") {
+            NoConnectionView(navController)
         }
 
         composable("Login") {
@@ -397,6 +406,7 @@ fun NavManager(context: Context) {
                 tokenViewModel,
                 applicantsViewModel,
                 loadingViewModel,
+                notificationsViewModel,
                 navController
             )
         }

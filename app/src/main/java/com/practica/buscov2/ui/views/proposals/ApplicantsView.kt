@@ -22,6 +22,7 @@ import androidx.navigation.NavHostController
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.practica.buscov2.model.busco.Application
+import com.practica.buscov2.model.busco.Notification
 import com.practica.buscov2.model.busco.Qualification
 import com.practica.buscov2.model.busco.User
 import com.practica.buscov2.navigation.RoutesBottom
@@ -36,6 +37,7 @@ import com.practica.buscov2.ui.components.Space
 import com.practica.buscov2.ui.components.TopBarWithBack
 import com.practica.buscov2.ui.theme.GrayText
 import com.practica.buscov2.ui.viewModel.LoadingViewModel
+import com.practica.buscov2.ui.viewModel.NotificationsViewModel
 import com.practica.buscov2.ui.viewModel.auth.GoogleLoginViewModel
 import com.practica.buscov2.ui.viewModel.auth.TokenViewModel
 import com.practica.buscov2.ui.viewModel.proposals.ApplicationsViewModel
@@ -50,6 +52,7 @@ fun ApplicantsView(
     vmToken: TokenViewModel,
     applicantsViewModel: ApplicationsViewModel,
     vmLoading: LoadingViewModel,
+    vmNotifications: NotificationsViewModel,
     navController: NavHostController
 ) {
     applicantsViewModel.setProposalId(proposalId)
@@ -78,6 +81,7 @@ fun ApplicantsView(
                 user!!,
                 applicantsViewModel,
                 vmLoading,
+                vmNotifications,
                 navController
             )
         }
@@ -92,6 +96,7 @@ fun ApplicantsV(
     user: User,
     applicantsViewModel: ApplicationsViewModel,
     vmLoading: LoadingViewModel,
+    vmNotifications:NotificationsViewModel,
     navController: NavHostController
 ) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
@@ -127,7 +132,7 @@ fun ApplicantsV(
                 val applicantsPage = applicantsViewModel.applicantsPage.collectAsLazyPagingItems()
 
                 activeLoaderMax(applicantsPage, vmLoading)
-                ShowApplicants(applicantsPage, applicantsViewModel, vmLoading, navController,
+                ShowApplicants(applicantsPage,user, applicantsViewModel, vmLoading, vmNotifications, navController,
                     onErrorDecline = {
                         showError.value = true
                     },
@@ -155,8 +160,10 @@ fun ApplicantsV(
 @Composable
 fun ShowApplicants(
     applicantsPage: LazyPagingItems<Application>,
+    user: User,
     vmApplications: ApplicationsViewModel,
     vmLoading: LoadingViewModel,
+    vmNotifications: NotificationsViewModel,
     navController: NavController,
     onErrorDecline: () -> Unit = {},
     onSuccessDecline: () -> Unit = {},
@@ -165,7 +172,7 @@ fun ShowApplicants(
 ) {
     ItemsInLazy(applicantsPage) { item ->
         val idUser = item.worker?.user?.id ?: 0
-        val qualification = Qualification(5f, 20)
+        val qualification = Qualification(item.worker?.averageQualification, item.worker?.numberOfQualifications)
 
         CardApplicant(
             item,
@@ -185,6 +192,14 @@ fun ShowApplicants(
                         },
                         onSuccess = {
                             //Actualizar la lista
+                            vmNotifications.sendNotification(
+                                Notification(
+                                    userSenderId = user.id,
+                                    userReceiveId = idUser,
+                                    text = "${user.username} ha rechazado tu postulación",
+                                    proposalId = item.proposalId
+                                )
+                            )
                             onSuccessDecline()
                         })
                 }
@@ -200,6 +215,15 @@ fun ShowApplicants(
                             onErrorAccept()
                         },
                         onSuccess = {
+                            vmNotifications.sendNotification(
+                                Notification(
+                                    userSenderId = user.id,
+                                    userReceiveId = idUser,
+                                    text = "${user.username} ha aceptado tu postulación",
+                                    proposalId = item.proposalId
+                                )
+                            )
+
                             //Ir a propuesta
                             navController.navigate("Proposal/${item.proposalId}")
                         })

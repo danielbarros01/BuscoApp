@@ -3,6 +3,7 @@ package com.practica.buscov2.data.repository.busco
 import android.util.Log
 import com.practica.buscov2.data.ApiBusco
 import com.practica.buscov2.model.busco.Proposal
+import com.practica.buscov2.model.busco.ResultList
 import com.practica.buscov2.model.busco.auth.ErrorBusco
 import com.practica.buscov2.util.ServerUtils
 import kotlinx.coroutines.delay
@@ -64,10 +65,14 @@ class ProposalsRepository @Inject constructor(private val api: ApiBusco) {
         page: Int? = null,
         pageSize: Int? = null,
         status: Boolean? = null
-    ): List<Proposal> {
+    ): ResultList<Proposal> {
         delay(2000) //para demostracion
         val response = api.getProposalsOfUser(userId, page, pageSize, status)
-        return response.body() ?: emptyList()
+
+        val customHeaderValue = response.headers()["NumberOfRecords"]
+        val numberOfRecords = customHeaderValue?.toIntOrNull() ?: 0
+
+        return ResultList(numberOfRecords, response.body() ?: emptyList())
     }
 
     suspend fun getProposal(proposalId: Int): Proposal? {
@@ -149,7 +154,7 @@ class ProposalsRepository @Inject constructor(private val api: ApiBusco) {
         pageSize: Int? = null,
         lat: Double? = null,
         lng: Double? = null
-    ): List<Proposal> {
+    ): ResultList<Proposal> {
         delay(2000) //para demostracion
         try {
             val response = api.getRecommendedProposals(
@@ -158,10 +163,14 @@ class ProposalsRepository @Inject constructor(private val api: ApiBusco) {
                 pageSize,
                 lat, lng
             )
-            return response.body() ?: emptyList()
+
+            val customHeaderValue = response.headers()["NumberOfRecords"]
+            val numberOfRecords = customHeaderValue?.toIntOrNull() ?: 0
+
+            return ResultList(numberOfRecords, response.body() ?: emptyList())
         } catch (error: Exception) {
             Log.d("Error", error.toString())
-            return emptyList()
+            return ResultList(0, emptyList())
         }
     }
 
@@ -187,7 +196,7 @@ class ProposalsRepository @Inject constructor(private val api: ApiBusco) {
         pageSize: Int? = null,
         lat: Double? = null,
         lng: Double? = null
-    ): List<Proposal> {
+    ): ResultList<Proposal> {
         try {
             delay(1000)
 
@@ -200,9 +209,12 @@ class ProposalsRepository @Inject constructor(private val api: ApiBusco) {
                 lat, lng
             )
 
-            return response.body() ?: emptyList()
+            val customHeaderValue = response.headers()["NumberOfRecords"]
+            val numberOfRecords = customHeaderValue?.toIntOrNull() ?: 0
+
+            return ResultList(numberOfRecords, response.body() ?: emptyList())
         } catch (e: Exception) {
-            return emptyList()
+            return ResultList(0, emptyList())
         }
     }
 }

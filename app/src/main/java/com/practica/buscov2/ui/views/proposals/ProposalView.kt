@@ -21,6 +21,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -223,7 +224,7 @@ fun ProposalV(
                 it.latitude?.let { latitude ->
                     it.longitude?.let { longitude ->
                         searchMapVM.getLocation(latitude, longitude) { address ->
-                            address?.let {results ->
+                            address?.let { results ->
                                 searchMapVM.setAddress(results.formatted_address)
                             }
                         }
@@ -273,7 +274,7 @@ fun ProposalV(
                         },
                         onSuccess = {
                             //Ir a mis trabajos
-                            navController.navigate("Jobs/me")
+                            navController.navigate("Applications/me")
                         })
                 }
             })
@@ -367,33 +368,44 @@ fun ProposalV(
                             }
                             if (userOwnerProposal != null) {
                                 ButtonPrincipal(
-                                    text = if (user.id == userOwnerProposal?.id) "Ver postulantes" else "Aplicar",
-                                    enabled = !(proposal?.status == false && user.id != userOwnerProposal?.id) //verificar si esta en proceso y el usuario no es el dueño
-                                ) {
+                                    text = if (user.id == userOwnerProposal?.id) "Ver postulantes"
+                                    else if (application?.worker?.userId == user.id) "Ir al chat"
+                                    else "Aplicar",
+                                    enabled = application?.worker?.userId == user.id
+                                            || !(proposal?.status == false && user.id != userOwnerProposal?.id)
+                                )
+                                //verificar si esta en proceso y el usuario no es el dueño
+                                {
                                     if (user.id == userOwnerProposal?.id) {
                                         //Ver postulantes
                                         navController.navigate("Applicants/${proposalId}")
+                                    } else if (application?.worker?.userId == user.id) {
+                                        navController.navigate("Chat/${userOwnerProposal?.id}")
                                     } else {
-                                        //Verificar el tipo de trabajador que buscan
-                                        if (user.worker?.professions?.firstOrNull()?.id?.equals(
-                                                proposal?.professionId
-                                            ) == false
-                                        ) {
-                                            //Si es distinto mostrar un cuadro de aviso
-                                            showAlertDifferentJob.value = true
-                                        } else {
-                                            //Aplicar e ir a aplicaciones
-                                            vmLoading.withLoading {
-                                                applicationsViewModel.applyToProposal(
-                                                    proposalId,
-                                                    onError = {
-                                                        vmProposal.setError(it)
-                                                        showError.value = true
-                                                    },
-                                                    onSuccess = {
-                                                        //Ir a mis trabajos
-                                                        navController.navigate("Jobs/me")
-                                                    })
+                                        if(user.worker == null){
+                                            navController.navigate("BeWorker")
+                                        }else{
+                                            //Verificar el tipo de trabajador que buscan
+                                            if (user.worker.professions?.firstOrNull()?.id?.equals(
+                                                    proposal?.professionId
+                                                ) == false
+                                            ) {
+                                                //Si es distinto mostrar un cuadro de aviso
+                                                showAlertDifferentJob.value = true
+                                            } else {
+                                                //Aplicar e ir a aplicaciones
+                                                vmLoading.withLoading {
+                                                    applicationsViewModel.applyToProposal(
+                                                        proposalId,
+                                                        onError = {
+                                                            vmProposal.setError(it)
+                                                            showError.value = true
+                                                        },
+                                                        onSuccess = {
+                                                            //Ir a mis trabajos
+                                                            navController.navigate("Jobs/me")
+                                                        })
+                                                }
                                             }
                                         }
                                     }
@@ -446,6 +458,7 @@ fun ProposalV(
                                 proposal,
                                 application,
                                 userOwnerProposal,
+                                user,
                                 searchMapVM,
                                 navController
                             )
@@ -504,12 +517,24 @@ fun PriceAndDate(proposal: Proposal) {
 }
 
 @Composable
-fun ProposalDescription(proposal: Proposal) {
+fun ProposalDescription(proposal: Proposal, application: Application?, user: User?) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
+        if (application?.worker?.userId == user?.id) {
+            HorizontalDivider(color = GreenBusco)
+            Text(
+                modifier = Modifier.padding(vertical = 4.dp),
+                text = "Estas asignado a este trabajo, comunícate con el autor de esta propuesta.",
+                fontWeight = FontWeight.Medium,
+                color = GrayText
+            )
+            HorizontalDivider(color = GreenBusco)
+            Space(size = 4.dp)
+        }
+
         Text(text = proposal.description ?: "")
 
         Text(
@@ -545,7 +570,7 @@ fun ProposalMoreInfo(
         if (proposal.status != null && application != null) {
             application.worker?.let {
                 //ACA
-                DataWorker(it, Qualification(5f, 20)) {
+                DataWorker(it, Qualification(it.averageQualification, it.numberOfQualifications)) {
                     navController?.navigate("Profile/${it.user?.id}")
                 }
             }
@@ -611,6 +636,7 @@ fun ProposalMoreInfo(
 private fun TabsPages(
     proposal: Proposal,
     application: Application?,
+    userOwner: User?,
     user: User?,
     searchMapVM: SearchMapViewModel,
     navController: NavController
@@ -625,7 +651,16 @@ private fun TabsPages(
             modifier = Modifier.padding(horizontal = 40.dp, vertical = 5.dp),
             fontSize = 14.sp
         )
-        TabsContent(tabs, pagerState, proposal, application, user, searchMapVM, navController)
+        TabsContent(
+            tabs,
+            pagerState,
+            proposal,
+            application,
+            userOwner,
+            user,
+            searchMapVM,
+            navController
+        )
     }
 }
 
@@ -636,6 +671,7 @@ private fun TabsContent(
     pagerState: PagerState,
     proposal: Proposal,
     application: Application? = null,
+    userOwner: User?,
     user: User?,
     searchMapVM: SearchMapViewModel,
     navController: NavController
@@ -643,7 +679,7 @@ private fun TabsContent(
     HorizontalPager(
         state = pagerState
     ) { page ->
-        tabs[page].screen(proposal, application, user, navController, searchMapVM)
+        tabs[page].screen(proposal, application, userOwner, user, navController, searchMapVM)
     }
 }
 

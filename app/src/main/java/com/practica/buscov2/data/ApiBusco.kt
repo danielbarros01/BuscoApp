@@ -18,6 +18,7 @@ import com.practica.buscov2.util.Constants.Companion.CONFIRM_PASSWORD_CODE
 import com.practica.buscov2.util.Constants.Companion.CONFIRM_REGISTER
 import com.practica.buscov2.util.Constants.Companion.ENDPOINT_APPLICATIONS
 import com.practica.buscov2.util.Constants.Companion.ENDPOINT_CATEGORIES
+import com.practica.buscov2.util.Constants.Companion.ENDPOINT_HEALTH
 import com.practica.buscov2.util.Constants.Companion.ENDPOINT_JOBS
 import com.practica.buscov2.util.Constants.Companion.ENDPOINT_LOGIN
 import com.practica.buscov2.util.Constants.Companion.ENDPOINT_MY_PROFILE
@@ -50,6 +51,9 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface ApiBusco {
+    @GET(ENDPOINT_HEALTH)
+    suspend fun checkHealth(): Response<Unit>
+
     @POST("$ENDPOINT_USERS/$ENDPOINT_LOGIN")
     suspend fun login(
         @Body loginRequest: LoginRequest

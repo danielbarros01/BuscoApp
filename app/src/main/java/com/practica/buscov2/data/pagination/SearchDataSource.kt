@@ -5,6 +5,7 @@ import androidx.paging.PagingState
 import com.google.android.gms.maps.model.LatLng
 import com.practica.buscov2.data.repository.busco.WorkersRepository
 import com.practica.buscov2.model.busco.Worker
+import kotlinx.coroutines.flow.MutableSharedFlow
 
 class SearchDataSource(
     private val repo: WorkersRepository,
@@ -19,6 +20,8 @@ class SearchDataSource(
     private val categoryId = categoryIdP
     private val qualificationStars = qualificationStarsP
     private val ubication = ubicationP
+
+    val totalRecordsFlow = MutableSharedFlow<Int>()
 
     override fun getRefreshKey(state: PagingState<Int, Worker>): Int? {
         return state.anchorPosition?.let { anchorPosition ->
@@ -41,10 +44,13 @@ class SearchDataSource(
                 lng = ubication?.longitude
             )
 
+            // Emitir numberOfRecords en el flujo
+            totalRecordsFlow.emit(response.numberOfRecords)
+
             LoadResult.Page(
-                data = response,
+                data = response.records,
                 prevKey = null,
-                nextKey = if (response.isEmpty()) null else nextPageNumber + 1
+                nextKey = if (response.records.isEmpty()) null else nextPageNumber + 1
             )
         } catch (e: Exception) {
             LoadResult.Error(e)

@@ -128,7 +128,7 @@ fun Login(
     vmLoading: LoadingViewModel,
     navController: NavController
 ) {
-    val email: String by viewModel.email
+    val loginValue: String by viewModel.loginValue
     val password: String by viewModel.password
     val loginEnable: Boolean by viewModel.loginEnabled
     val showError = remember { mutableStateOf(false) }
@@ -157,12 +157,12 @@ fun Login(
         Title(text = "Bienvenido!")
         Space(25.dp)
         CommonField(
-            email,
+            loginValue,
             "Ingrese su email/username",
             KeyboardType.Email
         ) { viewModel.onLoginChanged(it, password) }
         Space(8.dp)
-        PasswordField(password) { viewModel.onLoginChanged(email, it) }
+        PasswordField(password) { viewModel.onLoginChanged(loginValue, it) }
         Space(4.dp)
         ForgotPassword {
             navController.navigate("RecoverPassword")

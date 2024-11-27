@@ -13,8 +13,8 @@ import javax.inject.Inject
 
 class AuthRepository @Inject constructor(private val api: ApiBusco) {
 
-    suspend fun login(email: String, password: String): LoginResult? {
-        val response = api.login(LoginRequest(email, password))
+    suspend fun login(loginReq: LoginRequest): LoginResult? {
+        val response = api.login(loginReq)
 
         return when (response.code()) {
             200 -> if (response.isSuccessful) response.body()

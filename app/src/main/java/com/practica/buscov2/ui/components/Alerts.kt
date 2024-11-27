@@ -519,6 +519,7 @@ fun AlertFilters(
             confirmButton = {
                 ButtonPrincipal(text = "Filtrar", enabled = true) {
                     onFilter(stars, categorySelected)
+                    showDialog.value = false
                 }
             }
         )

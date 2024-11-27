@@ -3,6 +3,7 @@ package com.practica.buscov2.ui.views.chat
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -141,6 +142,9 @@ fun ChatP(
                             verticalArrangement = Arrangement.Center
                         ) {
                             Text(
+                                modifier = Modifier.clickable {
+                                    navController.navigate("Profile/${toUser.id}")
+                                },
                                 text = "${toUser.name} ${toUser.lastname}",
                                 fontSize = 26.sp,
                                 fontWeight = FontWeight.Medium

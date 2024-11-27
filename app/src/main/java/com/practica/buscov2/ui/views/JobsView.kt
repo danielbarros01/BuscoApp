@@ -34,6 +34,7 @@ import com.practica.buscov2.ui.components.ItemsInLazy
 import com.practica.buscov2.ui.components.LateralMenu
 import com.practica.buscov2.ui.components.LoaderMaxSize
 import com.practica.buscov2.ui.components.MenuNavigation
+import com.practica.buscov2.ui.components.Space
 import com.practica.buscov2.ui.components.TabsComponent
 import com.practica.buscov2.ui.components.TopBar
 import com.practica.buscov2.ui.theme.GrayText
@@ -182,6 +183,7 @@ private fun ShowJobs(jobsPage: LazyPagingItems<Proposal>, navController: NavCont
                     //Ir al chat
                     navController.navigate("Chat/${user.id}")
                 })
+            Space(size = 6.dp)
         }
     }
 }

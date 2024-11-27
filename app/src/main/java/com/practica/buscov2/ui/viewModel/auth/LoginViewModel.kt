@@ -18,6 +18,7 @@ import com.practica.buscov2.model.busco.auth.LoginResult
 import com.practica.buscov2.model.busco.auth.LoginToken
 import com.practica.buscov2.model.busco.auth.ErrorBusco
 import com.practica.buscov2.model.busco.User
+import com.practica.buscov2.model.busco.auth.LoginRequest
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -29,8 +30,8 @@ class LoginViewModel @Inject constructor(
     private val storeToken: StoreToken
 ) : ViewModel() {
 
-    private val _email: MutableState<String> = mutableStateOf("")
-    val email: State<String> = _email
+    private val _loginValue: MutableState<String> = mutableStateOf("")
+    val loginValue: State<String> = _loginValue
 
     private val _password: MutableState<String> = mutableStateOf("")
     val password: State<String> = _password
@@ -43,10 +44,10 @@ class LoginViewModel @Inject constructor(
         private set
 
     //Cambiar los valores
-    fun onLoginChanged(email: String, password: String) {
-        _email.value = email
+    fun onLoginChanged(loginValue: String, password: String) {
+        _loginValue.value = loginValue
         _password.value = password
-        _loginEnabled.value = isValidEmail(email) && isValidPassword(password)
+        _loginEnabled.value = loginValue.isNotEmpty() && isValidPassword(password)
     }
 
     private fun isValidEmail(email: String): Boolean =
@@ -57,7 +58,11 @@ class LoginViewModel @Inject constructor(
     fun login(onError: () -> Unit, onSuccess: (String) -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                val response: LoginResult? = repo.login(email.value, password.value)
+                val response: LoginResult? = if (isValidEmail(loginValue.value)) {
+                    repo.login(LoginRequest(email = loginValue.value, password = password.value))
+                } else {
+                    repo.login(LoginRequest(username = loginValue.value, password = password.value))
+                }
 
                 //Si hay un error
                 if (response?.error != null) {
@@ -103,7 +108,7 @@ class LoginViewModel @Inject constructor(
                 val response: LoginResult? = repo.loginGoogle(
                     User(
                         //Para quitar espacio si existe
-                        username = name?.replace(" ",""),
+                        username = name?.replace(" ", ""),
                         email = email,
                         googleId = googleId.toString()
                     )

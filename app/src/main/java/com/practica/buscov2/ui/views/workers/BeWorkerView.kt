@@ -53,6 +53,7 @@ fun BeWorker(modifier: Modifier, navController: NavController) {
         ButtonLine("No, gracias") {
             navController.navigate("Home")
         }
+
         Space(size = 5.dp)
         ButtonPrincipal(text = "Ser trabajador", enabled = true) {
             navController.navigate("RegisterWorker")

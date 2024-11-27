@@ -12,22 +12,22 @@ import com.practica.buscov2.ui.views.proposals.ProposalMoreInfo
 sealed class ItemTabOnlyProposal(
     override var title: String,
     override var icon: Int? = null,
-    var screen: @Composable (Proposal, Application?, User?, NavController?, SearchMapViewModel) -> Unit
+    var screen: @Composable (Proposal, Application?, User?, User?, NavController?, SearchMapViewModel) -> Unit
 ) : TabItem {
     data object TabDescription : ItemTabOnlyProposal(
         title = "Descripción",
-        screen = { proposal, application, user, navController, searchMapVM ->
-            ProposalDescription(proposal)
+        screen = { proposal, application, _, user, _, _ ->
+            ProposalDescription(proposal, application, user)
         }
     )
 
     data object TabMoreInfo : ItemTabOnlyProposal(
         title = "Más info",
-        screen = { proposal, application, user, navController, searchMapVM ->
+        screen = { proposal, application, userOwner, _, navController, searchMapVM ->
             ProposalMoreInfo(
                 proposal,
                 application,
-                user,
+                userOwner,
                 searchMapVM,
                 navController
             )

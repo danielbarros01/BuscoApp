@@ -5,6 +5,7 @@ import androidx.paging.PagingState
 import com.google.android.gms.maps.model.LatLng
 import com.practica.buscov2.data.repository.busco.ProposalsRepository
 import com.practica.buscov2.model.busco.Proposal
+import kotlinx.coroutines.flow.MutableSharedFlow
 
 class ProposalsDataSource(
     private val repo: ProposalsRepository,
@@ -23,6 +24,8 @@ class ProposalsDataSource(
     private val ubication = ubicationP
     private val query = queryP
     private val categoryId = categoryIdP
+
+    val totalRecordsFlow = MutableSharedFlow<Int>()
 
     //controla el estado de paginacion
     override fun getRefreshKey(state: PagingState<Int, Proposal>): Int? {
@@ -68,11 +71,14 @@ class ProposalsDataSource(
                         ubication?.longitude
                     )
                 }
+
+            totalRecordsFlow.emit(response.numberOfRecords)
+
             // Devuelve los resultados cargados en una página
             LoadResult.Page(
-                data = response, // Datos de la respuesta
+                data = response.records, // Datos de la respuesta
                 prevKey = null, //Sin pagina anterior
-                nextKey = if (response.isEmpty()) null else nextPageNumber + 1 // Determina la siguiente clave
+                nextKey = if (response.records.isEmpty()) null else nextPageNumber + 1 // Determina la siguiente clave
             )
         } catch (e: Exception) {
             LoadResult.Error(e)
