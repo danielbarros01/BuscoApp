@@ -162,5 +162,13 @@ class AppUtils {
             //MAX 5
             return value * 20;
         }
+
+        @RequiresApi(Build.VERSION_CODES.O)
+        fun getCurrentTimeFormatted(): String {
+            val current = LocalDateTime.now()
+            val formatter = DateTimeFormatter.ISO_DATE_TIME
+            return current.format(formatter)
+        }
+
     }
 }

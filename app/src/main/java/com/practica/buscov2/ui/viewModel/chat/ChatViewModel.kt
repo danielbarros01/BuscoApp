@@ -1,6 +1,8 @@
 package com.practica.buscov2.ui.viewModel.chat
 
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.gson.reflect.TypeToken
@@ -11,6 +13,7 @@ import com.practica.buscov2.model.busco.Chat
 import com.practica.buscov2.model.busco.Message
 import com.practica.buscov2.model.busco.User
 import com.practica.buscov2.model.busco.auth.LoginToken
+import com.practica.buscov2.util.AppUtils.Companion.getCurrentTimeFormatted
 import com.practica.buscov2.util.Constants.Companion.BASE_URL_CHAT
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.rxjava3.core.Single
@@ -67,8 +70,9 @@ class ChatViewModel @Inject constructor(
         getChats()
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     fun sendMessage(userIdReceiver: Int, message: String) {
-        hubConnection.send("SendMessage", userIdReceiver, message)
+        hubConnection.send("SendMessage", userIdReceiver, message, getCurrentTimeFormatted())
     }
 
     private fun getChats() {

@@ -20,13 +20,17 @@ class StartViewModel @Inject constructor(
     val isConnected: StateFlow<Boolean?> = _isConnected
 
     fun checkHealth(onResult : (Boolean) -> Unit) {
-        viewModelScope.launch {
-            val response = withContext(Dispatchers.IO) {
-                repository.checkHealth()
-            }
-            _isConnected.value = response
+        try {
+            viewModelScope.launch {
+                val response = withContext(Dispatchers.IO) {
+                    repository.checkHealth()
+                }
+                _isConnected.value = response
 
-            onResult(response)
+                onResult(response)
+            }
+        }catch (e : Exception){
+            onResult(false)
         }
     }
 }

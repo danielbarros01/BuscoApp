@@ -80,41 +80,45 @@ class NotificationsViewModel @Inject constructor(
     }
 
     private fun setupHubConnection(token: String) {
-        hubConnection = HubConnectionBuilder.create(Constants.BASE_URL_NOTIFICATIONS)
-            .withAccessTokenProvider(Single.defer { Single.just(token) })
-            .build()
+        try {
+            hubConnection = HubConnectionBuilder.create(Constants.BASE_URL_NOTIFICATIONS)
+                .withAccessTokenProvider(Single.defer { Single.just(token) })
+                .build()
 
-        hubConnectionChat = HubConnectionBuilder.create(Constants.BASE_URL_CHAT)
-            .withAccessTokenProvider(Single.defer { Single.just(token) })
-            .build()
+            hubConnectionChat = HubConnectionBuilder.create(Constants.BASE_URL_CHAT)
+                .withAccessTokenProvider(Single.defer { Single.just(token) })
+                .build()
 
-        hubConnectionChat?.on("ReceiveNotification", { notification: Notification ->
-            NotificationWorker.releaseNotification(_context.value!!, Notification(
-                userReceiveId = notification.userReceiveId,
-                userSenderId = notification.userSenderId,
-                text = notification.text,
-                dateAndTime = notification.dateAndTime,
-                title = notification.userSender?.username ?: "Nueva notificación",
-                notificationType = "MESSAGE"
-            ))
-            Log.d("context", _context.value.toString())
-        }, Notification::class.java)
-
-        hubConnectionChat?.on("ReceiveMessageNotification", { message: Message ->
-            NotificationWorker.releaseNotification(
-                _context.value!!, Notification(
-                    userReceiveId = message.userIdReceiver,
-                    userSenderId = message.userIdSender,
-                    text = message.text,
-                    dateAndTime = message.dateAndTime,
-                    title = message.userSender?.username ?: "Usuario ${message.userIdSender}",
+            hubConnectionChat?.on("ReceiveNotification", { notification: Notification ->
+                NotificationWorker.releaseNotification(_context.value!!, Notification(
+                    userReceiveId = notification.userReceiveId,
+                    userSenderId = notification.userSenderId,
+                    text = notification.text,
+                    dateAndTime = notification.dateAndTime,
+                    title = notification.userSender?.username ?: "Nueva notificación",
                     notificationType = "MESSAGE"
-                )
-            )
-        }, Message::class.java)
+                ))
+                Log.d("context", _context.value.toString())
+            }, Notification::class.java)
 
-        hubConnection?.start()?.blockingAwait()
-        hubConnectionChat?.start()?.blockingAwait()
+            hubConnectionChat?.on("ReceiveMessageNotification", { message: Message ->
+                NotificationWorker.releaseNotification(
+                    _context.value!!, Notification(
+                        userReceiveId = message.userIdReceiver,
+                        userSenderId = message.userIdSender,
+                        text = message.text,
+                        dateAndTime = message.dateAndTime,
+                        title = message.userSender?.username ?: "Usuario ${message.userIdSender}",
+                        notificationType = "MESSAGE"
+                    )
+                )
+            }, Message::class.java)
+
+            hubConnection?.start()?.blockingAwait()
+            hubConnectionChat?.start()?.blockingAwait()
+        }catch (e: Exception){
+            Log.d("Error", "Error al iniciar la conexión")
+        }
     }
 
     fun apllyContext(context: Context) {

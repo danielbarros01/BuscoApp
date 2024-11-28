@@ -72,6 +72,7 @@ import com.practica.buscov2.ui.views.workers.RegisterWorkerView
 @Composable
 fun NavManager(context: Context) {
     val navController = rememberNavController()
+
     val tokenViewModel: TokenViewModel = hiltViewModel()
     val loginGoogleViewModel: GoogleLoginViewModel = hiltViewModel()
     val searchViewModel: SearchViewModel = hiltViewModel()
